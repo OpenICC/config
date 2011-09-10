@@ -17,6 +17,9 @@ all:	$(TARGET)
 $(TARGET):	$(OBJECTS) $(SOURCES) $(HEADER)
 	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(LDFLAGS) -lyajl
 
+clean:
+	$(RM) $(OBJECTS)
+
 check:	$(TARGET)
 	./$(TARGET) ../OpenICC_device_config_DB.json
 
