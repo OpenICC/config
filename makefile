@@ -21,7 +21,7 @@ clean:
 	$(RM) $(OBJECTS)
 
 check:	$(TARGET)
-	./$(TARGET) ../OpenICC_device_config_DB.json
+	./$(TARGET) OpenICC_device_config_DB.json
 
 .SUFFIXES: .c.o
 
