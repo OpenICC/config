@@ -114,20 +114,9 @@ int                openiccConfigs_Count (
         for(i = 0; i < device_classes_n; ++i)
         {
           const char * obj_key[] = { device_classes[i], 0 };
-          int j = 1;
-          char num[24];
-          char * device_key[2] = { num, 0 };
-          yajl_val device = 0;
-          dev_class = yajl_tree_get( base, obj_key, yajl_t_object );
+          dev_class = yajl_tree_get( base, obj_key, yajl_t_array );
           if(dev_class)
-            do
-            {
-              sprintf( num, "%d", j++ );
-              device = yajl_tree_get( dev_class, (const char**) device_key,
-                                      yajl_t_object );
-              if(device)
-                ++n;
-            } while(device);
+            n += dev_class->u.array.len;
         }
       }
     } else
@@ -167,16 +156,14 @@ const char *       openiccConfigs_DeviceGet (
         {
           const char * obj_key[] = { device_classes[i], 0 };
           int j = 1;
-          char num[24];
-          char * device_key[2] = { num, 0 };
           yajl_val device = 0;
-          dev_class = yajl_tree_get( base, obj_key, yajl_t_object );
+          dev_class = yajl_tree_get( base, obj_key, yajl_t_array );
           if(dev_class)
-            do
+          {
+            int elements = dev_class->u.array.len;
+            for(j = 0; j < elements; ++j)
             {
-              sprintf( num, "%d", j++ );
-              device = yajl_tree_get( dev_class, (const char**)device_key,
-                                      yajl_t_object );
+              device = dev_class->u.array.values[j];
               if(n == pos)
               {
                 actual_device_class = device_classes[i];
@@ -252,7 +239,8 @@ const char *       openiccConfigs_DeviceGet (
               }
               if(device)
                 ++n;
-            } while(device);
+            }
+          }
         }
       }
     } else
@@ -288,7 +276,7 @@ char *             openiccConfigs_DeviceGetJSON (
                                                &keys, &values, malloc );
 
   if(!(flags & OPENICC_CONFIGS_SKIP_HEADER))
-    sprintf( txt, OPENICC_DEVICE_JSON_HEADER, d, 1 );
+    sprintf( txt, OPENICC_DEVICE_JSON_HEADER, d );
 
     n = 0; if(keys) while(keys[n]) ++n;
     for( j = 0; j < n; ++j )

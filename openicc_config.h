@@ -9,11 +9,10 @@
   "    \"freedesktop\": {\n" \
   "      \"openicc\": {\n" \
   "        \"device\": {\n" \
-  "          \"%s\": {\n" \
-  "            \"%d\": {\n"
+  "          \"%s\": [{\n"
 #define OPENICC_DEVICE_JSON_FOOTER \
   "            }\n" \
-  "          }\n" \
+  "          ]\n" \
   "        }\n" \
   "      }\n" \
   "    }\n" \
