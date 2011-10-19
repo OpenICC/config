@@ -14,6 +14,10 @@ struct OpeniccConfigs_s {
 void               StringAdd_        ( char             ** text,
                                        const char        * append );
 
+/**
+ *  @brief   load configurations from in memory JSON text
+ *  
+ */
 OpeniccConfigs_s * openiccConfigs_FromMem( const char       * data )
 {
   OpeniccConfigs_s * configs = NULL;
@@ -40,6 +44,9 @@ OpeniccConfigs_s * openiccConfigs_FromMem( const char       * data )
   return configs;
 }
 
+/**
+ *  @brief   release the data base object
+ */
 void               openiccConfigs_Release (
                                        OpeniccConfigs_s ** configs )
 {
@@ -68,6 +75,9 @@ void               openiccConfigs_Release (
   }
 }
 
+/**
+ *  @brief   get default device class
+ */
 const char **      openiccConfigs_GetClasses (
                                        const char       ** device_classes,
                                        int               * count )
@@ -92,6 +102,13 @@ const char **      openiccConfigs_GetClasses (
   return device_classes;
 }
 
+/**
+ *  @brief count devices in data base object
+ *
+ *  @param[in]     configs             the data base object
+ *  @param[in]     device_classes      the device class filter
+ *  @return                            count of matching device configurations
+ */
 int                openiccConfigs_Count (
                                        OpeniccConfigs_s  * configs,
                                        const char       ** device_classes )
@@ -127,6 +144,16 @@ int                openiccConfigs_Count (
   return n;
 }
 
+/**
+ *  @brief   get keys and their values
+ *
+ *  @param[in]     configs             the data base object
+ *  @param[in]     device_classes      the device class filter
+ *  @param[in]     pos                 the device position
+ *  @param[out]    keys                a zero terminated list of device keys
+ *  @param[out]    values              a zero terminated list of device values
+ *  @param[in]     alloc               user allocation function
+ */
 const char *       openiccConfigs_DeviceGet (
                                        OpeniccConfigs_s  * configs,
                                        const char       ** device_classes,
@@ -251,6 +278,9 @@ const char *       openiccConfigs_DeviceGet (
   return actual_device_class;
 }
 
+/**
+ *  @brief   add a string for debugging and error messages
+ */
 void               openiccConfigs_SetInfo (
                                        OpeniccConfigs_s  * configs,
                                        const char        * debug_info )
@@ -259,7 +289,19 @@ void               openiccConfigs_SetInfo (
     configs->dbg_text = strdup( (char*)debug_info );
 }
 
-
+/**
+ *  @brief   obtain a JSON string
+ * 
+ *  @param[in]     configs             a data base object
+ *  @param[in]     device_classes      a zero terminated list of device class
+ *                                     strings
+ *  @param[in]     pos                 device position in list
+ *  @param[in]     flags               - OPENICC_CONFIGS_SKIP_HEADER
+ *                                     - OPENICC_CONFIGS_SKIP_FOOTER
+ *  @param[in]     alloc               user allocation function
+ *  @return                            the resulting JSON string allocated by
+ *                                     alloc
+ */
 char *             openiccConfigs_DeviceGetJSON (
                                        OpeniccConfigs_s  * configs,
                                        const char       ** device_classes,
@@ -270,10 +312,24 @@ char *             openiccConfigs_DeviceGetJSON (
   char            ** keys = 0;
   char            ** values = 0;
   int j, n = 0;
-  char * txt = calloc( sizeof(char), 4096 );
+  char * txt = 0;
 
   const char * d = openiccConfigs_DeviceGet( configs, device_classes, pos,
                                                &keys, &values, malloc );
+
+  if(alloc)
+    txt = alloc(4096);
+  else
+    txt = calloc( sizeof(char), 4096 );
+
+  if(txt)
+    txt[0] = '\000';
+  else
+  {
+    fprintf( stderr, "%s:%d ERROR: could not allocate 4096 bytes\n",
+             __FILE__,__LINE__ );
+    return txt;
+  }
 
   if(!(flags & OPENICC_CONFIGS_SKIP_HEADER))
     sprintf( txt, OPENICC_DEVICE_JSON_HEADER, d );
@@ -302,7 +358,12 @@ char *             openiccConfigs_DeviceGetJSON (
   return txt;
 }
 
-
+/**
+ *  @brief   find out the device class of a given data base entry
+ *
+ *  @param[in]     config              a data base entry object
+ *  @param[in]     alloc               user allocation function
+ */
 char *             openiccConfigs_DeviceClassGet (
                                        OpeniccConfigs_s  * config,
                                        OpeniccConfigAlloc_f alloc )
