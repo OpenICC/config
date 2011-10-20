@@ -1,3 +1,33 @@
+/*  @file openicc_config.h
+ *
+ *  libOpenICC-config  OpenICC Colour Management Configuration
+ *
+ *  @par Copyright:
+ *            2011 (C) Kai-Uwe Behrmann
+ *
+ *  @brief    OpenICC Colour Management configuration helpers
+ *  @internal
+ *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
+ *  @par License:
+ *            MIT <http://www.opensource.org/licenses/mit-license.php>
+ *  @since    2011/06/27
+ */
+
+#ifndef __OPENICC_CONFIG_H__
+#define __OPENICC_CONFIG_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+/** \addtogroup OpenICC_config OpenICC Color Management Configuration API's
+
+ *  @{
+ */
+
+
+
 #define OPENICC_BASE_PATH "org/freedesktop/openicc/device"
 #define OPENICC_DEVICE_MONITOR "monitor"
 #define OPENICC_DEVICE_SCANNER "scanner"
@@ -59,3 +89,13 @@ int                openiccConfigs_Search (
                                        int              ** hits,
                                        OpeniccConfigAlloc_f alloc );
 
+/** 
+ *  @} *//*OpenICC_config
+ */
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* __cplusplus */
+
+
+#endif /* __OPENICC_CONFIG_H__ */
