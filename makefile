@@ -2,14 +2,14 @@ prefix=/opt/local
 
 CC = gcc
 DEBUG= -Wall -g
-INCL = -I$(prefix)/include -I./
+INCL = -I$(prefix)/include -I./OpenICC
 LDFLAGS = -L$(prefix)/lib64 -L./
 TARGET = openicc-config-read
 CFLAGS=$(DEBUG) $(INCL)
-HEADER  = openicc_config.h
+HEADER  = OpenICC/openicc_config.h
 SOURCES = \
-	openicc_config.c \
-	openicc_config_read.c
+	src/openicc_config.c \
+	examples/openicc_config_read.c
 OBJECTS = $(SOURCES:.c=.o)
 
 all:	$(TARGET)
