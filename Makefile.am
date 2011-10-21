@@ -45,6 +45,7 @@ openicc_device_SOURCES = \
 
 EXTRA_DIST = \
              src/openicc_config_internal.h \
+             utils/openicc_macros.h \
              OpenICC_device_config_DB.json \
              makefile.simple \
              bootstrap.sh
