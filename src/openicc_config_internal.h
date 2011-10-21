@@ -35,6 +35,7 @@
 # define _(text) text
 #endif
 
+
 #define DBG_UHR_ (double)clock()/(double)CLOCKS_PER_SEC
 
 #ifdef __cplusplus
@@ -50,6 +51,8 @@ struct OpeniccConfigs_s {
 void               StringAdd_        ( char             ** text,
                                        const char        * append );
 #define STRING_ADD( t, append ) StringAdd_( &t, append )
+
+extern openiccMessage_f     openiccMessage_p;
 
 #ifdef __cplusplus
 } /* extern "C" */

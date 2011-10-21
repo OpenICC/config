@@ -62,7 +62,7 @@ typedef enum {
 } openiccMSG_e;
 
 typedef int  (*openiccMessage_f)     ( openiccMSG_e        error_code,
-                                       OpeniccConfigs_s    context_object,
+                                       OpeniccConfigs_s  * context_object,
                                        const char        * format,
                                        ... );
 int            openiccMessageFuncSet ( openiccMessage_f    message_func );

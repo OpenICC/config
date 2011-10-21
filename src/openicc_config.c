@@ -706,7 +706,7 @@ int openiccMessageFunc( int code, OpeniccConfigs_s * context_object, const char 
   return error;
 }
 
-openiccMessage_f     openiccMessageFunc_p = openiccMessageFunc;
+openiccMessage_f     openiccMessage_p = openiccMessageFunc;
 
 /** @func    openiccMessageFuncSet
  *  @brief
@@ -718,7 +718,7 @@ openiccMessage_f     openiccMessageFunc_p = openiccMessageFunc;
 int            openiccMessageFuncSet ( openiccMessage_f    message_func )
 {
   if(message_func)
-    openiccMessageFunc_p = message_func;
+    openiccMessage_p = message_func;
   return 0;
 }
 
