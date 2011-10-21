@@ -1,18 +1,25 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <yajl/yajl_tree.h>
+/*  @file openicc_config.c
+ *
+ *  libOpenICC - OpenICC Colour Management Configuration
+ *
+ *  @par Copyright:
+ *            2011 (C) Kai-Uwe Behrmann
+ *
+ *  @brief    OpenICC Colour Management configuration helpers
+ *  @internal
+ *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
+ *  @par License:
+ *            MIT <http://www.opensource.org/licenses/mit-license.php>
+ *  @since    2011/06/27
+ */
 
-#include "openicc_config.h"
+#include "openicc_config_internal.h"
 
-struct OpeniccConfigs_s {
-  char     * json_text;
-  yajl_val   yajl;
-  char     * dbg_text;
-};
-
-void               StringAdd_        ( char             ** text,
-                                       const char        * append );
+int openicc_debug = 0;
+#ifndef HAVE_OY
+int level_PROG = 0;
+#endif
+int openicc_backtrace = 0;
 
 /**
  *  @brief   load configurations from in memory JSON text
@@ -463,6 +470,60 @@ char*              StringAppend_     ( const char        * text,
   return text_copy;
 }
 
+
+/** @internal 
+ *  @brief   printf style string add
+ *
+ *  @version Oyranos: 0.1.10
+ *  @since   2009/02/07 (Oyranos: 0.1.10)
+ *  @date    2009/02/07
+ */
+int          openiccStringAddPrintf_ ( char             ** string,
+                                       const char        * format,
+                                                           ... )
+{
+  char * text_copy = NULL;
+  char * text = 0;
+  va_list list;
+  int len;
+  size_t sz = strlen(format) * 2;
+
+  text = malloc( sz );
+  if(!text)
+  {
+    fprintf(stderr,
+     "openicc_config.c openiccStringAddPrintf_() Could not allocate 256 byte of memory.\n");
+    return 1;
+  }
+
+  text[0] = 0;
+
+  va_start( list, format);
+  len = vsnprintf( text, sz, format, list );
+  va_end  ( list );
+
+  if (len >= sz)
+  {
+    text = realloc( text, (len+1)*sizeof(char) );
+    va_start( list, format);
+    len = vsnprintf( text, len+1, format, list );
+    va_end  ( list );
+  }
+
+
+  text_copy = StringAppend_(*string, text);
+
+  if(string && *string)
+    free(*string);
+
+  *string = text_copy;
+
+  free(text);
+
+  return 0;
+}
+
+
 void               StringAdd_        ( char             ** text,
                                        const char        * append )
 {
@@ -476,5 +537,188 @@ void               StringAdd_        ( char             ** text,
   *text = text_copy;
 
   return;
+}
+
+
+/** @func    openiccMessageFormat
+ *  @brief   default function to form a message string
+ *
+ *  This default message function is used as a message formatter.
+ *  The resulting string can be placed anywhere, e.g. in a GUI.
+ *
+ *  @see the openiccMessageFunc() needs just to replaxe the fprintf with your 
+ *  favourite GUI call.
+ *
+ *  @version Oyranos: 0.2.1
+ *  @since   2008/04/03 (Oyranos: 0.2.1)
+ *  @date    2011/01/15
+ */
+int                openiccMessageFormat (
+                                       char             ** message_text,
+                                       int                 code,
+                                       OpeniccConfigs_s  * context_object,
+                                       const char        * string )
+{
+  char * text = 0, * t = 0;
+  int i;
+  const char * type_name = "";
+#ifdef HAVE_POSIX
+  pid_t pid = 0;
+#else
+  int pid = 0;
+#endif
+  FILE * fp = 0;
+  const char * id_text = 0;
+  char * id_text_tmp = 0;
+  OpeniccConfigs_s * c = (OpeniccConfigs_s*) context_object;
+
+  if(code == openiccMSG_DBG && !openicc_debug)
+    return 0;
+
+  if(c)
+  {
+    type_name = "OpeniccConfigs_s";
+    id_text = c->dbg_text;
+    if(id_text)
+      id_text_tmp = strdup(id_text);
+    id_text = id_text_tmp;
+  }
+
+  text = calloc( sizeof(char), 256 );
+
+# define MAX_LEVEL 20
+  if(level_PROG < 0)
+    level_PROG = 0;
+  if(level_PROG > MAX_LEVEL)
+    level_PROG = MAX_LEVEL;
+  for (i = 0; i < level_PROG; i++)
+    sprintf( &text[strlen(text)], " ");
+
+  STRING_ADD( t, text );
+
+  text[0] = 0;
+
+  switch(code)
+  {
+    case openiccMSG_WARN:
+         STRING_ADD( t, _("WARNING") );
+         break;
+    case openiccMSG_ERROR:
+         STRING_ADD( t, _("!!! ERROR"));
+         break;
+  }
+
+  /* reduce output for non core messages */
+  if( (openiccMSG_ERROR <= code && code <= 399) )
+  {
+    openiccStringAddPrintf_( &t,
+                        " %03f: ", DBG_UHR_);
+    openiccStringAddPrintf_( &t,
+                        "%s%s%s%s ", type_name,
+             id_text ? "=\"" : "", id_text ? id_text : "", id_text ? "\"" : "");
+  }
+
+  STRING_ADD( t, string );
+
+  if(openicc_backtrace)
+  {
+#   define TMP_FILE "/tmp/oyranos_gdb_temp." OPENICC_VERSION_NAME "txt"
+#ifdef HAVE_POSIX
+    pid = (int)getpid();
+#endif
+    fp = fopen( TMP_FILE, "w" );
+
+    if(fp)
+    {
+      fprintf(fp, "attach %d\n", pid);
+      fprintf(fp, "thread 1\nbacktrace\n"/*thread 2\nbacktrace\nthread 3\nbacktrace\n*/"detach" );
+      fclose(fp);
+      fprintf( stderr, "GDB output:\n" );
+      i = system("gdb -batch -x " TMP_FILE);
+    } else
+      fprintf( stderr, "could not open " TMP_FILE "\n" );
+  }
+
+  free( text ); text = 0;
+  if(id_text_tmp) free(id_text_tmp); id_text_tmp = 0;
+
+  *message_text = t;
+
+  return 0;
+}
+
+/** @func    openiccMessageFunc
+ *  @brief   default message function to console
+ *
+ *  The default message function is used as a message printer to the console 
+ *  from library start.
+ *
+ *  @param         code                a message code understood be your message
+ *                                     handler or openiccMSG_e
+ *  @param         context_object      a OpeniccConfigs_s is expected
+ *  @param         format              the text format string for following args
+ *  @param         ...                 the variable args fitting to format
+ *  @return                            0 - success; 1 - error
+ *
+ *  @version Oyranos: 0.3.0
+ *  @since   2008/04/03 (Oyranos: 0.1.8)
+ *  @date    2009/07/20
+ */
+int openiccMessageFunc( int code, OpeniccConfigs_s * context_object, const char * format, ... )
+{
+  char * text = 0, * msg = 0;
+  int error = 0;
+  va_list list;
+  size_t sz = 256;
+  int len;
+  OpeniccConfigs_s * c = context_object;
+
+  text = calloc( sizeof(char), sz );
+  if(!text)
+  {
+    fprintf(stderr,
+    "openicc_config.c openiccMessageFunc() Could not allocate 256 byte of memory.\n");
+    return 1;
+  }
+
+  text[0] = 0;
+
+  va_start( list, format);
+  len = vsnprintf( text, sz-1, format, list);
+  va_end  ( list );
+
+  if (len >= ((int)sz - 1))
+  {
+    text = realloc( text, (len+2)*sizeof(char) );
+    va_start( list, format);
+    len = vsnprintf( text, len+1, format, list);
+    va_end  ( list );
+  }
+
+  error = openiccMessageFormat( &msg, code, c, text );
+
+  if(msg)
+    fprintf( stderr, "%s\n", msg );
+
+  free( text ); text = 0;
+  free( msg ); msg = 0;
+
+  return error;
+}
+
+openiccMessage_f     openiccMessageFunc_p = openiccMessageFunc;
+
+/** @func    openiccMessageFuncSet
+ *  @brief
+ *
+ *  @version Oyranos: 0.1.8
+ *  @date    2008/04/03
+ *  @since   2008/04/03 (Oyranos: 0.1.8)
+ */
+int            openiccMessageFuncSet ( openiccMessage_f    message_func )
+{
+  if(message_func)
+    openiccMessageFunc_p = message_func;
+  return 0;
 }
 

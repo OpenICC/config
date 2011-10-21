@@ -1,3 +1,18 @@
+/*  @file openicc_config_read.h
+ *
+ *  libOpenICC - OpenICC Colour Management Configuration
+ *
+ *  @par Copyright:
+ *            2011 (C) Kai-Uwe Behrmann
+ *
+ *  @brief    OpenICC Colour Management configuration helpers
+ *  @internal
+ *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
+ *  @par License:
+ *            MIT <http://www.opensource.org/licenses/mit-license.php>
+ *  @since    2011/06/27
+ */
+
 /**
  * 
  */

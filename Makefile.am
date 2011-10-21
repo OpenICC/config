@@ -26,7 +26,8 @@ libOpenICC_la_CPPFLAGS = @X_CFLAGS@ @YAJL_CFLAGS@
 libOpenICCincludedir = $(includedir)/OpenICC
 
 libOpenICCinclude_HEADERS = \
-	OpenICC/openicc_config.h
+	OpenICC/openicc_config.h \
+	OpenICC/openicc_version.h
 
 INCLUDES = -I$(top_builddir) -I$(top_srcdir)/OpenICC
 
@@ -34,6 +35,7 @@ INCLUDES = -I$(top_builddir) -I$(top_srcdir)/OpenICC
 openicc_config_read_LDADD = -L$(top_builddir) -lOpenICC
 openicc_config_read_SOURCES = \
 	examples/openicc_config_read.c
+
 
 
 EXTRA_DIST = OpenICC_device_config_DB.json \

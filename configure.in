@@ -7,6 +7,7 @@ OPENICC_MAJOR_VERSION=0
 OPENICC_MINOR_VERSION=1
 OPENICC_MICRO_VERSION=0
 OPENICC_VERSION=$OPENICC_MAJOR_VERSION.$OPENICC_MINOR_VERSION.$OPENICC_MICRO_VERSION
+OPENICC_VERSION_NAME="$OPENICC_MAJOR_VERSION.$OPENICC_MINOR_VERSION.$OPENICC_MICRO_VERSION"
 
 LIBTOOL_CURRENT=1
 LIBTOOL_REVISION=0
@@ -91,9 +92,9 @@ dnl Test for libyajl
   export PKG_CONFIG_PATH
     if test "x$PKG_CONFIG" != "xno"; then
       YAJL_CONFIG="$PKG_CONFIG yajl"
-      libyajl_version=`$YAJL_CONFIG --modversion`
-      if expr $libyajl_version \>= 1.0.0 >/dev/null; then
-        AC_MSG_RESULT([checking for Yajl... (version $libyajl_version) yes])
+      yajl_version=`$YAJL_CONFIG --modversion`
+      if expr $yajl_version \>= 1.0.0 >/dev/null; then
+        AC_MSG_RESULT([checking for Yajl... (version $yajl_version) yes])
         YAJL_LIBS=`$YAJL_CONFIG --libs | sed  s/-O.\//`
         YAJL_CFLAGS=`$YAJL_CONFIG --cflags | sed  s/-O.\//`
       else
@@ -124,6 +125,7 @@ AC_SUBST(OPENICC_MAJOR_VERSION)
 AC_SUBST(OPENICC_MINOR_VERSION)
 AC_SUBST(OPENICC_MICRO_VERSION)
 AC_SUBST(OPENICC_VERSION)
+AC_SUBST(OPENICC_VERSION_NAME)
 AC_SUBST(VERSION)
 AC_SUBST(prefix)
 AC_SUBST(programincludedir)
@@ -144,13 +146,12 @@ echo ""
 echo "================================================================="
 echo "              Configuration Results"
 echo ""
-echo "OpenICC-Config Version $PROGRAM_VERSION"
-echo ""
+echo "OpenICC Version $PROGRAM_VERSION"
 echo ""
 if test "$YAJL_LIBS"; then
 echo "   YAJL                         yes    yajl $yajl_version"
 else
-echo "   YAJL                         no     !! OpenICC-Config will not build without !!"
+echo "   YAJL                         no     !! OpenICC will not build without !!"
 fi
 
 if test "$DEBUGFLAG"; then
@@ -173,6 +174,6 @@ if test "$ERROR"; then
     For bug reports please include the complete above output.
 )
 else
-echo "Now type 'make' and 'make install' / 'make rpm' to build the package and "
+echo "Now type 'make' and 'make install' to build the package and "
 echo "install."
 fi

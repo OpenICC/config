@@ -1,6 +1,6 @@
 /*  @file openicc_config.h
  *
- *  libOpenICC-config  OpenICC Colour Management Configuration
+ *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
  *            2011 (C) Kai-Uwe Behrmann
@@ -26,8 +26,6 @@ extern "C" {
  *  @{
  */
 
-
-
 #define OPENICC_BASE_PATH "org/freedesktop/openicc/device"
 #define OPENICC_DEVICE_MONITOR "monitor"
 #define OPENICC_DEVICE_SCANNER "scanner"
@@ -52,6 +50,22 @@ extern "C" {
 typedef void * (*OpeniccConfigAlloc_f)(size_t              size );
 
 typedef struct OpeniccConfigs_s OpeniccConfigs_s;
+
+/** @brief customisable messages */
+extern int openicc_debug;
+extern int openicc_backtrace;
+
+typedef enum {
+  openiccMSG_ERROR = 300,              /**< @brief fatal user messages */
+  openiccMSG_WARN,                     /**< @brief log messages */
+  openiccMSG_DBG,                      /**< @brief developer messages */
+} openiccMSG_e;
+
+typedef int  (*openiccMessage_f)     ( openiccMSG_e        error_code,
+                                       OpeniccConfigs_s    context_object,
+                                       const char        * format,
+                                       ... );
+int            openiccMessageFuncSet ( openiccMessage_f    message_func );
 
 OpeniccConfigs_s * openiccConfigs_FromMem (
                                        const char        * data );

@@ -5,8 +5,8 @@ includedir=@includedir@/OpenICC
 datarootdir=@datarootdir@
 datadir=@datadir@
 
-Name: sampleicc
-Description: ICC profiles i/o and manipulating library and CMM
+Name: openicc
+Description: CMS data base access library
 Version: @OPENICC_MAJOR_VERSION@.@OPENICC_MINOR_VERSION@.@OPENICC_MICRO_VERSION@
 Libs: -L${libdir} -lOpenICC -lm
 Cflags: -I${includedir}
