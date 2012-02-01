@@ -7,7 +7,7 @@
             { "prefix": "EDID_",
               "EDID_mnft_id": "12",
               "EDID_model_id": "123",
-              "EDID_model": "LCD",
+              "EDID_model": "LCD1",
               "EDID_serial": "ABCD",
               "EDID_red_x": "0.599609",
               "EDID_red_y": "0.34375",
@@ -19,7 +19,7 @@
               "EDID_white_y": "0.329102",
               "EDID_gamma": "2.2",
               "EDID_mnft": "VEN",
-              "EDID_manufacturer": "Vendor",
+              "EDID_manufacturer": "Vendor1",
               "EDID_date": "2007-T16"
             },
             { "prefix": "EDID_",
