@@ -19,7 +19,9 @@ lib_LTLIBRARIES = libOpenICC.la
 
 
 libOpenICC_la_SOURCES = \
-        src/openicc_config.c
+	src/openicc_config.c \
+	src/aglob.c \
+	src/xdg_bds.c
 
 libOpenICC_la_LIBADD = @YAJL_LIBS@
 libOpenICC_la_LDFLAGS = -version-info @LIBTOOL_VERSION@
@@ -31,7 +33,7 @@ libOpenICCinclude_HEADERS = \
 	OpenICC/openicc_config.h \
 	OpenICC/openicc_version.h
 
-INCLUDES = -I$(top_builddir) -I$(top_srcdir)/OpenICC
+INCLUDES = -I$(top_builddir) -I./OpenICC -I$(top_srcdir)/OpenICC
 
 
 openicc_config_read_LDADD = -L$(top_builddir) -lOpenICC
@@ -44,9 +46,11 @@ openicc_device_SOURCES = \
 
 
 EXTRA_DIST = \
-             src/openicc_config_internal.h \
-             utils/openicc_macros.h \
-             OpenICC_device_config_DB.json \
-             makefile.simple \
-             bootstrap.sh
+	src/openicc_config_internal.h \
+	src/xdg_bds.h \
+	src/aglob.h \
+	utils/openicc_macros.h \
+	OpenICC_device_config_DB.json \
+	makefile.simple \
+	bootstrap.sh
 
