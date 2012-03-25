@@ -669,27 +669,23 @@ int openiccMessageFunc( int code, OpeniccConfigs_s * context_object, const char 
   char * text = 0, * msg = 0;
   int error = 0;
   va_list list;
-  size_t sz = 256;
-  int len;
+  size_t sz = 0;
+  int len = 0;
   OpeniccConfigs_s * c = context_object;
 
-  text = calloc( sizeof(char), sz );
-  if(!text)
-  {
-    fprintf(stderr,
-    "openicc_config.c openiccMessageFunc() Could not allocate 256 byte of memory.\n");
-    return 1;
-  }
-
-  text[0] = 0;
 
   va_start( list, format);
-  len = vsnprintf( text, sz-1, format, list);
+  len = vsnprintf( text, sz, format, list);
   va_end  ( list );
 
-  if (len >= ((int)sz - 1))
   {
-    text = realloc( text, (len+2)*sizeof(char) );
+    text = calloc( sizeof(char), len+2 );
+    if(!text)
+    {
+      fprintf(stderr,
+      "openicc_config.c openiccMessageFunc() Could not allocate 256 byte of memory.\n");
+      return 1;
+    }
     va_start( list, format);
     len = vsnprintf( text, len+1, format, list);
     va_end  ( list );
