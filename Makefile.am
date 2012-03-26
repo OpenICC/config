@@ -33,7 +33,8 @@ libOpenICCinclude_HEADERS = \
 	OpenICC/openicc_config.h \
 	OpenICC/openicc_version.h
 
-INCLUDES = -I$(top_builddir) -I./OpenICC -I$(top_srcdir)/OpenICC
+INCLUDES = -I$(top_builddir) -I$(top_builddir)/OpenICC \
+	-I$(top_srcdir)/OpenICC -I$(top_srcdir)/src
 
 
 openicc_config_read_LDADD = -L$(top_builddir) -lOpenICC
