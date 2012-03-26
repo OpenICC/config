@@ -48,6 +48,9 @@ struct OpeniccConfigs_s {
   char     * dbg_text;
 };
 
+int          openiccStringAddPrintf_ ( char             ** string,
+                                       const char        * format,
+                                                           ... );
 void               StringAdd_        ( char             ** text,
                                        const char        * append );
 #define STRING_ADD( t, append ) StringAdd_( &t, append )
