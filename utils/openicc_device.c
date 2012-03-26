@@ -20,6 +20,31 @@
 #include "openicc_version.h"
 #include "openicc_config.h"
 #include "openicc_macros.h"
+#include "openicc_config_internal.h"
+#include "xdg_bds.h"
+
+typedef enum {
+	ucmm_ok = 0,
+	ucmm_resource,				/* Resource failure (e.g. out of memory) */
+	ucmm_invalid_profile,		/* Profile is not a valid display ICC profile */
+	ucmm_no_profile,			/* There is no associated profile */
+	ucmm_no_home,				/* There is no HOME environment variable defined */
+	ucmm_no_edid_or_display,	/* There is no edid or display name */
+	ucmm_profile_copy,			/* There was an error copying the profile */
+	ucmm_open_config,			/* There was an error opening the config file */
+	ucmm_access_config,			/* There was an error accessing the config information */
+	ucmm_set_config,			/* There was an error setting the config file */
+	ucmm_save_config,			/* There was an error saving the config file */
+	ucmm_monitor_not_found,		/* The EDID or display wasn't matched */
+	ucmm_delete_key,			/* Delete_key failed */
+	ucmm_delete_profile,		/* Delete_key failed */
+} ucmm_error;
+
+/* Install scope */
+typedef enum {
+	ucmm_user,
+	ucmm_local_system
+} ucmm_scope;
 
 
 void printfHelp(int argc, char ** argv)
@@ -55,17 +80,17 @@ int main(int argc, char ** argv)
   int count = 0;
 
   int verbose = 0;
-  int result = 0;
   int list_devices = 0,
       list_long = 0;
-  int error;
+  int error = 0;
   FILE * fp = 0;
-  const char * home,
-             * file_name = NULL,
-             * devices_filter = NULL;
+  const char * file_name = NULL,
+            ** devices_filter = NULL;
   int list_pos = -1;
   int dump_json = 0;
+  int show_paths = 0;
   char * t = NULL;
+  ucmm_scope scope = ucmm_user;		/* Scope of instalation */
 
 #ifdef USE_GETTEXT
   setlocale(LC_ALL,"");
@@ -100,6 +125,8 @@ int main(int argc, char ** argv)
                         { list_long = 1; i=100; break; }
                         else if(OY_IS_ARG("pos"))
                         { OY_PARSE_INT_ARG2( list_pos, "pos" ); break; }
+                        else if(OY_IS_ARG("show-paths"))
+                        { show_paths = 1; i=100; break; }
                         }
               default:
                         printfHelp(argc, argv);
@@ -126,24 +153,40 @@ int main(int argc, char ** argv)
                         exit (0);
   }
 
-
   if(file_name)
     fp = fopen( file_name, "r" );
   else
   {
-    home = getenv("HOME");
-    if(!home)
+    char *config_file = OPENICC_DB_PREFIX "/" OPENICC_DEVICES_DB;
+    char *conf_name = NULL;		/* Configuration path to use */
+    /* Locate the directories where the config file is, */
+    /* and where we should copy the profile to. */
     {
-      WARN( 0, "%s", _("unable to obtain home directory name"));
-      exit(1);
+      int npaths;
+      xdg_error er;
+      char **paths;
+
+      if ((npaths = xdg_bds(&er, &paths, xdg_conf, xdg_write, 
+                            (scope == ucmm_local_system) ? xdg_local : xdg_user,
+                            config_file)) == 0)
+      {
+        return ucmm_open_config;
+      }
+      if ((conf_name = strdup(paths[0])) == NULL)
+      {
+        xdg_free(paths, npaths);
+        return ucmm_resource;
+      }
+      xdg_free(paths, npaths);
     }
 
-    openiccStringAddPrintf_( &t, "%s%s%s", home,
-                             (home[strlen(home)] == '/')?"":"/",
-                             OPENICC_USER_DEVICE_DB_NAME );
-    fp = fopen( t, "r" );
-    if(t)
-      free(t);
+    if(show_paths)
+    {
+    }
+
+    fp = fopen( conf_name, "r" );
+    if(conf_name)
+      free(conf_name);
   }
 
   if(!fp)
@@ -154,13 +197,13 @@ int main(int argc, char ** argv)
 
   if(list_devices)
   {
-    OpeniccConfigs_s * configs, * config;
+    OpeniccConfigs_s * configs;
     char * text = 0;
     size_t size = 0;
     char            ** keys = 0;
     char            ** values = 0;
     int i,j, n = 0, devices_n, flags;
-    char * json, * device_class;
+    char * json;
 
     /* read JSON input file */
     fseek(fp,0L,SEEK_END);
@@ -269,7 +312,7 @@ int main(int argc, char ** argv)
 
   }
 
-  return result;
+  return error;
 }
 
 

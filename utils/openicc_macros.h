@@ -11,7 +11,6 @@
 #endif
 
 #include "openicc_version.h"
-#define OPENICC_USER_DEVICE_DB_NAME ".config/color/settings/openicc_device.json"
 
 extern openiccMessage_f     openiccMessage_p;
 
