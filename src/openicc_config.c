@@ -664,7 +664,10 @@ int                openiccMessageFormat (
  *  @since   2008/04/03 (Oyranos: 0.1.8)
  *  @date    2009/07/20
  */
-int openiccMessageFunc( int code, OpeniccConfigs_s * context_object, const char * format, ... )
+int  openiccMessageFunc              ( openiccMSG_e        code,
+                                       OpeniccConfigs_s  * context_object,
+                                       const char        * format,
+                                       ... )
 {
   char * text = 0, * msg = 0;
   int error = 0;
