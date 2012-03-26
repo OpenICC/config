@@ -26,8 +26,7 @@ extern "C" {
  *  @{
  */
 
-#define OPENICC_HOME_COLOR_PATH "~/.config/color/settings"
-#define OPENICC_SYSTEM_COLOR_PATH "/etc/xdg/color/settings"
+#define OPENICC_DB_PREFIX "color/settings"
 #define OPENICC_SETTINGS_DB "openicc-defaults.json"
 #define OPENICC_DEVICES_DB "openicc-devices.json"
 
