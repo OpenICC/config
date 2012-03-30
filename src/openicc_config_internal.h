@@ -57,6 +57,10 @@ void               StringAdd_        ( char             ** text,
 
 extern openiccMessage_f     openiccMessage_p;
 
+
+char * openiccOpenFile( const char * file_name,
+                        size_t   * size_ptr );
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */
