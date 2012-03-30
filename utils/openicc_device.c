@@ -57,9 +57,9 @@ void printfHelp(int argc, char ** argv)
   fprintf( stderr, "\n");
   fprintf( stderr, "%s\n",                 _("Usage"));
   fprintf( stderr, "  %s\n",               _("List devices:"));
-  fprintf( stderr, "      %s -l [-v] [-f FILE_NAME] [--long]\n",        argv[0]);
+  fprintf( stderr, "      %s -l [-v] [-db-file FILE_NAME] [--long]\n",        argv[0]);
   fprintf( stderr, "                        [-p NUMBER|--pos NUMBER] [-j]\n");
-  fprintf( stderr, "        -f FILE_NAME    %s\n", _("specify DB file"));
+  fprintf( stderr, "        --db-file FILE_NAME  %s\n", _("specify DB file"));
   fprintf( stderr, "        --long          %s\n", _("listing all key/values pairs"));
   fprintf( stderr, "        -p NUMBER | --pos NUMBER\n"
                    "                        %s\n", _("select device by position"));
@@ -70,6 +70,7 @@ void printfHelp(int argc, char ** argv)
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("General options:"));
   fprintf( stderr, "        -v              %s\n", _("verbose"));
+  fprintf( stderr, "        --show-paths    %s\n", _("locate DB"));
   fprintf( stderr, "\n");
   fprintf( stderr, "\n");
 }
@@ -84,13 +85,25 @@ int main(int argc, char ** argv)
       list_long = 0;
   int error = 0;
   FILE * fp = 0;
-  const char * file_name = NULL,
+  size_t size = 0, s;
+  char * text = NULL;
+  const char * db_file = NULL,
+             * file_name = NULL,
             ** devices_filter = NULL;
+  int add_device = 0;
   int list_pos = -1;
   int dump_json = 0;
   int show_paths = 0;
-  char * t = NULL;
+  char *conf_name = NULL;		/* Configuration path to use */
   ucmm_scope scope = ucmm_user;		/* Scope of instalation */
+  OpeniccConfigs_s * configs = NULL;
+  int devices_n = 0, devices_new_n = 0;
+  OpeniccConfigs_s * configs_new = NULL;
+  char * json_new = NULL;
+  const char * d = NULL;
+  int pos = -1;
+  char * json;
+  int i,j, n = 0, flags;
 
 #ifdef USE_GETTEXT
   setlocale(LC_ALL,"");
@@ -108,6 +121,7 @@ int main(int argc, char ** argv)
             for(i = 1; pos < argc && i < strlen(argv[pos]); ++i)
             switch (argv[pos][i])
             {
+              case 'a': add_device = 1; break;
               case 'f': OY_PARSE_STRING_ARG(file_name); break;
               case 'j': dump_json = 1; break;
               case 'l': list_devices = 1; break;
@@ -127,6 +141,8 @@ int main(int argc, char ** argv)
                         { OY_PARSE_INT_ARG2( list_pos, "pos" ); break; }
                         else if(OY_IS_ARG("show-paths"))
                         { show_paths = 1; i=100; break; }
+                        else if(OY_IS_ARG("db-file"))
+                        { OY_PARSE_STRING_ARG2( db_file, "db-file"); break; }
                         }
               default:
                         printfHelp(argc, argv);
@@ -153,12 +169,9 @@ int main(int argc, char ** argv)
                         exit (0);
   }
 
-  if(file_name)
-    fp = fopen( file_name, "r" );
-  else
+  if(!db_file)
   {
     char *config_file = OPENICC_DB_PREFIX "/" OPENICC_DEVICES_DB;
-    char *conf_name = NULL;		/* Configuration path to use */
     /* Locate the directories where the config file is, */
     /* and where we should copy the profile to. */
     {
@@ -177,57 +190,77 @@ int main(int argc, char ** argv)
         xdg_free(paths, npaths);
         return ucmm_resource;
       }
+      if(show_paths)
+      {
+        if(verbose)
+          fprintf(stderr, "%s\n", _("Paths:"));
+        for(i=0; i < npaths; ++i)
+          printf("%s\n", paths[i]);
+      }
+
       xdg_free(paths, npaths);
     }
 
-    if(show_paths)
-    {
-    }
-
-    fp = fopen( conf_name, "r" );
-    if(conf_name)
-      free(conf_name);
+    db_file = conf_name;
   }
 
-  if(!fp)
+  if(!db_file)
   {
-    DBG( 0, "%s at \"%s\"", _("unable to open data base"), t);
+    DBG( 0, "%s at \"%s\"", _("unable to open data base"), db_file);
     exit(0);
+  } else
+    fprintf( stderr, "using DB: %s\n", db_file);
+ 
+  {
+    /* read JSON input file */
+    text = openiccOpenFile( db_file, &size );
+
+    /* parse JSON */
+    configs = openiccConfigs_FromMem( text );
+    if(text) free(text); text = NULL;
+    openiccConfigs_SetInfo ( configs, db_file );
+    devices_n = openiccConfigs_Count(configs, NULL);
+    DBG( configs, "Found %d devices.", devices_n );
+  }
+
+  if(add_device)
+  {
+    fprintf( stderr, "%d\n", add_device );
+    if(file_name)
+    {
+      text = openiccOpenFile( file_name, &size );
+    } else
+    {
+      int c;
+
+      text = malloc(65535);
+      fp = stdin;
+      while(((c = getc(stdin)) != EOF) &&
+            size < 65535)
+        text[size++] = c;
+    }
+
+    /* parse JSON */
+    configs_new = openiccConfigs_FromMem( text );
+    if(text) free(text); text = NULL;
+    openiccConfigs_SetInfo ( configs_new, file_name );
+    devices_new_n = openiccConfigs_Count(configs_new, NULL);
+    DBG( configs_new, "Found %d devices.", devices_new_n );
+    if(devices_new_n)
+      list_devices = 1;
   }
 
   if(list_devices)
   {
-    OpeniccConfigs_s * configs;
-    char * text = 0;
-    size_t size = 0;
     char            ** keys = 0;
     char            ** values = 0;
-    int i,j, n = 0, devices_n, flags;
-    char * json;
 
-    /* read JSON input file */
-    fseek(fp,0L,SEEK_END);
-    size = ftell (fp);
-    rewind(fp);
-    if(size)
-    {
-      text = malloc(size+1);
-      if(text)
-        fread(text, sizeof(char), size, fp);
-      text[size] = '\000';
-    }
- 
+    n = 0;
+    d = 0;
 
-    /* parse JSON */
-    configs = openiccConfigs_FromMem( text );
-    openiccConfigs_SetInfo ( configs, file_name );
-    devices_n = openiccConfigs_Count(configs, NULL);
-    DBG( configs, "Found %d devices.", devices_n );
-
-  
     if(dump_json)
     {
-      int pos = -1;
+      pos = -1;
 
       devices_n = openiccConfigs_Count(configs, devices_filter);
       count = devices_n;
@@ -242,24 +275,42 @@ int main(int argc, char ** argv)
         flags = 0;
         if(pos != 0) /* not the first */
           flags |= OPENICC_CONFIGS_SKIP_HEADER;
-        if(i != count - 1) /* not the last */
+        if(i != count - 1 || devices_new_n) /* not the last */
           flags |= OPENICC_CONFIGS_SKIP_FOOTER;
-        /* end the current JSON array field and open the next one */
-        if(pos > 0 && pos < count) 
-          printf("            },\n            {\n");
 
-        json = openiccConfigs_DeviceGetJSON( configs, devices_filter, i,
-                                             flags, malloc );
+        d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i,
+                                             flags, d, &json, malloc );
 
         printf( "%s", json );
-        free(json);
+        if(json) free(json); json = NULL;
       }
+
+      count = devices_new_n;
+      for(i = 0; i < count; ++i)
+      {
+        ++pos;
+        flags = 0;
+        if(pos != 0 || devices_n) /* not the first */
+          flags |= OPENICC_CONFIGS_SKIP_HEADER;
+        if(i != count - 1) /* not the last */
+          flags |= OPENICC_CONFIGS_SKIP_FOOTER;
+
+        d = openiccConfigs_DeviceGetJSON( configs_new, devices_filter, i,
+                                             flags, d, &json, malloc );
+
+        STRING_ADD( json_new, json );
+        if(json) free(json); json = NULL;
+        if(json_new)
+          list_devices = 1;
+      }
+ 
+      if(json_new)
+        printf( "%s", json_new );
     } else
     {
       /* print all found key/value pairs */
       for(i = 0; i < devices_n; ++i)
       {
-        const char * d;
         char * manufacturer = 0,
              * model = 0,
              * prefix = 0;
@@ -303,16 +354,16 @@ int main(int argc, char ** argv)
         }
         free(keys); free(values);
         if(!list_long)
-          fprintf(stdout, "%s\t%s\n", manufacturer, model);
+          fprintf(stdout, "%d : \"%s\" - \"%s\"\n", i, manufacturer, model);
       }
     }
-
-
-    openiccConfigs_Release( &configs );
-
   }
+
+  openiccConfigs_Release( &configs );
+
+  if(conf_name)
+    free(conf_name);
 
   return error;
 }
-
 
