@@ -91,11 +91,13 @@ const char *       openiccConfigs_DeviceGet (
                                        OpeniccConfigAlloc_f alloc );
 #define OPENICC_CONFIGS_SKIP_HEADER 0x01
 #define OPENICC_CONFIGS_SKIP_FOOTER 0x02
-char *             openiccConfigs_DeviceGetJSON (
+const char *       openiccConfigs_DeviceGetJSON (
                                        OpeniccConfigs_s  * configs,
                                        const char       ** device_classes,
                                        int                 pos,
                                        int                 flags,
+                                       const char        * device_class,
+                                       char             ** json,
                                        OpeniccConfigAlloc_f alloc );
 char *             openiccConfigs_DeviceClassGet (
                                        OpeniccConfigs_s  * config,

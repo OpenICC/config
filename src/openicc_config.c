@@ -305,15 +305,19 @@ void               openiccConfigs_SetInfo (
  *  @param[in]     pos                 device position in list
  *  @param[in]     flags               - OPENICC_CONFIGS_SKIP_HEADER
  *                                     - OPENICC_CONFIGS_SKIP_FOOTER
- *  @param[in]     alloc               user allocation function
- *  @return                            the resulting JSON string allocated by
+ *  @param[in]m    devive_class        the last written device class
+ *  @param[out]    json                the resulting JSON string allocated by
  *                                     alloc
+ *  @param[in]     alloc               user allocation function
+ *  @return                            device class
  */
-char *             openiccConfigs_DeviceGetJSON (
+const char *       openiccConfigs_DeviceGetJSON (
                                        OpeniccConfigs_s  * configs,
                                        const char       ** device_classes,
                                        int                 pos,
                                        int                 flags,
+                                       const char        * device_class,
+                                       char             ** json,
                                        OpeniccConfigAlloc_f alloc )
 {
   char            ** keys = 0;
@@ -340,6 +344,15 @@ char *             openiccConfigs_DeviceGetJSON (
 
   if(!(flags & OPENICC_CONFIGS_SKIP_HEADER))
     sprintf( txt, OPENICC_DEVICE_JSON_HEADER, d );
+  else if(device_class)
+  {
+    if(d != device_class)
+      sprintf( &txt[strlen(txt)],
+  "\n          ],\n          \"%s\": [{\n", d);
+    else
+        /* end the previous JSON array field and open the next one */
+      sprintf( &txt[strlen(txt)], ",\n            {\n");
+  }
 
     n = 0; if(keys) while(keys[n]) ++n;
     for( j = 0; j < n; ++j )
@@ -359,10 +372,15 @@ char *             openiccConfigs_DeviceGetJSON (
     }
     if(keys) free(keys); if(values) free(values);
 
+    /* close the object */
   if(!(flags & OPENICC_CONFIGS_SKIP_FOOTER))
     sprintf( &txt[strlen(txt)], OPENICC_DEVICE_JSON_FOOTER);
+  else
+    sprintf( &txt[strlen(txt)], "            }" );
 
-  return txt;
+  *json = txt;
+
+  return d;
 }
 
 /**
@@ -719,5 +737,39 @@ int            openiccMessageFuncSet ( openiccMessage_f    message_func )
   if(message_func)
     openiccMessage_p = message_func;
   return 0;
+}
+
+
+char * openiccOpenFile( const char * file_name,
+                        size_t   * size_ptr )
+{
+  FILE * fp = NULL;
+  size_t size = 0, s = 0;
+  char * text = NULL;
+
+    if(file_name)
+    {
+      fp = fopen(file_name,"rb");
+      if(fp)
+      {
+        fseek(fp,0L,SEEK_END); 
+        size = ftell (fp);
+        rewind(fp);
+        text = malloc(size+1);
+        s = fread(text, sizeof(char), size, fp);
+        text[size] = '\000';
+        if(s != size)
+          fprintf(stderr, "Error: fread %lu but should read %lu\n",
+                  (long unsigned int) s, (long unsigned int)size);
+      } else
+      {
+        fprintf(stderr, "Error: Could not open file - \"%s\"\n", file_name);
+      }
+    }
+
+  if(size_ptr)
+    *size_ptr = size;
+
+  return text;
 }
 
