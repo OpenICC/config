@@ -68,9 +68,14 @@ void printfHelp(int argc, char ** argv)
   fprintf( stderr, "  %s\n",               _("Print a help text:"));
   fprintf( stderr, "      %s -h\n",        argv[0]);
   fprintf( stderr, "\n");
+  fprintf( stderr, "  %s\n",               _("Add device:"));
+  fprintf( stderr, "      %s -a [-f FILE_NAME] [-v] [-db-file FILE_NAME] \n",argv[0]);
+  fprintf( stderr, "\n");
+  fprintf( stderr, "  %s\n",               _("Sow DB path:"));
+  fprintf( stderr, "        --show-path [-s]   %s\n", _("locate DB"));
+  fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("General options:"));
   fprintf( stderr, "        -v              %s\n", _("verbose"));
-  fprintf( stderr, "        --show-paths    %s\n", _("locate DB"));
   fprintf( stderr, "\n");
   fprintf( stderr, "\n");
 }
@@ -93,7 +98,7 @@ int main(int argc, char ** argv)
   int add_device = 0;
   int list_pos = -1;
   int dump_json = 0;
-  int show_paths = 0;
+  int show_path = 0;
   char *conf_name = NULL;		/* Configuration path to use */
   ucmm_scope scope = ucmm_user;		/* Scope of instalation */
   OpeniccConfigs_s * configs = NULL;
@@ -121,11 +126,12 @@ int main(int argc, char ** argv)
             for(i = 1; pos < argc && i < strlen(argv[pos]); ++i)
             switch (argv[pos][i])
             {
-              case 'a': add_device = 1; break;
+              case 'a': add_device = 1; dump_json = 1; break;
               case 'f': OY_PARSE_STRING_ARG(file_name); break;
               case 'j': dump_json = 1; break;
               case 'l': list_devices = 1; break;
               case 'p': OY_PARSE_INT_ARG(list_pos); break;
+              case 's': scope = ucmm_local_system; break;
               case 'v': ++verbose; ++openicc_debug; break;
               case 'h':
               case '-':
@@ -139,8 +145,8 @@ int main(int argc, char ** argv)
                         { list_long = 1; i=100; break; }
                         else if(OY_IS_ARG("pos"))
                         { OY_PARSE_INT_ARG2( list_pos, "pos" ); break; }
-                        else if(OY_IS_ARG("show-paths"))
-                        { show_paths = 1; i=100; break; }
+                        else if(OY_IS_ARG("show-path"))
+                        { show_path = 1; i=100; break; }
                         else if(OY_IS_ARG("db-file"))
                         { OY_PARSE_STRING_ARG2( db_file, "db-file"); break; }
                         }
@@ -190,7 +196,7 @@ int main(int argc, char ** argv)
         xdg_free(paths, npaths);
         return ucmm_resource;
       }
-      if(show_paths)
+      if(show_path)
       {
         if(verbose)
           fprintf(stderr, "%s\n", _("Paths:"));
@@ -225,7 +231,6 @@ int main(int argc, char ** argv)
 
   if(add_device)
   {
-    fprintf( stderr, "%d\n", add_device );
     if(file_name)
     {
       text = openiccOpenFile( file_name, &size );
