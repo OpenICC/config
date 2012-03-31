@@ -71,8 +71,9 @@ void printfHelp(int argc, char ** argv)
   fprintf( stderr, "  %s\n",               _("Add device:"));
   fprintf( stderr, "      %s -a [-f FILE_NAME] [-v] [-db-file FILE_NAME] \n",argv[0]);
   fprintf( stderr, "\n");
-  fprintf( stderr, "  %s\n",               _("Sow DB path:"));
+  fprintf( stderr, "  %s\n",               _("Show DB path:"));
   fprintf( stderr, "        --show-path [-s]   %s\n", _("locate DB"));
+  fprintf( stderr, "        -s              %s\n", _("list system DB (default is user DB)"));
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("General options:"));
   fprintf( stderr, "        -v              %s\n", _("verbose"));
