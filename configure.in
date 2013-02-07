@@ -81,11 +81,11 @@ if eval "test x$GCC = xyes"; then
   fi
 fi
 
-openicc_save_CPPFLAGS="$CPPFLAGS"
+openicc_save_CFLAGS="$CFLAGS"
 openicc_save_LDFLAGS="$LDFLAGS"
 openicc_save_LIBS="$LIBS"
 
-CPPFLAGS="$CPPFLAGS -I$includedir"
+CFLAGS="$CFLAGS -I$includedir"
 LDFLAGS="$LDFLAGS"
 LIBS="$LIBS -L$libdir"
 
@@ -113,9 +113,9 @@ dnl Test for libyajl
 
 
 X_LIBS="$LDFLAGS $X_LIBS"
-X_CFLAGS="$CPPFLAGS $X_CFLAGS"
+X_CFLAGS="$CFLAGS $X_CFLAGS"
 
-CPPFLAGS="$openicc_save_CPPFLAGS"
+CFLAGS="$openicc_save_CFLAGS"
 LDFLAGS="$openicc_save_LDFLAGS"
 LIBS="$openicc_save_LIBS"
 PKG_CONFIG_PATH="$openicc_save_PKG_CONFIG_PATH"
