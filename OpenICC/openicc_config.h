@@ -108,6 +108,9 @@ int                openiccConfigs_Search (
                                        const char       ** values,
                                        int              ** hits,
                                        OpeniccConfigAlloc_f alloc );
+const char** const openiccConfigs_GetClasses (
+                                       const char       ** device_classes,
+                                       int               * count );
 
 /** 
  *  @} *//*OpenICC_config
