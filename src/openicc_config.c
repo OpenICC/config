@@ -3,7 +3,7 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2011 (C) Kai-Uwe Behrmann
+ *            2011-2013 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
  *  @internal
@@ -82,27 +82,27 @@ void               openiccConfigs_Release (
   }
 }
 
-/**
- *  @brief   get default device class
- */
-const char **      openiccConfigs_GetClasses (
-                                       const char       ** device_classes,
-                                       int               * count )
-{
-        int device_classes_n = 0;
-
-        if(device_classes)
-          while(device_classes[device_classes_n++]) ;
-        else
-        {
-          static const char * dev_cl[] = {
+static const char * dev_cl[] = {
                 OPENICC_DEVICE_MONITOR,
                 OPENICC_DEVICE_SCANNER,
                 OPENICC_DEVICE_PRINTER ,
-                OPENICC_DEVICE_CAMERA , 0 };
-          device_classes_n = 4;
-          device_classes = dev_cl;
-        }
+                OPENICC_DEVICE_CAMERA , NULL };
+/**
+ *  @brief   get default device class
+ */
+const char** const openiccConfigs_GetClasses (
+                                       const char       ** device_classes,
+                                       int               * count )
+{
+  int device_classes_n = 0;
+
+  if(device_classes)
+    while(device_classes[device_classes_n++]) ;
+  else
+  {
+    device_classes_n = 4;
+    device_classes = dev_cl;
+  }
 
   *count = device_classes_n;
 
