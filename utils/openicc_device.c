@@ -95,7 +95,7 @@ int main(int argc, char ** argv)
   char * text = NULL;
   const char * db_file = NULL,
              * file_name = NULL,
-            ** devices_filter = NULL;
+             * devices_filter[] = {NULL,NULL};
   int add_device = 0;
   int list_pos = -1;
   int dump_json = 0;
@@ -106,7 +106,8 @@ int main(int argc, char ** argv)
   int devices_n = 0, devices_new_n = 0;
   OpeniccConfigs_s * configs_new = NULL;
   char * json_new = NULL;
-  const char * d = NULL;
+  const char * d = NULL,
+             * old_d = NULL;;
   int pos = -1;
   char * json;
   int i,j, n = 0, flags;
@@ -263,55 +264,78 @@ int main(int argc, char ** argv)
 
     n = 0;
     d = 0;
+    old_d = 0;
 
     if(dump_json)
     {
+      int device_classes_n = 0;
+      const char ** device_classes = 0;
+
+      device_classes = openiccConfigs_GetClasses( device_classes,
+                                       &device_classes_n );
       pos = -1;
 
-      devices_n = openiccConfigs_Count(configs, devices_filter);
-      count = devices_n;
-      if(list_pos != -1)
-        count = list_pos + 1;
-      fprintf(stderr, "Found %d devices.\n", devices_n );
-      for(i = 0; i < devices_n; ++i)
+      n = openiccConfigs_Count(configs, NULL);
+
+      for(j = 0; j < device_classes_n; ++j)
       {
-        if(list_pos != -1 && i != list_pos)
-          continue;
-        ++pos;
-        flags = 0;
-        if(pos != 0) /* not the first */
-          flags |= OPENICC_CONFIGS_SKIP_HEADER;
-        if(i != count - 1 || devices_new_n) /* not the last */
-          flags |= OPENICC_CONFIGS_SKIP_FOOTER;
+        fprintf(stderr, "Found device class: %s\n", device_classes[j] );
 
-        d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i,
-                                             flags, d, &json, malloc );
+        devices_filter[0] = device_classes[j];
+        devices_n = openiccConfigs_Count(configs, devices_filter);
 
-        printf( "%s", json );
-        if(json) free(json); json = NULL;
-      }
+        for(i = 0; i < devices_n; ++i)
+        {
+          ++pos;
 
-      count = devices_new_n;
-      for(i = 0; i < count; ++i)
-      {
-        ++pos;
-        flags = 0;
-        if(pos != 0 || devices_n) /* not the first */
-          flags |= OPENICC_CONFIGS_SKIP_HEADER;
-        if(i != count - 1) /* not the last */
-          flags |= OPENICC_CONFIGS_SKIP_FOOTER;
+          if(list_pos != -1 && pos != list_pos)
+            continue;
 
-        d = openiccConfigs_DeviceGetJSON( configs_new, devices_filter, i,
-                                             flags, d, &json, malloc );
+          flags = 0;
+          if(pos != 0 && list_pos == -1) /* not the first */
+            flags |= OPENICC_CONFIGS_SKIP_HEADER;
+          if((pos != (n + devices_new_n - 1)) && list_pos == -1) /* not the last */
+            flags |= OPENICC_CONFIGS_SKIP_FOOTER;
 
-        STRING_ADD( json_new, json );
-        if(json) free(json); json = NULL;
-        if(json_new)
-          list_devices = 1;
+          d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i,
+                                            flags, old_d, &json, malloc );
+
+          if(d)
+          {
+            STRING_ADD( json_new, json );
+            old_d = d;
+          }
+          if(json) free(json); json = NULL;
+        }
+
+        count = openiccConfigs_Count(configs_new, devices_filter);
+        for(i = 0; i < count; ++i)
+        {
+          ++pos;
+          flags = 0;
+          if(pos != 0 || n) /* not the first */
+            flags |= OPENICC_CONFIGS_SKIP_HEADER;
+          if(pos != (n + i)) /* not the last */
+            flags |= OPENICC_CONFIGS_SKIP_FOOTER;
+
+          d = openiccConfigs_DeviceGetJSON( configs_new, devices_filter, i,
+                                            flags, old_d, &json, malloc );
+
+          if(d)
+          {
+            STRING_ADD( json_new, json );
+            old_d = d;
+          }
+
+          if(json) free(json); json = NULL;
+          if(json_new)
+            list_devices = 1;
+        }
       }
  
       if(json_new)
         printf( "%s", json_new );
+
     } else
     {
       /* print all found key/value pairs */
