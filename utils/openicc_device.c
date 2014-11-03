@@ -90,8 +90,7 @@ int main(int argc, char ** argv)
   int list_devices = 0,
       list_long = 0;
   int error = 0;
-  FILE * fp = 0;
-  size_t size = 0, s;
+  size_t size = 0;
   char * text = NULL;
   const char * db_file = NULL,
              * file_name = NULL,
@@ -241,7 +240,6 @@ int main(int argc, char ** argv)
       int c;
 
       text = malloc(65535);
-      fp = stdin;
       while(((c = getc(stdin)) != EOF) &&
             size < 65535)
         text[size++] = c;
@@ -279,8 +277,6 @@ int main(int argc, char ** argv)
 
       for(j = 0; j < device_classes_n; ++j)
       {
-        fprintf(stderr, "Found device class: %s\n", device_classes[j] );
-
         devices_filter[0] = device_classes[j];
         devices_n = openiccConfigs_Count(configs, devices_filter);
 
