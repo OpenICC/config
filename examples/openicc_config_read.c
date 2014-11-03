@@ -34,7 +34,9 @@ int main(int argc, char ** argv)
   char            ** values = 0;
   int i,j, n = 0, devices_n, flags;
   char * json, * device_class;
-  const char * devices_filter[] = {OPENICC_DEVICE_CAMERA,NULL};
+  const char * devices_filter[] = {OPENICC_DEVICE_CAMERA,NULL},
+             * old_device_class = NULL,
+             * d = NULL;
 
   /* show help text */
   if(argc == 1)
@@ -88,7 +90,8 @@ int main(int argc, char ** argv)
 
   /* get a single JSON device */
   i = 1; /* select the second one, we start counting from zero */
-  json = openiccConfigs_DeviceGetJSON ( configs, NULL, i, 0, malloc );
+  d = openiccConfigs_DeviceGetJSON ( configs, NULL, i, 0,
+                                     old_device_class, &json, malloc );
   config = openiccConfigs_FromMem( json );
   device_class = openiccConfigs_DeviceClassGet( config, malloc );
   fprintf( stderr, "\ndevice class[%d]: \"%s\"\n", i, device_class);
@@ -99,6 +102,7 @@ int main(int argc, char ** argv)
   /* we want a single device class DB for lets say cameras */
   devices_n = openiccConfigs_Count(configs, devices_filter);
   fprintf(stderr, "Found %d %s devices.\n", devices_n, devices_filter[0] );
+  old_device_class = NULL;
   for(i = 0; i < devices_n; ++i)
   {
     flags = 0;
@@ -109,9 +113,9 @@ int main(int argc, char ** argv)
     else /* end the current JSON array field and open the next one */
       printf("            },\n            {\n");
 
-    json = openiccConfigs_DeviceGetJSON( configs, devices_filter, i,
-                                         flags, malloc );
-
+    d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i, flags,
+                                      old_device_class, &json, malloc );
+    old_device_class = d;
     printf( "%s\n", json );
     free(json);
   }
