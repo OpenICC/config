@@ -98,6 +98,7 @@ int main(int argc, char ** argv)
              * devices_filter[] = {NULL,NULL};
   int write_db_file = 0;
   int add_device = 0;
+  int erase_device = 0;
   int list_pos = -1;
   int dump_json = 0;
   int show_path = 0;
@@ -130,6 +131,7 @@ int main(int argc, char ** argv)
             switch (argv[pos][i])
             {
               case 'a': add_device = 1; dump_json = 1; break;
+              case 'e': erase_device = 1; dump_json = 1; break;
               case 'f': OY_PARSE_STRING_ARG(file_name); break;
               case 'j': dump_json = 1; break;
               case 'l': list_devices = 1; break;
@@ -236,17 +238,9 @@ int main(int argc, char ** argv)
   if(add_device)
   {
     if(file_name)
-    {
       text = openiccOpenFile( file_name, &size );
-    } else
-    {
-      int c;
-
-      text = malloc(65535);
-      while(((c = getc(stdin)) != EOF) &&
-            size < 65535)
-        text[size++] = c;
-    }
+    else
+      text = openiccReadFileSToMem( stdin, &size );
 
     /* parse JSON */
     configs_new = openiccConfigs_FromMem( text );

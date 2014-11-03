@@ -778,6 +778,41 @@ char * openiccOpenFile( const char * file_name,
   return text;
 }
 
+char *       openiccReadFileSToMem   ( FILE              * fp,
+                                       size_t            * size)
+{
+  size_t mem_size = 256;
+  char* mem = malloc(mem_size),
+        c;
+
+  if (fp && size)
+  {
+    *size = 0;
+    do
+    {
+      c = getc(fp);
+      if(*size >= mem_size)
+      {
+        mem_size *= 2;
+        mem = realloc( mem, mem_size );
+      }
+      mem[(*size)++] = c;
+    } while(!feof(fp));
+
+    --*size;
+
+    if(mem)
+      mem[*size] = 0;
+    else
+    {
+      free (mem);
+      *size = 0;
+    }
+  }
+
+  return mem;
+}
+
 #include <errno.h>
 #include <sys/stat.h> /* mkdir() */
 char* openiccExtractPathFromFileName_ (const char* file_name)

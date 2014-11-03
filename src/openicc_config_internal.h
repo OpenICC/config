@@ -70,6 +70,9 @@ extern openiccMessage_f     openiccMessage_p;
 
 char * openiccOpenFile( const char * file_name,
                         size_t     * size_ptr );
+char * openiccReadFileSToMem(
+                        FILE       * fp,
+                        size_t     * size);
 size_t openiccWriteFile(const char * file_name,
                         void       * ptr,
                         size_t       size );
