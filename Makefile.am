@@ -11,12 +11,10 @@ dist_doc_DATA = \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = openicc.pc
 
-# targets
-check_PROGRAMS = \
-        openicc-config-read
-bin_PROGRAMS = \
-        openicc-device
+AM_CFLAGS = -I$(top_builddir) -I$(top_builddir)/OpenICC \
+	-I$(top_srcdir)/OpenICC -I$(top_srcdir)/src @X_CFLAGS@ @YAJL_CFLAGS@
 
+# targets
 lib_LTLIBRARIES = libOpenICC.la
 
 
@@ -35,15 +33,17 @@ libOpenICCinclude_HEADERS = \
 	OpenICC/openicc_config.h \
 	OpenICC/openicc_version.h
 
-AM_CPPFLAGS = -I$(top_builddir) -I$(top_builddir)/OpenICC \
-	-I$(top_srcdir)/OpenICC -I$(top_srcdir)/src @X_CFLAGS@ @YAJL_CFLAGS@
 
+check_PROGRAMS = \
+        openicc-config-read
+bin_PROGRAMS = \
+        openicc-device
 
-openicc_config_read_LDADD = -L$(top_builddir) -lOpenICC
+openicc_config_read_LDADD = -L$(top_builddir) libOpenICC.la
 openicc_config_read_SOURCES = \
 	examples/openicc_config_read.c
 
-openicc_device_LDADD = -L$(top_builddir) -lOpenICC
+openicc_device_LDADD = -L$(top_builddir) libOpenICC.la
 openicc_device_SOURCES = \
 	utils/openicc_device.c
 
