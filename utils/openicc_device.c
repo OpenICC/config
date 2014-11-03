@@ -70,6 +70,7 @@ void printfHelp(int argc, char ** argv)
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Add device:"));
   fprintf( stderr, "      %s -a [-f FILE_NAME] [-v] [-db-file FILE_NAME] \n",argv[0]);
+  fprintf( stderr, "        -w              %s\n", _("write to selected DB file"));
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Show DB path:"));
   fprintf( stderr, "        --show-path [-s]   %s\n", _("locate DB"));
@@ -95,6 +96,7 @@ int main(int argc, char ** argv)
   const char * db_file = NULL,
              * file_name = NULL,
              * devices_filter[] = {NULL,NULL};
+  int write_db_file = 0;
   int add_device = 0;
   int list_pos = -1;
   int dump_json = 0;
@@ -134,6 +136,7 @@ int main(int argc, char ** argv)
               case 'p': OY_PARSE_INT_ARG(list_pos); break;
               case 's': scope = ucmm_local_system; break;
               case 'v': ++verbose; ++openicc_debug; break;
+              case 'w': write_db_file = 1; break;
               case 'h':
               case '-':
                         if(i == 1)
@@ -331,6 +334,14 @@ int main(int argc, char ** argv)
  
       if(json_new)
         printf( "%s", json_new );
+
+      if(write_db_file && json_new)
+      {
+        size_t len = strlen(json_new) + 1;
+        size_t s = openiccWriteFile( db_file, json_new, len );
+        if(s != len)
+          WARNc1_S("Could not write file %s  %u!=%u", db_file, s, len );
+      }
 
     } else
     {
