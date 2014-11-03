@@ -218,7 +218,6 @@ const char *       openiccConfigs_DeviceGet (
                     }
                     if(device->u.object.values[i])
                     {
-                      int len = 0;
                       char * t = 0;
                       const char * tmp = NULL, * tmp2 = NULL;
                       switch(device->u.object.values[i]->type)
@@ -263,7 +262,6 @@ const char *       openiccConfigs_DeviceGet (
                       }
                       if(!tmp)
                         tmp = "no value found";
-                      len = strlen(tmp);
                       (*values)[i] = alloc( sizeof(char) * (strlen(tmp) + 1) );
                       strcpy( (*values)[i], tmp );
                     }
@@ -305,7 +303,7 @@ void               openiccConfigs_SetInfo (
  *  @param[in]     pos                 device position in list
  *  @param[in]     flags               - OPENICC_CONFIGS_SKIP_HEADER
  *                                     - OPENICC_CONFIGS_SKIP_FOOTER
- *  @param[in]m    devive_class        the last written device class
+ *  @param[in]     device_class        the last written device class
  *  @param[out]    json                the resulting JSON string allocated by
  *                                     alloc
  *  @param[in]     alloc               user allocation function
@@ -429,12 +427,11 @@ int                openiccConfigs_Search (
   char            ** keys = 0;
   char            ** values = 0;
   int i,j,k, n = 0, devices_n, keys_n = 0;
-  int *hits_, hits_n = 0;
+  int hits_n = 0;
 
   while(keys[keys_n++]) ;
 
   devices_n = openiccConfigs_Count(config, NULL);
-  hits_ = calloc( sizeof(int), devices_n + 1 );
 
   for(i = 0; i < devices_n; ++i)
   {
