@@ -35,8 +35,18 @@
 # define _(text) text
 #endif
 
+#if (defined(__APPLE__) && defined(__MACH__)) || defined(__unix__) || (!defined(_WIN32) && !defined(_MSC_VER)) || (defined(_WIN32) && defined(__CYGWIN__)) || defined(__MINGW32__) || defined(__MINGW32)
+# include <unistd.h>
+# if defined(_POSIX_VERSION)
+#  define HAVE_POSIX 1
+# endif
+#endif
 
 #define DBG_UHR_ (double)clock()/(double)CLOCKS_PER_SEC
+#define WARNc1_S( format_,...) openiccMessage_p( openiccMSG_WARN, NULL, \
+                                                format_, __VA_ARGS__)
+#define WARNc2_S WARNc1_S
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,7 +69,10 @@ extern openiccMessage_f     openiccMessage_p;
 
 
 char * openiccOpenFile( const char * file_name,
-                        size_t   * size_ptr );
+                        size_t     * size_ptr );
+size_t openiccWriteFile(const char * file_name,
+                        void       * ptr,
+                        size_t       size );
 
 #ifdef __cplusplus
 } /* extern "C" */
