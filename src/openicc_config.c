@@ -21,6 +21,14 @@ int level_PROG = 0;
 #endif
 int openicc_backtrace = 0;
 
+#if HAVE_POSIX
+#include <unistd.h>  /* getpid() */
+#endif
+#include <string.h>  /* strdup() */
+#include <stdarg.h>  /* vsnprintf() */
+#include <stdio.h>   /* vsnprintf() */
+
+
 /**
  *  @brief   load configurations from in memory JSON text
  *  
@@ -770,3 +778,181 @@ char * openiccOpenFile( const char * file_name,
   return text;
 }
 
+#include <errno.h>
+#include <sys/stat.h> /* mkdir() */
+char* openiccExtractPathFromFileName_ (const char* file_name)
+{
+  char *path_name = 0;
+  char *ptr;
+
+  path_name = strdup( file_name );
+  ptr = strrchr (path_name, '/');
+  ptr[0] = 0;
+  return path_name;
+}
+int openiccIsDirFull_ (const char* name)
+{
+  struct stat status;
+  int r = 0;
+
+  memset(&status,0,sizeof(struct stat));
+  r = stat (name, &status);
+
+  if(r != 0 && openicc_debug > 1)
+  switch (errno)
+  {
+    case EACCES:       WARNc1_S("Permission denied: %s", name); break;
+    case EIO:          WARNc1_S("EIO : %s", name); break;
+    case ENAMETOOLONG: WARNc1_S("ENAMETOOLONG : %s", name); break;
+    case ENOENT:       WARNc1_S("A component of the name/file_name does not exist, or the file_name is an empty string: \"%s\"", name); break;
+    case ENOTDIR:      WARNc1_S("ENOTDIR : %s", name); break;
+#ifdef HAVE_POSIX
+    case ELOOP:        WARNc1_S("Too many symbolic links encountered while traversing the name: %s", name); break;
+    case EOVERFLOW:    WARNc1_S("EOVERFLOW : %s", name); break;
+#endif
+    default:           WARNc2_S("%s : %s", strerror(errno), name); break;
+  }
+  r = !r &&
+       ((status.st_mode & S_IFMT) & S_IFDIR);
+
+  return r;
+}
+
+char * oyPathGetParent_ (const char* name)
+{
+  char *parentDir = 0, *ptr = 0;
+
+  parentDir = strdup( name );
+  ptr = strrchr( parentDir, '/');
+  if (ptr)
+  {
+    if (ptr[1] == 0) /* ending dir separator */
+    {
+      ptr[0] = 0;
+      if (strrchr( parentDir, '/'))
+      {
+        ptr = strrchr (parentDir, '/');
+        ptr[0+1] = 0;
+      }
+    }
+    else
+      ptr[0+1] = 0;
+  }
+
+  return parentDir;
+}
+
+
+int openiccMakeDir_ (const char* path)
+{
+  const char * full_name = path;
+  char * path_parent = 0,
+       * path_name = 0;
+  int rc = !full_name;
+
+#ifdef HAVE_POSIX
+  mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH; /* 0755 */
+#endif
+
+  if(full_name)
+    path_name = openiccExtractPathFromFileName_(full_name);
+  if(path_name)
+  {
+    if(!openiccIsDirFull_(path_name))
+    {
+      path_parent = oyPathGetParent_(path_name);
+      if(!openiccIsDirFull_(path_parent))
+      {
+        rc = openiccMakeDir_(path_parent);
+        free( path_parent );
+      }
+
+      rc = mkdir (path_name
+#ifdef HAVE_POSIX
+                            , mode
+#endif
+                                  );
+      if(rc && openicc_debug > 1)
+      switch (errno)
+      {
+        case EACCES:       WARNc1_S("Permission denied: %s", path); break;
+        case EIO:          WARNc1_S("EIO : %s", path); break;
+        case ENAMETOOLONG: WARNc1_S("ENAMETOOLONG : %s", path); break;
+        case ENOENT:       WARNc1_S("A component of the path/file_name does not exist, or the file_name is an empty string: \"%s\"", path); break;
+        case ENOTDIR:      WARNc1_S("ENOTDIR : %s", path); break;
+#ifdef HAVE_POSIX
+        case ELOOP:        WARNc1_S("Too many symbolic links encountered while traversing the path: %s", path); break;
+        case EOVERFLOW:    WARNc1_S("EOVERFLOW : %s", path); break;
+#endif
+        default:           WARNc2_S("%s : %s", strerror(errno), path); break;
+      }
+    }
+    free( path_name );;
+  }
+
+  return rc;
+}
+
+
+size_t openiccWriteFile(const char * filename,
+                        void       * mem,
+                        size_t       size )
+{
+  FILE *fp = 0;
+  const char * full_name = filename;
+  int r = !filename;
+  size_t written_n = 0;
+  char * path = 0;
+
+  if(!r)
+  {
+    path = openiccExtractPathFromFileName_( full_name );
+    r = openiccMakeDir_( path );
+  }
+
+  if(!r)
+  {
+    fp = fopen(full_name, "wb");
+    if ((fp != 0)
+     && mem
+     && size)
+    {
+#if 0
+      do {
+        r = fputc ( block[pt++] , fp);
+      } while (--size);
+#else
+      written_n = fwrite( mem, 1, size, fp );
+      if(written_n != size)
+        r = errno;
+#endif
+    } else 
+      if(mem && size)
+        r = errno;
+      else
+        WARNc1_S("no data to write into: \"%s\"", filename );
+
+    if(r && openicc_debug > 1)
+    {
+      switch (errno)
+      {
+        case EACCES:       WARNc1_S("Permission denied: %s", filename); break;
+        case EIO:          WARNc1_S("EIO : %s", filename); break;
+        case ENAMETOOLONG: WARNc1_S("ENAMETOOLONG : %s", filename); break;
+        case ENOENT:       WARNc1_S("A component of the path/file_name does not exist, or the file_name is an empty string: \"%s\"", filename); break;
+        case ENOTDIR:      WARNc1_S("ENOTDIR : %s", filename); break;
+#ifdef HAVE_POSIX
+        case ELOOP:        WARNc1_S("Too many symbolic links encountered while traversing the path: %s", filename); break;
+        case EOVERFLOW:    WARNc1_S("EOVERFLOW : %s", filename); break;
+#endif
+        default:           WARNc2_S("%s : %s", strerror(errno), filename);break;
+      }
+    }
+
+    if (fp) fclose (fp);
+  }
+
+  if(path) free( path );
+
+  return written_n;
+}
