@@ -58,7 +58,7 @@
 		$XDG_DATA_DIRS
 		/usr/local/share:/usr/share
 
-		$XDG_CONF_DIRS
+		$XDG_CONFIG_DIRS
 		/etc/xdg
 
 	OS X:
@@ -74,7 +74,7 @@
 		$XDG_DATA_DIRS
 		/Library
 
-		$XDG_CONF_DIRS
+		$XDG_CONFIG_DIRS
 		/Library/Preferences
 
 	MSWin:
@@ -93,7 +93,7 @@
 		$XDG_DATA_DIRS
 		$ALLUSERSPROFILE
 
-		$XDG_CONF_DIRS
+		$XDG_CONFIG_DIRS
 		$ALLUSERSPROFILE
  */
 
@@ -492,7 +492,7 @@ int xdg_bds(
 				}
 			}
 		} else if (st == xdg_conf) {
-			if ((xdg = getenv("XDG_CONF_DIRS")) != NULL) {
+			if ((xdg = getenv("XDG_CONFIG_DIRS")) != NULL) {
 				if ((path = cappend(path, xdg)) == NULL) {
 					if (er != NULL) *er = xdg_alloc;
 					DBG((dbgo,"malloc error\n"))
@@ -983,7 +983,7 @@ main() {
 		{ xdg_data, xdg_local, {NULL, "HOME"},
 							{ "XDG_DATA_DIRS", "ALLUSERSPROFILE", NULL } },
 		{ xdg_conf, xdg_local, {NULL, "HOME"},
-							{ "XDG_CONF_DIRS", "ALLUSERSPROFILE", NULL } }
+							{ "XDG_CONFIG_DIRS", "ALLUSERSPROFILE", NULL } }
 	};
 #else	/* Apple, Unix, Default */
 	testcase cases[5] = {
@@ -996,7 +996,7 @@ main() {
 		{ xdg_data, xdg_local, {NULL, "HOME"},
 							{ "XDG_DATA_DIRS", "", NULL } },
 		{ xdg_conf, xdg_local, {NULL, "HOME"},
-							{ "XDG_CONF_DIRS", "", NULL } }
+							{ "XDG_CONFIG_DIRS", "", NULL } }
 	};
 #endif
 
