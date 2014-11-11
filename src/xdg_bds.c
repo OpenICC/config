@@ -403,6 +403,7 @@ int xdg_bds(
 				}
 #ifdef NT
 			} else if (getenv("HOME") == NULL && (xdg = getenv("APPDATA")) != NULL) {
+/* if(SUCCEEDED(SHGetFolderPath(NULL, CSIDL_COMMON_APPDATA, NULL, 0, &path[0]))) */
 				if ((path = cappend(path, xdg)) == NULL) {
 					if (er != NULL) *er = xdg_alloc;
 					DBG((dbgo,"malloc error\n"))
