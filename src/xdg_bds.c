@@ -809,7 +809,7 @@ char *xdg_errstr(xdg_error er) {
 		case xdg_nopath:
 			return "There is no resulting path";
 		case xdg_mallformed:
-			return "Malfomed path fount";
+			return "Malformed path fount";
 		default:
 			return "unknown";
 	}
