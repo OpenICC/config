@@ -35,7 +35,8 @@ libOpenICCinclude_HEADERS = \
 
 
 check_PROGRAMS = \
-        openicc-config-read
+        openicc-config-read \
+	test-xdg
 bin_PROGRAMS = \
         openicc-device
 
@@ -47,6 +48,10 @@ openicc_device_LDADD = -L$(top_builddir) libOpenICC.la
 openicc_device_SOURCES = \
 	utils/openicc_device.c
 
+test_xdg_SOURCES = \
+	src/aglob.c \
+	src/xdg_bds.c
+test_xdg_CPPFLAGS = -DSTANDALONE_TEST $(AM_CFLAGS)
 
 EXTRA_DIST = \
 	src/openicc_config_internal.h \
@@ -57,3 +62,7 @@ EXTRA_DIST = \
 	makefile.simple \
 	bootstrap.sh
 
+test:	test-xdg
+	./test-xdg
+
+.PHONY:	test
