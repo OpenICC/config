@@ -53,6 +53,7 @@ OpeniccConfigs_s * openiccConfigs_FromMem( const char       * data )
       char * msg = malloc(1024);
       configs->yajl = yajl_tree_parse( data, msg, 1024 );
       fprintf(stderr, "%s:%d ERROR: %s\n", __FILE__,__LINE__, msg?msg:"");
+      openiccConfigs_Release( &configs );
     }
   }
 
@@ -87,6 +88,7 @@ void               openiccConfigs_Release (
         fprintf( stderr, "%s:%d ERROR: expected OpeniccConfigs_s::dbg_text\n",
                   __FILE__,__LINE__ );
     }
+    *configs = NULL;
   }
 }
 
