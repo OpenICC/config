@@ -340,12 +340,16 @@ int main(int argc, char ** argv)
         printf( "%s", json_new );
       }
 
-      if(write_db_file && json_new)
+      if(write_db_file)
       {
-        size_t len = strlen(json_new) + 1;
-        size_t s = openiccWriteFile( db_file, json_new, len );
-        if(s != len)
-          WARNc1_S("Could not write file %s  %u!=%u", db_file, s, len );
+        if(json_new)
+        {
+          size_t len = strlen(json_new) + 1;
+          size_t s = openiccWriteFile( db_file, json_new, len );
+          if(s != len)
+            WARNc1_S("Could not write file %s  %u!=%u", db_file, s, len );
+        } else
+          remove(db_file);
       }
 
     } else
