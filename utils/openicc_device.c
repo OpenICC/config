@@ -58,10 +58,10 @@ void printfHelp(int argc, char ** argv)
   fprintf( stderr, "%s\n",                 _("Usage"));
   fprintf( stderr, "  %s\n",               _("List devices:"));
   fprintf( stderr, "      %s -l [-v] [-db-file FILE_NAME] [--long]\n",        argv[0]);
-  fprintf( stderr, "                        [-p NUMBER|--pos NUMBER] [-j]\n");
+  fprintf( stderr, "                        [-d NUMBER|--device NUMBER] [-j]\n");
   fprintf( stderr, "        --db-file FILE_NAME  %s\n", _("specify DB file"));
   fprintf( stderr, "        --long          %s\n", _("listing all key/values pairs"));
-  fprintf( stderr, "        -p NUMBER | --pos NUMBER\n"
+  fprintf( stderr, "        -d NUMBER | --device NUMBER\n"
                    "                        %s\n", _("select device by position"));
   fprintf( stderr, "        -j | --json     %s\n", _("dump raw JSON"));
   fprintf( stderr, "\n");
@@ -73,7 +73,7 @@ void printfHelp(int argc, char ** argv)
   fprintf( stderr, "        -w              %s\n", _("write to selected DB file"));
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Erase device:"));
-  fprintf( stderr, "      %s -e [-p NUMBER|--pos NUMBER] [-v] [-db-file FILE_NAME] \n",argv[0]);
+  fprintf( stderr, "      %s -e [-d NUMBER|--device NUMBER] [-v] [-db-file FILE_NAME] \n",argv[0]);
   fprintf( stderr, "        -w              %s\n", _("write to selected DB file"));
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Show DB path:"));
@@ -136,11 +136,11 @@ int main(int argc, char ** argv)
             switch (argv[pos][i])
             {
               case 'a': add_device = 1; dump_json = 1; break;
+              case 'd': OY_PARSE_INT_ARG(list_pos); break;
               case 'e': erase_device = 1; dump_json = 1; break;
               case 'f': OY_PARSE_STRING_ARG(file_name); break;
               case 'j': dump_json = 1; break;
               case 'l': list_devices = 1; break;
-              case 'p': OY_PARSE_INT_ARG(list_pos); break;
               case 's': scope = ucmm_local_system; break;
               case 'v': ++verbose; ++openicc_debug; break;
               case 'w': write_db_file = 1; break;
@@ -154,8 +154,8 @@ int main(int argc, char ** argv)
                         { dump_json = 1; i=100; break; }
                         else if(OY_IS_ARG("long"))
                         { list_long = 1; i=100; break; }
-                        else if(OY_IS_ARG("pos"))
-                        { OY_PARSE_INT_ARG2( list_pos, "pos" ); break; }
+                        else if(OY_IS_ARG("device"))
+                        { OY_PARSE_INT_ARG2( list_pos, "device" ); break; }
                         else if(OY_IS_ARG("show-path"))
                         { show_path = 1; i=100; break; }
                         else if(OY_IS_ARG("db-file"))
