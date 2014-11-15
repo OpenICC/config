@@ -382,7 +382,7 @@ const char *       openiccConfigs_DeviceGetJSON (
 
     /* close the object */
   if(!(flags & OPENICC_CONFIGS_SKIP_FOOTER))
-    sprintf( &txt[strlen(txt)], OPENICC_DEVICE_JSON_FOOTER);
+    sprintf( &txt[strlen(txt)], "            }\n" OPENICC_DEVICE_JSON_FOOTER);
   else
     sprintf( &txt[strlen(txt)], "            }" );
 

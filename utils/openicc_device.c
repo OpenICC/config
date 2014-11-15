@@ -72,6 +72,10 @@ void printfHelp(int argc, char ** argv)
   fprintf( stderr, "      %s -a [-f FILE_NAME] [-v] [-db-file FILE_NAME] \n",argv[0]);
   fprintf( stderr, "        -w              %s\n", _("write to selected DB file"));
   fprintf( stderr, "\n");
+  fprintf( stderr, "  %s\n",               _("Erase device:"));
+  fprintf( stderr, "      %s -e [-p NUMBER|--pos NUMBER] [-v] [-db-file FILE_NAME] \n",argv[0]);
+  fprintf( stderr, "        -w              %s\n", _("write to selected DB file"));
+  fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Show DB path:"));
   fprintf( stderr, "        --show-path [-s]   %s\n", _("locate DB"));
   fprintf( stderr, "        -s              %s\n", _("list system DB (default is user DB)"));
@@ -112,7 +116,8 @@ int main(int argc, char ** argv)
              * old_d = NULL;;
   int pos = -1;
   char * json;
-  int i,j, n = 0, flags;
+  int i,j, n = 0,
+      flags = OPENICC_CONFIGS_SKIP_HEADER | OPENICC_CONFIGS_SKIP_FOOTER;
 
 #ifdef USE_GETTEXT
   setlocale(LC_ALL,"");
@@ -176,6 +181,12 @@ int main(int argc, char ** argv)
       ++pos;
     }
   } else
+  {
+                        printfHelp(argc, argv);
+                        exit (0);
+  }
+
+  if(erase_device && list_pos == -1)
   {
                         printfHelp(argc, argv);
                         exit (0);
@@ -252,6 +263,9 @@ int main(int argc, char ** argv)
       list_devices = 1;
   }
 
+  if(erase_device && devices_n)
+      list_devices = 1;
+
   if(list_devices)
   {
     char            ** keys = 0;
@@ -281,20 +295,17 @@ int main(int argc, char ** argv)
         {
           ++pos;
 
-          if(list_pos != -1 && pos != list_pos)
+          if(list_pos != -1 && ((!erase_device && pos != list_pos) ||
+                                (erase_device && pos == list_pos)))
             continue;
-
-          flags = 0;
-          if(pos != 0 && list_pos == -1) /* not the first */
-            flags |= OPENICC_CONFIGS_SKIP_HEADER;
-          if((pos != (n + devices_new_n - 1)) && list_pos == -1) /* not the last */
-            flags |= OPENICC_CONFIGS_SKIP_FOOTER;
 
           d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i,
                                             flags, old_d, &json, malloc );
 
           if(d)
           {
+            if(!old_d)
+              openiccStringAddPrintf_( &json_new, OPENICC_DEVICE_JSON_HEADER, d );
             STRING_ADD( json_new, json );
             old_d = d;
           }
@@ -305,17 +316,14 @@ int main(int argc, char ** argv)
         for(i = 0; i < count; ++i)
         {
           ++pos;
-          flags = 0;
-          if(pos != 0 || n) /* not the first */
-            flags |= OPENICC_CONFIGS_SKIP_HEADER;
-          if(pos != (n + i)) /* not the last */
-            flags |= OPENICC_CONFIGS_SKIP_FOOTER;
 
           d = openiccConfigs_DeviceGetJSON( configs_new, devices_filter, i,
                                             flags, old_d, &json, malloc );
 
           if(d)
           {
+            if(!old_d)
+              openiccStringAddPrintf_( &json_new, OPENICC_DEVICE_JSON_HEADER, d );
             STRING_ADD( json_new, json );
             old_d = d;
           }
@@ -327,7 +335,10 @@ int main(int argc, char ** argv)
       }
  
       if(json_new)
+      {
+        STRING_ADD( json_new, "\n" OPENICC_DEVICE_JSON_FOOTER );
         printf( "%s", json_new );
+      }
 
       if(write_db_file && json_new)
       {
@@ -346,7 +357,8 @@ int main(int argc, char ** argv)
              * model = 0,
              * prefix = 0;
 
-        if(list_pos != -1 && i != list_pos)
+        if(list_pos != -1 && ((!erase_device && pos != list_pos) ||
+                              (erase_device && pos == list_pos)))
           continue;
 
         d = openiccConfigs_DeviceGet( configs, NULL, i,

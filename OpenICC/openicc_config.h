@@ -43,7 +43,6 @@ extern "C" {
   "        \"device\": {\n" \
   "          \"%s\": [{\n"
 #define OPENICC_DEVICE_JSON_FOOTER \
-  "            }\n" \
   "          ]\n" \
   "        }\n" \
   "      }\n" \
