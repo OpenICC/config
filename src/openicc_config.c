@@ -3,7 +3,7 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2011-2013 (C) Kai-Uwe Behrmann
+ *            2011-2014 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
  *  @internal
@@ -238,7 +238,7 @@ const char *       openiccConfigs_DeviceGet (
                              {
                                int k = 0,
                                    n = device->u.object.values[i]->u.array.len;
-                               StringAdd_( &t, "[" );
+                               openiccStringAdd_( &t, "[" );
                                for(k = 0; k < n; ++k)
                                {
                                  if(device->u.object.values[i]->
@@ -254,14 +254,14 @@ const char *       openiccConfigs_DeviceGet (
                                  if(tmp2)
                                  {
                                    if(k != 0)
-                                   StringAdd_( &t, "," );
-                                   StringAdd_( &t, "\"" );
-                                   StringAdd_( &t, tmp2 );
-                                   StringAdd_( &t, "\"" );
+                                   openiccStringAdd_( &t, "," );
+                                   openiccStringAdd_( &t, "\"" );
+                                   openiccStringAdd_( &t, tmp2 );
+                                   openiccStringAdd_( &t, "\"" );
                                    tmp = t;
                                  }
                                }
-                               StringAdd_( &t, "]" );
+                               openiccStringAdd_( &t, "]" );
                                tmp = t;
                              }
                              break;
@@ -466,7 +466,7 @@ int                openiccConfigs_Search (
   return hits_n;
 }
 
-char*              StringAppend_     ( const char        * text,
+static char *  openiccStringAppend_  ( const char        * text,
                                        const char        * append )
 {
   char * text_copy = NULL;
@@ -534,7 +534,7 @@ int          openiccStringAddPrintf_ ( char             ** string,
   }
 
 
-  text_copy = StringAppend_(*string, text);
+  text_copy = openiccStringAppend_(*string, text);
 
   if(string && *string)
     free(*string);
@@ -547,12 +547,12 @@ int          openiccStringAddPrintf_ ( char             ** string,
 }
 
 
-void               StringAdd_        ( char             ** text,
+void               openiccStringAdd_ ( char             ** text,
                                        const char        * append )
 {
   char * text_copy = NULL;
 
-  text_copy = StringAppend_(*text, append);
+  text_copy = openiccStringAppend_(*text, append);
 
   if(text && *text)
     free(*text);

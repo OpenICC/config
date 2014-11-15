@@ -61,9 +61,9 @@ struct OpeniccConfigs_s {
 int          openiccStringAddPrintf_ ( char             ** string,
                                        const char        * format,
                                                            ... );
-void               StringAdd_        ( char             ** text,
+void         openiccStringAdd_       ( char             ** text,
                                        const char        * append );
-#define STRING_ADD( t, append ) StringAdd_( &t, append )
+#define STRING_ADD( t, append ) openiccStringAdd_( &t, append )
 
 extern openiccMessage_f     openiccMessage_p;
 
