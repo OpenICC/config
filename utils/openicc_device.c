@@ -110,10 +110,15 @@ int main(int argc, char ** argv)
   ucmm_scope scope = ucmm_user;		/* Scope of instalation */
   OpeniccConfigs_s * configs = NULL;
   int devices_n = 0, devices_new_n = 0;
+  const char * device_classes_[] = {NULL, NULL};
+  const char ** device_classes = 0;
+  int device_classes_n = 0;
+
   OpeniccConfigs_s * configs_new = NULL;
   char * json_new = NULL;
   const char * d = NULL,
-             * old_d = NULL;;
+             * old_d = NULL,
+             * device_class = NULL;
   int pos = -1;
   char * json;
   int i,j, n = 0,
@@ -136,6 +141,7 @@ int main(int argc, char ** argv)
             switch (argv[pos][i])
             {
               case 'a': add_device = 1; dump_json = 1; break;
+              case 'c': OY_PARSE_STRING_ARG(device_class); break;
               case 'd': OY_PARSE_INT_ARG(list_pos); break;
               case 'e': erase_device = 1; dump_json = 1; break;
               case 'f': OY_PARSE_STRING_ARG(file_name); break;
@@ -242,7 +248,17 @@ int main(int argc, char ** argv)
     configs = openiccConfigs_FromMem( text );
     if(text) free(text); text = NULL;
     openiccConfigs_SetInfo ( configs, db_file );
-    devices_n = openiccConfigs_Count(configs, NULL);
+
+    if(device_class)
+    {
+      device_classes_[0] = device_class;
+      device_classes = device_classes_;
+      device_classes_n = 1;
+    } else
+      device_classes = openiccConfigs_GetClasses( device_classes,
+                                                  &device_classes_n );
+
+    devices_n = openiccConfigs_Count(configs, device_classes);
     DBG( configs, "Found %d devices.", devices_n );
   }
 
@@ -264,7 +280,9 @@ int main(int argc, char ** argv)
   }
 
   if(erase_device && devices_n)
-      list_devices = 1;
+  {
+    list_devices = 1;
+  }
 
   if(list_devices)
   {
@@ -277,11 +295,6 @@ int main(int argc, char ** argv)
 
     if(dump_json)
     {
-      int device_classes_n = 0;
-      const char ** device_classes = 0;
-
-      device_classes = openiccConfigs_GetClasses( device_classes,
-                                       &device_classes_n );
       pos = -1;
 
       n = openiccConfigs_Count(configs, NULL);
@@ -342,6 +355,13 @@ int main(int argc, char ** argv)
 
       if(write_db_file)
       {
+        if(device_class)
+        {
+          WARNc1_S("Can not write file %s  with single device class \"%s\"",
+                    db_file, device_class );
+          exit(1);
+        }
+
         if(json_new)
         {
           size_t len = strlen(json_new) + 1;
@@ -360,13 +380,12 @@ int main(int argc, char ** argv)
         char * manufacturer = 0,
              * model = 0,
              * prefix = 0;
-
         if(list_pos != -1 && ((!erase_device && pos != list_pos) ||
                               (erase_device && pos == list_pos)))
           continue;
 
-        d = openiccConfigs_DeviceGet( configs, NULL, i,
-                                                   &keys, &values, malloc );
+        d = openiccConfigs_DeviceGet( configs, device_classes, i,
+                                      &keys, &values, malloc );
 
         if(i && list_long)
           fprintf( stderr,"\n");
