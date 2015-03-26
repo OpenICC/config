@@ -148,15 +148,13 @@ GET_PROPERTY(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 
 ADD_SUBDIRECTORY( include )
 
-#ADD_SUBDIRECTORY( include_private )
-
 ADD_SUBDIRECTORY( libopenicc )
 
 #ADD_SUBDIRECTORY( tests )
 
 #ADD_SUBDIRECTORY( tools )
 
-#ADD_SUBDIRECTORY( examples )
+ADD_SUBDIRECTORY( examples )
 
 
 # versions for libraries
