@@ -49,6 +49,6 @@ CONFIGURE_FILE (
 
 INSTALL ( FILES
 		"${CMAKE_CURRENT_BINARY_DIR}/OpenIccConfig.cmake"
-		DESTINATION lib${LIB_SUFFIX}/openicc/cmake COMPONENT dev
+		DESTINATION lib${LIB_SUFFIX}/cmake/openicc COMPONENT dev
 	)
 
