@@ -2,12 +2,14 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6.2)
 
 PROJECT (OpenICC)
 
-SET (OPENICC_VERSION_MAJOR 0)
-SET (OPENICC_VERSION_MINOR 1)
-SET (OPENICC_VERSION_MICRO 0)
+SET( ${PROJECT_NAME}_MAJOR_VERSION 0)
+SET( ${PROJECT_NAME}_MINOR_VERSION 1)
+SET( ${PROJECT_NAME}_MICRO_VERSION 0)
+SET( ${PROJECT_NAME}_VERSION ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_MICRO_VERSION} )
 
 SET (PACKAGE_NAME "OpenICC")
-SET (PACKAGE_DESCRIPTION "OpenICC library is a Color Management System (CMS) on operating system level. It allows to match predictably input device colors to output device colors across supporting applications. One goal is to make color management useful for all users in a automated fashion and regardless of any technical knowledge.")
+SET (PACKAGE_DESCRIPTION "The OpenICC configuration data base allows to story, share and manipulate
+color management informations.")
 
 SET( OI_CMMSUBPATH     "color/modules" )
 SET( OI_METASUBPATH    "${PACKAGE_NAME}" )
@@ -24,8 +26,7 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 SET( DOMAIN openicc.org ) #needed by doxygen
 SET( REVERSE_DOMAIN org.openicc )
 
-SET( OPENICC_VERSION "${OPENICC_VERSION_MAJOR}.${OPENICC_VERSION_MINOR}.${OPENICC_VERSION_MICRO}" )
-SET( OPENICC_VERSION_MAJORMINOR "${OPENICC_VERSION_MAJOR}.${OPENICC_VERSION_MINOR}" )
+SET( ${PROJECT_NAME}_VERSION_MAJORMINOR "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}" )
 
 IF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   SET(PLATFORM "OSX")
@@ -75,7 +76,7 @@ ENDIF( HAVE_YAJL )
 #now add all directories
 ADD_SUBDIRECTORY( src )
 ADD_SUBDIRECTORY( cmake )
-#ADD_SUBDIRECTORY( extras )
+ADD_SUBDIRECTORY( extras )
 #ADD_SUBDIRECTORY( settings )
 #ADD_SUBDIRECTORY( doc )
 
@@ -88,21 +89,21 @@ ADD_CUSTOM_TARGET( uninstall
 	"${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake/OpenIccUninstall.cmake")
 
 ADD_CUSTOM_TARGET( dist
-		COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/ && git archive --prefix=libopenicc-${OPENICC_VERSION}/ --format=tar HEAD > ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${OPENICC_VERSION}.tar 
-                COMMAND echo "git:       git clone git://guthub.com/openicc-cms/libopenicc.git" > ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
-                COMMAND echo "git sha1:  " | tr -d "\\n" >> ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
-                COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/ && git rev-parse HEAD >> ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum 
-                COMMAND rm -rf libopenicc-${OPENICC_VERSION} && tar xf libopenicc-${OPENICC_VERSION}.tar 
-                COMMAND cp -ar ${CMAKE_SOURCE_DIR}/elektra-0.7.1/ libopenicc-${OPENICC_VERSION} && tar cf - libopenicc-${OPENICC_VERSION} | bzip2 > libopenicc-${OPENICC_VERSION}.tar.bz2
-                COMMAND echo  "package:   http://sourceforge.net/projects/openicc/files/OpenICC/libopenicc%20${OPENICC_VERSION_MAJORMINOR}/libopenicc-${OPENICC_VERSION}.tar.bz2" >> libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
-                COMMAND echo  "size:      " | tr -d "\\n" >> libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
-                COMMAND du -b libopenicc-${OPENICC_VERSION}.tar.bz2 | sed s/[[:space:]][[:print:]]*// >> libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum 
-                COMMAND echo  "md5sum:    " | tr -d "\\n" >> libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
-                COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}/ && md5sum libopenicc-${OPENICC_VERSION}.tar.bz2 >> libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
-                COMMAND echo  "sha1sum:   " | tr -d "\\n" >> libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
-                COMMAND sha1sum libopenicc-${OPENICC_VERSION}.tar.bz2 >> libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
-                COMMAND echo  "sha256sum: " | tr -d "\\n" >> libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
-                COMMAND sha256sum libopenicc-${OPENICC_VERSION}.tar.bz2 >> libopenicc-${OPENICC_VERSION}.tar.bz2.hashsum
+		COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/ && git archive --prefix=libopenicc-${${PROJECT_NAME}_VERSION}/ --format=tar HEAD > ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${${PROJECT_NAME}_VERSION}.tar 
+                COMMAND echo "git:       git clone git://guthub.com/openicc-cms/libopenicc.git" > ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
+                COMMAND echo "git sha1:  " | tr -d "\\n" >> ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
+                COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/ && git rev-parse HEAD >> ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum 
+                COMMAND rm -rf libopenicc-${${PROJECT_NAME}_VERSION} && tar xf libopenicc-${${PROJECT_NAME}_VERSION}.tar 
+                COMMAND cp -ar ${CMAKE_SOURCE_DIR}/elektra-0.7.1/ libopenicc-${${PROJECT_NAME}_VERSION} && tar cf - libopenicc-${${PROJECT_NAME}_VERSION} | bzip2 > libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2
+                COMMAND echo  "package:   http://sourceforge.net/projects/openicc/files/OpenICC/libopenicc%20${${PROJECT_NAME}_VERSION_MAJORMINOR}/libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2" >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
+                COMMAND echo  "size:      " | tr -d "\\n" >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
+                COMMAND du -b libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2 | sed s/[[:space:]][[:print:]]*// >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum 
+                COMMAND echo  "md5sum:    " | tr -d "\\n" >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
+                COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}/ && md5sum libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2 >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
+                COMMAND echo  "sha1sum:   " | tr -d "\\n" >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
+                COMMAND sha1sum libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2 >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
+                COMMAND echo  "sha256sum: " | tr -d "\\n" >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
+                COMMAND sha256sum libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2 >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
 		COMMENT Make a libopenicc source package by using git
 		VERBATIM
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
@@ -113,10 +114,10 @@ EXECUTE_PROCESS(COMMAND rpmbuild --showrc
                 ERROR_VARIABLE RPMBUILD_ERROR
                )
 ADD_CUSTOM_TARGET( rpm
-		COMMAND test -d ${PACKAGE_NAME}-${OPENICC_VERSION}/ && rm -rf ${PACKAGE_NAME}-${OPENICC_VERSION}/
-		COMMAND tar xjf ${PACKAGE_NAME}-${OPENICC_VERSION}.tar.bz2
+		COMMAND test -d ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}/ && rm -rf ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}/
+		COMMAND tar xjf ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}.tar.bz2
                 COMMAND mkdir -p rpmdir/BUILD rpmdir/SPECS rpmdir/SOURCES rpmdir/SRPMS rpmdir/RPMS/${RPMARCH}
-                COMMAND cp -f ${PACKAGE_NAME}-${OPENICC_VERSION}.tar.bz2 rpmdir/SOURCES
+                COMMAND cp -f ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}.tar.bz2 rpmdir/SOURCES
                 COMMAND rpmbuild --clean -ba extras/${PACKAGE_NAME}.spec --define "_topdir ${CMAKE_CURRENT_BINARY_DIR}/rpmdir"
                 DEPENDS dist
 		COMMENT Make a libopenicc RPM package
@@ -124,17 +125,17 @@ ADD_CUSTOM_TARGET( rpm
 		)
 
 ADD_CUSTOM_TARGET( debsrc
-		COMMAND test -d ${PACKAGE_NAME}-${OPENICC_VERSION}/ && rm -rf ${PACKAGE_NAME}-${OPENICC_VERSION}/
-		COMMAND tar xjf ${PACKAGE_NAME}-${OPENICC_VERSION}.tar.bz2
-                COMMAND mv ${PACKAGE_NAME}-${OPENICC_VERSION}.tar.bz2 ${PACKAGE_NAME}_${OPENICC_VERSION}.orig.tar.bz2
-                COMMAND cp -R ${CMAKE_SOURCE_DIR}/extras/debian ${PACKAGE_NAME}-${OPENICC_VERSION}/
-                COMMAND dpkg-source -b ${PACKAGE_NAME}-${OPENICC_VERSION}/
+		COMMAND test -d ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}/ && rm -rf ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}/
+		COMMAND tar xjf ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}.tar.bz2
+                COMMAND mv ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}.tar.bz2 ${PACKAGE_NAME}_${${PROJECT_NAME}_VERSION}.orig.tar.bz2
+                COMMAND cp -R ${CMAKE_SOURCE_DIR}/extras/debian ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}/
+                COMMAND dpkg-source -b ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}/
                 DEPENDS dist
 		COMMENT Make a libopenicc# DEB source package
 		VERBATIM
 		)
 ADD_CUSTOM_TARGET( debian
-		COMMAND cd ${PACKAGE_NAME}-${OPENICC_VERSION}/ && debuild
+		COMMAND cd ${PACKAGE_NAME}-${${PROJECT_NAME}_VERSION}/ && debuild
                 DEPENDS debsrc
 		COMMENT Make a libopenicc DEB package
 		VERBATIM

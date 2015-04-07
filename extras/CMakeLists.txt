@@ -1,0 +1,18 @@
+#pkg-config files
+CONFIGURE_FILE(
+		"${CMAKE_CURRENT_SOURCE_DIR}/openicc.pc.in"
+		"${CMAKE_CURRENT_BINARY_DIR}/openicc.pc"
+		@ONLY
+       )
+
+#CONFIGURE_FILE(
+#		"${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.spec.in"
+#		"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.spec"
+#		@ONLY
+#       )
+
+INSTALL( FILES
+		"${CMAKE_CURRENT_BINARY_DIR}/openicc.pc"
+		DESTINATION lib${LIB_SUFFIX}/${TARGET_PKGCONFIG_FOLDER}
+       )
+
