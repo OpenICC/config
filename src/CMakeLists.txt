@@ -145,6 +145,16 @@ ENDIF()
 GET_PROPERTY(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 #MESSAGE( "-- INCLUDE_DIRECTORIES: ${inc_dirs}" )
 
+INCLUDE(CodeCoverage)
+SET(CMAKE_C_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
+SETUP_TARGET_FOR_COVERAGE(
+				coverage  # Name for custom target.
+				openicc-config-read         # Name of the test driver executable that runs the tests.
+									# NOTE! This should always have a ZERO as exit code
+									# otherwise the coverage generation will not complete.
+				coverage            # Name of output directory.
+				)
+
 
 ADD_SUBDIRECTORY( include )
 
