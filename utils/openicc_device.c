@@ -285,6 +285,12 @@ int main(int argc, char ** argv)
     list_devices = 1;
   }
 
+  if(dump_json && devices_n)
+  {
+    list_devices = 1;
+  }
+
+
   if(list_devices)
   {
     char            ** keys = 0;
