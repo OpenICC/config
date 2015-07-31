@@ -16,7 +16,7 @@ OPENICC_VERSION=$OPENICC_MAJOR_VERSION.$OPENICC_MINOR_VERSION.$OPENICC_MICRO_VER
 OPENICC_VERSION_NAME="$OPENICC_MAJOR_VERSION.$OPENICC_MINOR_VERSION.$OPENICC_MICRO_VERSION"
 
 AC_CANONICAL_TARGET
-AC_CONFIG_SRCDIR([OpenICC/openicc_version.h.in])
+AC_CONFIG_SRCDIR([src/include/openicc_version.h.in])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -146,7 +146,7 @@ dnl Output the Makefiles
 AC_OUTPUT(
 Makefile
 openicc.pc
-OpenICC/openicc_version.h
+src/include/openicc_version.h
 )
 
 echo ""

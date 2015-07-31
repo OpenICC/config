@@ -11,17 +11,17 @@ dist_doc_DATA = \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = openicc.pc
 
-AM_CFLAGS = -I$(top_builddir) -I$(top_builddir)/OpenICC \
-	-I$(top_srcdir)/OpenICC -I$(top_srcdir)/src @X_CFLAGS@ @YAJL_CFLAGS@
+AM_CFLAGS = -I$(top_builddir) -I$(top_builddir)/src/include -I$(top_builddir)/src/libopenicc \
+	-I$(top_srcdir)/src/include -I$(top_srcdir)/src -I$(top_srcdir)/src/libopenicc @X_CFLAGS@ @YAJL_CFLAGS@
 
 # targets
 lib_LTLIBRARIES = libOpenICC.la
 
 
 libOpenICC_la_SOURCES = \
-	src/openicc_config.c \
-	src/aglob.c \
-	src/xdg_bds.c
+	src/libopenicc/openicc_config.c \
+	src/libopenicc/aglob.c \
+	src/libopenicc/xdg_bds.c
 
 libOpenICC_la_LIBADD = @YAJL_LIBS@
 libOpenICC_la_LDFLAGS = -version-info @LIBTOOL_VERSION@
@@ -30,8 +30,8 @@ libOpenICC_la_CPPFLAGS = @X_CFLAGS@ @YAJL_CFLAGS@
 libOpenICCincludedir = $(includedir)/OpenICC
 
 libOpenICCinclude_HEADERS = \
-	OpenICC/openicc_config.h \
-	OpenICC/openicc_version.h
+	src/include/openicc_config.h \
+	src/include/openicc_version.h
 
 
 check_PROGRAMS = \
@@ -49,14 +49,14 @@ openicc_device_SOURCES = \
 	utils/openicc_device.c
 
 test_xdg_SOURCES = \
-	src/aglob.c \
-	src/xdg_bds.c
+	src/libopenicc/aglob.c \
+	src/libopenicc/xdg_bds.c
 test_xdg_CPPFLAGS = -DSTANDALONE_TEST $(AM_CFLAGS)
 
 EXTRA_DIST = \
-	src/openicc_config_internal.h \
-	src/xdg_bds.h \
-	src/aglob.h \
+	src/libopenicc/openicc_config_internal.h \
+	src/libopenicc/xdg_bds.h \
+	src/libopenicc/aglob.h \
 	utils/openicc_macros.h \
 	OpenICC_device_config_DB.json \
 	makefile.simple \
