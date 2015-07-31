@@ -74,6 +74,7 @@ void printfHelp(int argc, char ** argv)
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Erase device:"));
   fprintf( stderr, "      %s -e [-d NUMBER|--device NUMBER] [-v] [-db-file FILE_NAME] \n",argv[0]);
+  fprintf( stderr, "                        %s\n", _("implies --json option"));
   fprintf( stderr, "        -w              %s\n", _("write to selected DB file"));
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Show DB path:"));
@@ -380,7 +381,7 @@ int main(int argc, char ** argv)
         char * manufacturer = 0,
              * model = 0,
              * prefix = 0;
-        if(list_pos != -1 && ((!erase_device && pos != list_pos) ||
+        if(list_pos != -1 && ((!erase_device && i != list_pos) ||
                               (erase_device && pos == list_pos)))
           continue;
 
