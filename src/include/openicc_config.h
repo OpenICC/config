@@ -3,7 +3,7 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2011 (C) Kai-Uwe Behrmann
+ *            2011-2015 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
  *  @internal
@@ -27,10 +27,10 @@ extern "C" {
  */
 
 #define OPENICC_DB_PREFIX "color/settings"
-#define OPENICC_SETTINGS_DB "openicc-defaults.json"
-#define OPENICC_DEVICES_DB "openicc-devices.json"
+#define OPENICC_DB "openicc.json"
 
-#define OPENICC_BASE_PATH "org/freedesktop/openicc/device"
+#define OPENICC_BASE_PATH "org/freedesktop/openicc"
+#define OPENICC_DEVICE_PATH OPENICC_BASE_PATH "/device"
 #define OPENICC_DEVICE_MONITOR "monitor"
 #define OPENICC_DEVICE_SCANNER "scanner"
 #define OPENICC_DEVICE_PRINTER "printer"
