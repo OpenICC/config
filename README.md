@@ -1,37 +1,43 @@
 # OpenICC
 
-The OpenICC configuration data base allows to story, share and manipulate
+The OpenICC configuration data base allows to store, share and manipulate
 colour management informations.
 
 Part of that is a file format based on JSON and a implementation of a 
-according library for easier access.
+according library for easy access.
 
-## Features
-Currently are serialised and parsed device informations.
+### Features
+* access to OpenICC device JSON DB
 
-## Internet
-git:  git://openicc.git.sourceforge.net/gitroot/openicc/openicc (read-only)
+### Links
+* [Copyright](docs/COPYING) - MIT
+* [ChangeLog](docs/ChangeLog)
+* [Authors](docs/AUTHORS)
+* [Code](http://sourceforge.net/p/openicc/code/ci/master/tree/)
+* [OpenICC](http://www.openicc.info) - open source color management discussion group
+ 
 
-## Dependencies
-Yajl - a JSON parser library http://lloyd.github.com/yajl/
+### Dependencies
+* [Yajl](http://lloyd.github.com/yajl/) - a JSON parser library
 
-## Building
+### Building
+Supported are autotools and cmake style builds.
+
+    $ mkdir build && cd build
+    $ ../configure # or
+    $ cmake ..
     $ make
     $ make install
 
-    A optional make check is provided.
+    The make check and make coverage targets are provided.
 
-## Install
-Copy the resulting library into your local library path if not to use
-the sources inside your code.
+####Build Flags
+... are typical cmake flags like CMAKE\_C\_FLAGS to tune compilation.
 
-## Usage
-The library provides an easy to use API for DB access. Include the 
-openicc_config.h header file into your sources and link to the object file
-generated from openicc_config.c.
-### Example
-See the openicc_config_example.c file.
+* CMAKE\_INSTALL\_PREFIX to install into paths and so on. Use on the command 
+  line through -DCMAKE\_INSTALL\_PREFIX=/my/path .
+* LIB\_SUFFIX - allows to append a architecture specific suffix like 
+  LIB\_SUFFIX=64 for 64bit RedHat style Linux systems.
 
-## Known Bugs
+### Known Bugs
 The source code provides currently no mechanism for a write lock.
-
