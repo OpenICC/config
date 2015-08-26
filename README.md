@@ -29,8 +29,6 @@ Supported are autotools and cmake style builds.
     $ make
     $ make install
 
-    The make check and make coverage targets are provided.
-
 ####Build Flags
 ... are typical cmake flags like CMAKE\_C\_FLAGS to tune compilation.
 
@@ -38,6 +36,11 @@ Supported are autotools and cmake style builds.
   line through -DCMAKE\_INSTALL\_PREFIX=/my/path .
 * LIB\_SUFFIX - allows to append a architecture specific suffix like 
   LIB\_SUFFIX=64 for 64bit RedHat style Linux systems.
+* USE\_GCOV - enable gcov/lcov compiler flags on the Unix platform and the coverage target
 
 ### Known Bugs
-The source code provides currently no mechanism for a write lock.
+* The source code provides currently no mechanism for a write lock.
+
+### TODO
+* XDG API exposure
+* cascading config files or keys
