@@ -3,7 +3,7 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2011 (C) Kai-Uwe Behrmann
+ *            2011-2015 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
  *  @internal
@@ -26,8 +26,8 @@
 int main(int argc, char ** argv)
 {
   OpeniccConfigs_s * configs, * config;
-  const char * file_name = argc > 1 ? argv[1] : "test.json";
-  FILE * fp = fopen(file_name,"rb");
+  const char * file_name = argc > 1 ? argv[1] : "../test.json";
+  FILE * fp = NULL;
   char * text = 0;
   size_t size = 0;
   char            ** keys = 0;
@@ -38,12 +38,8 @@ int main(int argc, char ** argv)
              * old_device_class = NULL,
              * d = NULL;
 
-  /* show help text */
-  if(argc == 1)
-  {
-    fprintf( stderr, "Usage: %s openicc.json\n\n", argv[0] );
-    return 0;
-  }
+
+  fp = fopen(file_name,"rb");
 
   /* read JSON input file */
   if(fp)
@@ -58,6 +54,10 @@ int main(int argc, char ** argv)
         fread(text, sizeof(char), size, fp);
       text[size] = '\000';
     }
+  } else
+  {
+    fprintf( stderr, "Usage: %s openicc.json\n\n", argv[0] );
+    return 0;
   }
  
 

@@ -13,6 +13,13 @@ IF(UNIX)
   IF(CMAKE_COMPILER_IS_GNUCC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    # coverage testing
+    IF(USE_GCOV)
+      SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+      SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+      SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+    ENDIF(USE_GCOV)
   ENDIF(CMAKE_COMPILER_IS_GNUCC)
 ENDIF(UNIX)
 
@@ -145,15 +152,17 @@ ENDIF()
 GET_PROPERTY(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 #MESSAGE( "-- INCLUDE_DIRECTORIES: ${inc_dirs}" )
 
-INCLUDE(CodeCoverage)
-SET(CMAKE_C_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
-SETUP_TARGET_FOR_COVERAGE(
+IF(USE_GCOV)
+  MESSAGE("testing coverage using gcc's gcov; try target: coverage")
+  INCLUDE(CodeCoverage)
+  SETUP_TARGET_FOR_COVERAGE(
 				coverage  # Name for custom target.
 				openicc-config-read         # Name of the test driver executable that runs the tests.
 									# NOTE! This should always have a ZERO as exit code
 									# otherwise the coverage generation will not complete.
 				coverage            # Name of output directory.
 				)
+ENDIF(USE_GCOV)
 
 
 ADD_SUBDIRECTORY( include )
