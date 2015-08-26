@@ -3,7 +3,7 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2011-2014 (C) Kai-Uwe Behrmann
+ *            2011-2015 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
  *  @internal
@@ -154,7 +154,7 @@ int                openiccConfigs_Count (
         }
       }
     } else
-      fprintf( stderr, "%s:%d ERROR: could not find " OPENICC_BASE_PATH " %s\n",
+      fprintf( stderr, "%s:%d ERROR: could not find " OPENICC_DEVICE_PATH " %s\n",
                __FILE__,__LINE__, configs->dbg_text ? configs->dbg_text : "" );
   }
 
@@ -286,7 +286,7 @@ const char *       openiccConfigs_DeviceGet (
         }
       }
     } else
-      fprintf( stderr, "%s:%d ERROR: could not find " OPENICC_BASE_PATH " %s\n",
+      fprintf( stderr, "%s:%d ERROR: could not find " OPENICC_DEVICE_PATH " %s\n",
                __FILE__,__LINE__, configs->dbg_text ? configs->dbg_text : "" );
   }
 
@@ -420,7 +420,7 @@ char *             openiccConfigs_DeviceClassGet (
       }
 
     } else
-      fprintf( stderr, "%s:%d ERROR: could not find " OPENICC_BASE_PATH " %s\n",
+      fprintf( stderr, "%s:%d ERROR: could not find " OPENICC_DEVICE_PATH " %s\n",
                __FILE__,__LINE__, config->dbg_text ? config->dbg_text : "" );
   }
 
