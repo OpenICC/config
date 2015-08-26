@@ -42,11 +42,11 @@ bin_PROGRAMS = \
 
 openicc_config_read_LDADD = -L$(top_builddir) libOpenICC.la
 openicc_config_read_SOURCES = \
-	examples/openicc_config_read.c
+	src/examples/openicc_config_read.c
 
 openicc_device_LDADD = -L$(top_builddir) libOpenICC.la
 openicc_device_SOURCES = \
-	utils/openicc_device.c
+	src/tools/openicc_device.c
 
 test_xdg_SOURCES = \
 	src/libopenicc/aglob.c \
@@ -57,7 +57,7 @@ EXTRA_DIST = \
 	src/libopenicc/openicc_config_internal.h \
 	src/libopenicc/xdg_bds.h \
 	src/libopenicc/aglob.h \
-	utils/openicc_macros.h \
+	src/tools/openicc_macros.h \
 	OpenICC_device_config_DB.json \
 	makefile.simple \
 	bootstrap.sh

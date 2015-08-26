@@ -3,7 +3,7 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2011 (C) Kai-Uwe Behrmann
+ *            2011-2015 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
  *  @internal
@@ -201,7 +201,7 @@ int main(int argc, char ** argv)
 
   if(!db_file)
   {
-    char *config_file = OPENICC_DB_PREFIX "/" OPENICC_DEVICES_DB;
+    char *config_file = OPENICC_DB_PREFIX "/" OPENICC_DB;
     /* Locate the directories where the config file is, */
     /* and where we should copy the profile to. */
     {
@@ -387,6 +387,7 @@ int main(int argc, char ** argv)
         char * manufacturer = 0,
              * model = 0,
              * prefix = 0;
+        const char * check_key;
         if(list_pos != -1 && ((!erase_device && i != list_pos) ||
                               (erase_device && pos == list_pos)))
           continue;
@@ -403,9 +404,16 @@ int main(int argc, char ** argv)
                  i, d, n );
         for( j = 0; j < n; ++j )
         {
+          check_key = keys[j];
+          if(strcmp(check_key, "prefix") == 0)
+            prefix = values[j];
+        }
+
+        for( j = 0; j < n; ++j )
+        {
           if(!list_long)
           {
-            const char * check_key = keys[j];
+            check_key = keys[j];
             if(prefix && strlen(prefix) < strlen(check_key) &&
                memcmp(prefix, check_key, strlen(prefix)) == 0)
               check_key += strlen(prefix);
