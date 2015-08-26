@@ -3,10 +3,10 @@ ACLOCAL_AMFLAGS = -I m4
 
 
 dist_doc_DATA = \
-            COPYING \
-            README \
+            docs/COPYING \
             README.md \
-            AUTHORS
+            docs/AUTHORS \
+            docs/ChangeLog
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = openicc.pc
