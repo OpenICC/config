@@ -824,7 +824,10 @@ char* openiccExtractPathFromFileName_ (const char* file_name)
 
   path_name = strdup( file_name );
   ptr = strrchr (path_name, '/');
-  ptr[0] = 0;
+  if(ptr)
+    ptr[0] = 0;
+  else
+    strcpy( path_name, "." );
   return path_name;
 }
 int openiccIsDirFull_ (const char* name)
