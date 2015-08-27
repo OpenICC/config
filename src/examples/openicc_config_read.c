@@ -1,4 +1,4 @@
-/*  @file openicc_config_read.h
+/*  @file openicc_config_read.c
  *
  *  libOpenICC - OpenICC Colour Management Configuration
  *
@@ -110,8 +110,6 @@ int main(int argc, char ** argv)
       flags |= OPENICC_CONFIGS_SKIP_HEADER;
     if(i != devices_n - 1) /* not the last */
       flags |= OPENICC_CONFIGS_SKIP_FOOTER;
-    else /* end the current JSON array field and open the next one */
-      printf("            },\n            {\n");
 
     d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i, flags,
                                       old_device_class, &json, malloc );
