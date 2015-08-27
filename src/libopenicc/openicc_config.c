@@ -87,6 +87,7 @@ void               openiccConfigs_Release (
       else
         fprintf( stderr, "%s:%d ERROR: expected OpeniccConfigs_s::dbg_text\n",
                   __FILE__,__LINE__ );
+      free(c);
     }
     *configs = NULL;
   }
@@ -301,7 +302,11 @@ void               openiccConfigs_SetInfo (
                                        const char        * debug_info )
 {
   if(configs && debug_info)
+  {
+    if(configs->dbg_text)
+      free(configs->dbg_text);
     configs->dbg_text = strdup( (char*)debug_info );
+  }
 }
 
 /**
@@ -756,6 +761,43 @@ int            openiccMessageFuncSet ( openiccMessage_f    message_func )
 int            openiccVersion        ( void )
 {
   return OPENICC_VERSION;
+}
+
+const char * openicc_domain_path = OI_LOCALEDIR;
+int openicc_i18n_init = 0;
+/** @func    openiccInit
+ *  @brief   init the library; optionally
+ *
+ *  Additionally use setlocale() somewhere in your application.
+ *
+ *  return -1 for no USE_GETTEXT defined, otherwise 1
+ *
+ *  @version OpenICC: 0.1.0
+ *  @date    2015/08/27
+ *  @since   2015/08/27 (OpenICC: 0.1.0)
+ */
+int            openiccInit           ( void )
+{
+#ifdef USE_GETTEXT
+  if(!openicc_i18n_init)
+  {
+    char * temp = 0;
+    ++openicc_i18n_init;
+
+    if(getenv("OI_LOCALEDIR") && strlen(getenv("OI_LOCALEDIR")))
+      openicc_domain_path = strdup(getenv("OI_LOCALEDIR"));
+
+    openiccStringAdd_( &temp, "NLSPATH=");
+    openiccStringAdd_( &temp, openicc_domain_path);
+    putenv(temp); /* Solaris */
+
+    bindtextdomain( "OpenICC", openicc_domain_path );
+    if(openicc_debug)
+      WARNc1_S("bindtextdomain() to \"%s\"", openicc_domain_path );
+  }
+  return openicc_i18n_init;
+#endif
+  return -1;
 }
 
 char * openiccOpenFile( const char * file_name,
