@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <locale.h>           /* setlocale LC_NUMERIC */
 
 #include "openicc_config.h"
 
@@ -38,6 +39,8 @@ int main(int argc, char ** argv)
              * old_device_class = NULL,
              * d = NULL;
 
+  setlocale(LC_ALL,"");
+  openiccInit();
 
   fp = fopen(file_name,"rb");
 

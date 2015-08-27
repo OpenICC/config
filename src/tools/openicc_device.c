@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "openicc_conf.h"
 #include "openicc_version.h"
 #include "openicc_config.h"
 #include "openicc_macros.h"
@@ -128,6 +129,7 @@ int main(int argc, char ** argv)
 #ifdef USE_GETTEXT
   setlocale(LC_ALL,"");
 #endif
+  openiccInit();
 
   if(argc >= 2)
   {
