@@ -69,6 +69,7 @@ typedef int  (*openiccMessage_f)     ( openiccMSG_e        error_code,
                                        const char        * format,
                                        ... );
 int            openiccMessageFuncSet ( openiccMessage_f    message_func );
+int            openiccVersion        ( void );
 
 OpeniccConfigs_s * openiccConfigs_FromMem (
                                        const char        * data );
