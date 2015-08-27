@@ -8,6 +8,11 @@ SET( CFILES_OBJECT_CONFIG
 	${CFILES_OBJECT_CONFIG_PUBLIC}
    )
 
+CONFIGURE_FILE (
+		"${CMAKE_CURRENT_SOURCE_DIR}/openicc_conf.h.in"
+		"${CMAKE_BINARY_DIR}/src/include/openicc_conf.h"
+		@ONLY
+	)
 
 SET( SOURCES ${CFILES_OBJECT_CONFIG} )
 
