@@ -779,6 +779,7 @@ char * openiccOpenFile( const char * file_name,
         if(s != size)
           fprintf(stderr, "Error: fread %lu but should read %lu\n",
                   (long unsigned int) s, (long unsigned int)size);
+        fclose( fp );
       } else
       {
         fprintf(stderr, "Error: Could not open file - \"%s\"\n", file_name);
