@@ -6,7 +6,7 @@
  *             (c) 2011 - Kai-Uwe Behrmann <ku.b@gmx.de>
  */
 
-#ifndef USE_GETTEXT
+#if !defined(USE_GETTEXT) && !defined(_)
 #define _(text) text
 #endif
 
