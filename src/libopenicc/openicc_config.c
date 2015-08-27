@@ -499,9 +499,9 @@ static char *  openiccStringAppend_  ( const char        * text,
 /** @internal 
  *  @brief   printf style string add
  *
- *  @version Oyranos: 0.1.10
- *  @since   2009/02/07 (Oyranos: 0.1.10)
+ *  @version OpenICC: 0.1.0
  *  @date    2009/02/07
+ *  @since   2009/02/07 (OpenICC: 0.1.0)
  */
 int          openiccStringAddPrintf_ ( char             ** string,
                                        const char        * format,
@@ -574,9 +574,9 @@ void               openiccStringAdd_ ( char             ** text,
  *  @see the openiccMessageFunc() needs just to replaxe the fprintf with your 
  *  favourite GUI call.
  *
- *  @version Oyranos: 0.2.1
- *  @since   2008/04/03 (Oyranos: 0.2.1)
+ *  @version OpenICC: 0.1.0
  *  @date    2011/01/15
+ *  @since   2008/04/03 (OpenICC: 0.1.0)
  */
 int                openiccMessageFormat (
                                        char             ** message_text,
@@ -685,9 +685,9 @@ int                openiccMessageFormat (
  *  @param         ...                 the variable args fitting to format
  *  @return                            0 - success; 1 - error
  *
- *  @version Oyranos: 0.3.0
- *  @since   2008/04/03 (Oyranos: 0.1.8)
+ *  @version OpenICC: 0.1.0
  *  @date    2009/07/20
+ *  @since   2008/04/03 (OpenICC: 0.1.0)
  */
 int  openiccMessageFunc              ( openiccMSG_e        code,
                                        OpeniccConfigs_s  * context_object,
@@ -735,9 +735,9 @@ openiccMessage_f     openiccMessage_p = openiccMessageFunc;
 /** @func    openiccMessageFuncSet
  *  @brief
  *
- *  @version Oyranos: 0.1.8
- *  @date    2008/04/03
- *  @since   2008/04/03 (Oyranos: 0.1.8)
+ *  @version OpenICC: 0.1.0
+ *  @date    2011/10/21
+ *  @since   2008/04/03 (OpenICC: 0.1.0)
  */
 int            openiccMessageFuncSet ( openiccMessage_f    message_func )
 {
@@ -746,6 +746,17 @@ int            openiccMessageFuncSet ( openiccMessage_f    message_func )
   return 0;
 }
 
+/** @func    openiccVersion
+ *  @brief
+ *
+ *  @version OpenICC: 0.1.0
+ *  @date    2015/08/27
+ *  @since   2015/08/27 (OpenICC: 0.1.0)
+ */
+int            openiccVersion        ( void )
+{
+  return OPENICC_VERSION;
+}
 
 char * openiccOpenFile( const char * file_name,
                         size_t   * size_ptr )
