@@ -519,7 +519,7 @@ oiTESTRESULT_e testIO ()
   t1 = openiccOpenFile( file_name, &size );
   if(t1)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccOpenFile() &size %u                       ", size );
+    "openiccOpenFile() &size %u                       ", (unsigned)size );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccOpenFile() %s    ", file_name );
@@ -533,7 +533,7 @@ oiTESTRESULT_e testIO ()
                            strlen(OPENICC_DEVICE_PATH) + 1 );
   if(size)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccWriteFile() size %u                         ", size );
+    "openiccWriteFile() size %u                         ", (unsigned)size );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccWriteFile() %s                ", file_name );
@@ -543,7 +543,7 @@ oiTESTRESULT_e testIO ()
   t1 = openiccReadFileSToMem( fp, &size );
   if(t1)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccReadFileSToMem() &size %u                 ", size );
+    "openiccReadFileSToMem() &size %u                 ", (unsigned)size );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccReadFileSToMem() %s    ", file_name );
@@ -593,6 +593,7 @@ oiTESTRESULT_e testStringRun ()
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccStringAdd_() ...                            " );
   }
+  if(t) free(t);
 
   return result;
 }
