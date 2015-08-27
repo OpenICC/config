@@ -58,6 +58,8 @@ typedef struct OpeniccConfigs_s OpeniccConfigs_s;
 extern int openicc_debug;
 extern int openicc_backtrace;
 
+int            openiccInit           ( void );
+
 typedef enum {
   openiccMSG_ERROR = 300,              /**< @brief fatal user messages */
   openiccMSG_WARN,                     /**< @brief log messages */
