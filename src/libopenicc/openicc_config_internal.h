@@ -76,6 +76,9 @@ char * openiccReadFileSToMem(
 size_t openiccWriteFile(const char * file_name,
                         void       * ptr,
                         size_t       size );
+char * openiccExtractPathFromFileName_(const char        * file_name );
+int    openiccIsDirFull_             ( const char        * name );
+char * oyPathGetParent_              ( const char        * name );
 
 #ifdef __cplusplus
 } /* extern "C" */
