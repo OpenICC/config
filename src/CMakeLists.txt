@@ -152,24 +152,12 @@ ENDIF()
 GET_PROPERTY(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 #MESSAGE( "-- INCLUDE_DIRECTORIES: ${inc_dirs}" )
 
-IF(USE_GCOV)
-  MESSAGE("testing coverage using gcc's gcov; try target: coverage")
-  INCLUDE(CodeCoverage)
-  SETUP_TARGET_FOR_COVERAGE(
-				coverage  # Name for custom target.
-				openicc-config-read         # Name of the test driver executable that runs the tests.
-									# NOTE! This should always have a ZERO as exit code
-									# otherwise the coverage generation will not complete.
-				coverage            # Name of output directory.
-				)
-ENDIF(USE_GCOV)
-
 
 ADD_SUBDIRECTORY( include )
 
 ADD_SUBDIRECTORY( libopenicc )
 
-#ADD_SUBDIRECTORY( tests )
+ADD_SUBDIRECTORY( tests )
 
 ADD_SUBDIRECTORY( tools )
 
