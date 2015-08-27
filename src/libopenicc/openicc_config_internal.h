@@ -24,13 +24,14 @@
 
 #include <yajl/yajl_tree.h>
 
+#include "openicc_conf.h"
 #include "openicc_config.h"
 #include "openicc_version.h"
 
 #ifdef USE_GETTEXT
 # include <libintl.h>
 # include <locale.h>
-# define _(text) dgettext( oy_domain, text )
+# define _(text) dgettext( "OpenICC", text )
 #else
 # define _(text) text
 #endif
