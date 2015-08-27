@@ -10,7 +10,7 @@ ADD_CUSTOM_TARGET(check
 
 ADD_CUSTOM_COMMAND( OUTPUT test_openicc
                     DEPENDS test-openicc
-                    COMMAND valgrind ./test-openicc "${CMAKE_SOURCE_DIR}/test.json" )
+                    COMMAND valgrind --leak-check=full --show-leak-kinds=all ./test-openicc )
 
 IF(USE_GCOV)
   MESSAGE("testing coverage using gcc's gcov; try target: coverage")

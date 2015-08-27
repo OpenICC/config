@@ -142,7 +142,6 @@ oiTESTRESULT_e testVersion()
 
 #include <locale.h>
 
-#if 0
 oiTESTRESULT_e testI18N()
 {
   const char * lang = 0;
@@ -150,32 +149,25 @@ oiTESTRESULT_e testI18N()
 
   fprintf(stdout, "\n" );
 
-  oiI18Nreset();
-
-  lang = oiLanguage();
-  if((lang && (strcmp(lang, "C") == 0)) || !lang)
-  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
-    "oiLanguage() uninitialised good %s                ", lang );
-  } else
-  { PRINT_SUB( oiTESTRESULT_FAIL, 
-    "oiLanguage() uninitialised failed                 " );
-  }
-
   setlocale(LC_ALL,"");
-  oiI18Nreset();
+  int old_openicc_debug = openicc_debug;
+  openicc_debug = 1;
+  openiccInit();
+  openicc_debug = old_openicc_debug;
 
-  lang = oiLanguage();
+  lang = setlocale(LC_ALL, NULL);
   if(lang && (strcmp(lang, "C") != 0))
   { PRINT_SUB( oiTESTRESULT_SUCCESS, 
-    "oiLanguage() initialised good %s                  ", lang );
+    "setlocale() initialised good %s            ", lang );
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL, 
-    "oiLanguage() initialised failed %s                ", lang );
+    "setlocale() initialised failed %s          ", lang );
   }
 
   return result;
 }
 
+#if 0
 #define TEST_DOMAIN "sw/Oyranos/Tests"
 #define TEST_KEY "/test_key"
 
@@ -516,6 +508,13 @@ oiTESTRESULT_e testIO ()
 
   size_t size = 0;
   file_name = "../../../test.json";
+  FILE * fp = fopen( file_name, "r" );
+
+  if(fp)
+    fclose(fp);
+  else
+    file_name = "test.json";
+
   t1 = openiccOpenFile( file_name, &size );
   if(t1)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
@@ -539,7 +538,7 @@ oiTESTRESULT_e testIO ()
     "openiccWriteFile() %s                ", file_name );
   }
 
-  FILE * fp = fopen( file_name, "r" );
+  fp = fopen( file_name, "r" );
   t1 = openiccReadFileSToMem( fp, &size );
   if(t1)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
@@ -597,6 +596,138 @@ oiTESTRESULT_e testStringRun ()
 
   return result;
 }
+
+oiTESTRESULT_e testDeviceJSON ()
+{
+  oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
+
+  fprintf(stdout, "\n" );
+
+  int error = 0;
+
+
+  OpeniccConfigs_s * configs, * config;
+  const char * file_name = "../../../test.json";
+  char * text = 0;
+  char            ** keys = 0;
+  char            ** values = 0;
+  int i,j, n = 0, devices_n, flags;
+  char * json, * full_json = NULL, * device_class;
+  const char * devices_filter[] = {OPENICC_DEVICE_CAMERA,NULL},
+             * old_device_class = NULL,
+             * d = NULL;
+  size_t size = 0;
+  FILE * fp = fopen( file_name, "r" );
+
+  if(fp)
+    fclose(fp);
+  else
+    file_name = "test.json";
+
+  /* read JSON input file */
+  text = openiccOpenFile( file_name, &size );
+
+  /* parse JSON */
+  configs = openiccConfigs_FromMem( text );
+  if(text) free(text);
+  openiccConfigs_SetInfo ( configs, file_name );
+  devices_n = openiccConfigs_Count(configs, NULL);
+  fprintf( zout, "Found %d devices.\n", devices_n );
+  if( devices_n )
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccConfigs_FromMem(\"%s\") %d ", file_name, devices_n );
+  } else
+  { PRINT_SUB( oiTESTRESULT_XFAIL,
+    "openiccConfigs_FromMem()...                        " );
+  }
+
+
+  
+  /* print all found key/value pairs */
+  for(i = 0; i < devices_n; ++i)
+  {
+    const char * d = openiccConfigs_DeviceGet( configs, NULL, i,
+                                               &keys, &values, malloc );
+
+    if(i)
+      fprintf( zout,"\n");
+
+    n = 0; if(keys) while(keys[n]) ++n;
+    fprintf( zout, "[%d] device class:\"%s\" with %d keys/values pairs\n", i, d, n);
+    for( j = 0; j < n; ++j )
+    {
+      if(openicc_debug)
+      fprintf(zout, "%s:\"%s\"\n", keys[j], values[j]);
+      free(keys[j]);
+      free(values[j]);
+    }
+    free(keys); free(values);
+  }
+  fprintf(zout, "\n" );
+
+  /* get a single JSON device */
+  i = 1; /* select the second one, we start counting from zero */
+  d = openiccConfigs_DeviceGetJSON ( configs, NULL, i, 0,
+                                     old_device_class, &json, malloc );
+  config = openiccConfigs_FromMem( json );
+  openiccConfigs_SetInfo ( config, file_name );
+  device_class = openiccConfigs_DeviceClassGet( config, malloc );
+  if( strcmp(device_class,"camera") == 0 )
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccConfigs_DeviceClassGet([%d]) %s      ", i, device_class );
+  } else
+  { PRINT_SUB( oiTESTRESULT_XFAIL,
+    "openiccConfigs_DeviceClassGet()...                 " );
+  }
+  if(json) free(json);
+  if(device_class) free(device_class);
+  openiccConfigs_Release( &config );
+
+
+  /* we want a single device class DB for lets say cameras */
+  devices_n = openiccConfigs_Count(configs, devices_filter);
+  if( devices_n == 2 )
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccConfigs_Count(%s) %d                 ", OPENICC_DEVICE_CAMERA, devices_n );
+  } else
+  { PRINT_SUB( oiTESTRESULT_XFAIL,
+    "openiccConfigs_Count()...                        " );
+  }
+  old_device_class = NULL;
+  for(i = 0; i < devices_n; ++i)
+  {
+    flags = 0;
+    if(i != 0) /* not the first */
+      flags |= OPENICC_CONFIGS_SKIP_HEADER;
+    if(i != devices_n - 1) /* not the last */
+      flags |= OPENICC_CONFIGS_SKIP_FOOTER;
+
+    d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i, flags,
+                                      old_device_class, &json, malloc );
+    old_device_class = d;
+    STRING_ADD( full_json, json );
+    free(json);
+  }
+  openiccConfigs_Release( &configs );
+
+
+  configs = openiccConfigs_FromMem( full_json );
+  openiccConfigs_SetInfo ( configs, "full_json" );
+  if(full_json) free(full_json);
+  devices_n = openiccConfigs_Count(configs, NULL);
+  if( devices_n == 2 )
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccConfigs_DeviceGetJSON()                     " );
+  } else
+  { PRINT_SUB( oiTESTRESULT_XFAIL,
+    "openiccConfigs_DeviceGetJSON()                     " );
+  }
+  openiccConfigs_Release( &configs );
+
+
+  return result;
+}
+
 
 
 
@@ -683,8 +814,10 @@ int main(int argc, char** argv)
 
   TEST_RUN( testVersion, "Version matching" );
   //TEST_RUN( testDB, "DB" );
+  TEST_RUN( testI18N, "i18n" );
   TEST_RUN( testIO, "file i/o" );
   TEST_RUN( testStringRun, "String handling" );
+  TEST_RUN( testDeviceJSON, "Device JSON handling" );
   //TEST_RUN( testPaths, "Paths" );
 
   /* give a summary */
