@@ -6,6 +6,6 @@ includedir=${prefix}/include/@TARGET_INCLUDE_FOLDER@
 Name: @PACKAGE_NAME@
 Description: @PACKAGE_DESCRIPTION@
 Version: @OpenICC_VERSION@
-Libs: -L${libdir} -lOpenICC
+Libs: -L${libdir} -l@PROJECT_NAME@
 Cflags: -I${includedir}
 Libs.private: -L@YAJL_LIBRARY_DIRS@ -l@YAJL_LIBRARIES@ -lm

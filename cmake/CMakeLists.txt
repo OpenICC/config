@@ -3,7 +3,7 @@
 #
 
 SET (TARGET_INCLUDE_FOLDER
-		"openicc"
+		${PROJECT_DOWN_NAME}
 		CACHE STRING
 		"Optional folder below system include folder to install include files."
     )
