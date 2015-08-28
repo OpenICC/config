@@ -101,7 +101,7 @@ ADD_CUSTOM_TARGET( dist
                 COMMAND echo "git sha1:  " | tr -d "\\n" >> ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
                 COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/ && git rev-parse HEAD >> ${CMAKE_CURRENT_BINARY_DIR}/libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum 
                 COMMAND rm -rf libopenicc-${${PROJECT_NAME}_VERSION} && tar xf libopenicc-${${PROJECT_NAME}_VERSION}.tar 
-                COMMAND cp -ar ${CMAKE_SOURCE_DIR}/elektra-0.7.1/ libopenicc-${${PROJECT_NAME}_VERSION} && tar cf - libopenicc-${${PROJECT_NAME}_VERSION} | bzip2 > libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2
+                COMMAND tar cf - libopenicc-${${PROJECT_NAME}_VERSION} | bzip2 > libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2
                 COMMAND echo  "package:   http://sourceforge.net/projects/openicc/files/OpenICC/libopenicc%20${${PROJECT_NAME}_VERSION_MAJORMINOR}/libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2" >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
                 COMMAND echo  "size:      " | tr -d "\\n" >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum
                 COMMAND du -b libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2 | sed s/[[:space:]][[:print:]]*// >> libopenicc-${${PROJECT_NAME}_VERSION}.tar.bz2.hashsum 
