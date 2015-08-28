@@ -20,6 +20,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define OPENICC_SLASH "/"
 
 /** \addtogroup OpenICC_config OpenICC Color Management Configuration API's
 
@@ -108,6 +109,40 @@ char *             openiccConfigs_DeviceClassGet (
 const char** const openiccConfigs_GetClasses (
                                        const char       ** device_classes,
                                        int               * count );
+
+/** \addtogroup path_names Path Names
+ *  @brief   Access to data path names for Installation
+ *
+ *  The obtained informations can be used outside OpenICC, to do system
+ *  specific operations, which do not easily fit into the library.
+ *  @{ */
+/**
+ *  @brief   data type selectors
+ */
+typedef enum {
+  openiccPATH_NONE      = 0x00,        /**< */
+  openiccPATH_ICC       = 0x01,        /**< ICC profile path */
+  openiccPATH_POLICY    = 0x02,        /**< policy data */
+  openiccPATH_MODULE    = 0x04,        /**< module data */
+  openiccPATH_SCRIPT    = 0x08,
+  openiccPATH_CACHE     = 0xf0
+} openiccPATH_TYPE_e;
+
+/** @brief Select Scope for Installation or Configurations
+ */
+typedef enum {
+  openiccSCOPE_USER_SYS = 0x0,         /**< do not limit search to one scope */
+  openiccSCOPE_USER = 0x01,            /**< use user data scope */
+  openiccSCOPE_SYSTEM = 0x02           /**< use system data scope */
+} openiccSCOPE_e;
+/** use OpenICC installation data scope */
+#define openiccSCOPE_OPENICC  0x04
+/** use machine data scope */
+#define openiccSCOPE_MACHINE  0x08
+
+char *       openiccGetInstallPath   ( openiccPATH_TYPE_e  type,
+                                       openiccSCOPE_e      scope,
+                                       openiccAlloc_f      allocFunc );
 
 /** 
  *  @} *//*OpenICC_config

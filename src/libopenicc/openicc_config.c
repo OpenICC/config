@@ -16,7 +16,7 @@
 #include "openicc_config_internal.h"
 
 int openicc_debug = 0;
-#ifndef HAVE_OY
+#ifndef HAVE_OPENICC
 int level_PROG = 0;
 #endif
 int openicc_backtrace = 0;
@@ -467,7 +467,7 @@ static char *  openiccStringAppend_  ( const char        * text,
  *  @date    2009/02/07
  *  @since   2009/02/07 (OpenICC: 0.1.0)
  */
-int          openiccStringAddPrintf_ ( char             ** string,
+int          openiccStringAddPrintf  ( char             ** string,
                                        const char        * format,
                                                            ... )
 {
@@ -481,7 +481,7 @@ int          openiccStringAddPrintf_ ( char             ** string,
   if(!text)
   {
     fprintf(stderr,
-     "openicc_config.c openiccStringAddPrintf_() Could not allocate 256 byte of memory.\n");
+     "openicc_config.c openiccStringAddPrintf() Could not allocate 256 byte of memory.\n");
     return 1;
   }
 
@@ -528,6 +528,24 @@ void               openiccStringAdd_ ( char             ** text,
   return;
 }
 
+char *       openiccStringCopy       ( const char        * text,
+                                       openiccAlloc_f      alloc )
+{
+  char * text_copy = NULL;
+    
+  if(text)
+  {
+    text_copy = alloc( strlen(text) + 1 );
+    if(text_copy == NULL)
+    {
+      WARNc1_S("could not allocate enough memory: %d", strlen(text) + 1 );
+      return NULL;
+    }
+
+    strcpy( text_copy, text );
+  }
+  return text_copy;
+}
 
 /** @func    openiccMessageFormat
  *  @brief   default function to form a message string
@@ -600,9 +618,9 @@ int                openiccMessageFormat (
   /* reduce output for non core messages */
   if( (openiccMSG_ERROR <= code && code <= 399) )
   {
-    openiccStringAddPrintf_( &t,
+    openiccStringAddPrintf( &t,
                         " %03f: ", DBG_UHR_);
-    openiccStringAddPrintf_( &t,
+    openiccStringAddPrintf( &t,
                         "%s%s%s%s ", type_name,
              id_text ? "=\"" : "", id_text ? id_text : "", id_text ? "\"" : "");
   }
@@ -611,7 +629,7 @@ int                openiccMessageFormat (
 
   if(openicc_backtrace)
   {
-#   define TMP_FILE "/tmp/oyranos_gdb_temp." OPENICC_VERSION_NAME "txt"
+#   define TMP_FILE "/tmp/openicc_gdb_temp." OPENICC_VERSION_NAME "txt"
 #ifdef HAVE_POSIX
     pid = (int)getpid();
 #endif
@@ -722,7 +740,7 @@ int            openiccVersion        ( void )
   return OPENICC_VERSION;
 }
 
-const char * openicc_domain_path = OI_LOCALEDIR;
+const char * openicc_domain_path = OPENICC_LOCALEDIR;
 int openicc_i18n_init = 0;
 /** @func    openiccInit
  *  @brief   init the library; optionally
@@ -758,6 +776,115 @@ int            openiccInit           ( void )
 #endif
   return -1;
 }
+
+/** \addtogroup path_names
+ *  @{
+ */
+
+/**
+ *  @brief get Path Name for Installation 
+ *
+ *  Note: Not all combinations return a path name. Some make no sense.
+ *  So be careful and test the result.
+ *
+ *  ::openiccPATH_MODULE + ::openiccSCOPE_USER and ::openiccPATH_MODULE + ::openiccSCOPE_OPENICC are
+ *  supported. ::openiccPATH_SCRIPT gives no result at all.
+ *
+ *  @version OpenICC: 0.1.0
+ *  @date    2015/08/28
+ *  @since   2015/02/08 (OpenICC: 0.1.0)
+ */
+char *       openiccGetInstallPath   ( openiccPATH_TYPE_e  type,
+                                       openiccSCOPE_e      scope,
+                                       openiccAlloc_f      allocFunc )
+{
+  char * path = NULL;
+#define C(p) openiccStringCopy(p,allocFunc);
+  switch (type)
+  {
+    case openiccPATH_ICC:
+      switch((int)scope)
+      {
+        case openiccSCOPE_USER:
+          path = C( OS_ICC_USER_DIR );
+          break;
+        case openiccSCOPE_SYSTEM:
+          path = C( OS_ICC_SYSTEM_DIR ) ;
+          break;
+        case openiccSCOPE_OPENICC:
+          path = C( OPENICC_SYSCOLORDIR OPENICC_SLASH OPENICC_ICCDIRNAME );
+          break;
+        case openiccSCOPE_MACHINE:
+          path = C( OS_ICC_MACHINE_DIR );
+        break;
+        default:
+          path = NULL;
+      }
+      break;
+    case openiccPATH_POLICY:
+    {
+      switch((int)scope)
+      {
+        case openiccSCOPE_USER:
+          path = C( OS_SETTINGS_USER_DIR );
+          break;
+        case openiccSCOPE_SYSTEM:
+          path = C( OS_SETTINGS_SYSTEM_DIR );
+          break;
+        case openiccSCOPE_OPENICC:
+          path = C( OPENICC_SYSCOLORDIR OPENICC_SLASH OPENICC_SETTINGSDIRNAME);
+          break;
+        case openiccSCOPE_MACHINE:
+          path = C( OS_SETTINGS_MACHINE_DIR );
+        break;
+      }
+      break;
+    }
+    case openiccPATH_MODULE:
+    {
+      switch((int)scope)
+      {
+        case openiccSCOPE_USER:
+        {
+          char * t = NULL;
+          openiccStringAddPrintf( &t,
+                             "~/.local/lib%s/" OPENICC_CMMSUBPATH, strstr(OPENICC_LIBDIR, "lib64") ? "64":"");
+          path = C( t );
+          if(t) free(t); t = NULL;
+          break;
+        }
+        case openiccSCOPE_OPENICC:
+          path = C( OPENICC_CMMDIR );
+          break;
+        default:
+          path = NULL;
+      }
+      break;
+    }
+    case openiccPATH_CACHE:
+    {
+      switch((int)scope)
+      {
+        case openiccSCOPE_USER:
+          path = C( OS_DL_CACHE_USER_DIR );
+          break;
+        case openiccSCOPE_SYSTEM:
+          path = C( OS_DL_CACHE_SYSTEM_DIR );
+          break;
+        default:
+          path = NULL;
+      }
+      break;
+    }
+    default:
+      path = NULL;
+  }
+
+  return path;
+}
+
+/*  @} *//* path_names */
+
 
 char * openiccOpenFile( const char * file_name,
                         size_t   * size_ptr )
@@ -871,7 +998,7 @@ int openiccIsDirFull_ (const char* name)
   return r;
 }
 
-char * oyPathGetParent_ (const char* name)
+char * openiccPathGetParent_ (const char* name)
 {
   char *parentDir = 0, *ptr = 0;
 
@@ -913,7 +1040,7 @@ int openiccMakeDir_ (const char* path)
   {
     if(!openiccIsDirFull_(path_name))
     {
-      path_parent = oyPathGetParent_(path_name);
+      path_parent = openiccPathGetParent_(path_name);
       if(!openiccIsDirFull_(path_parent))
       {
         rc = openiccMakeDir_(path_parent);

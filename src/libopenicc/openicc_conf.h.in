@@ -19,7 +19,6 @@
 #cmakedefine HAVE_LOCALE_H
 #cmakedefine HAVE_INTTYPES_H
 #cmakedefine HAVE_STDINT_H
-#define OI_LOCALEDIR "@OI_LOCALEDIR@"
 #ifndef DEBUG 
 #cmakedefine01 DEBUG
 #endif

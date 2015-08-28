@@ -88,6 +88,54 @@ char * openiccExtractPathFromFileName_(const char        * file_name );
 int    openiccIsDirFull_             ( const char        * name );
 char * openiccPathGetParent_         ( const char        * name );
 
+
+/* system variables - exposed by the openiccGetInstallPath() API */
+#define OPENICC_COLOR_DL_CACHE_PATH "openicc/device_link"
+#define OPENICC_ICCDIRNAME "icc"
+#define OPENICC_SETTINGSDIRNAME "settings"
+
+#if defined(__APPLE__)
+  /* Apples ColorSync default paths */
+
+# define OS_USER_DIR    "~/Library"
+# define OS_GLOBAL_DIR  "/Library"
+# define OS_MACHINE_DIR "/System/Library"
+
+# define OS_ICC_PATH         "/ColorSync/Profiles"
+# define OS_ICC_USER_DIR               OS_USER_DIR         OS_ICC_PATH
+# define OS_ICC_SYSTEM_DIR             OS_GLOBAL_DIR       OS_ICC_PATH
+# define OS_ICC_MACHINE_DIR            OS_MACHINE_DIR      OS_ICC_PATH
+# define CSNetworkPath                 "/Network/Library"  OS_ICC_PATH
+
+# define OS_CACHE_PATH       "/Caches/org.freedesktop." OPENICC_COLOR_DL_CACHE_PATH
+# define OS_SETTING_PATH     "/Preferences/org.freedesktop.openicc/" OPENICC_SETTINGSDIRNAME
+# define OS_SETTINGS_USER_DIR          OS_USER_DIR           OS_SETTING_PATH
+# define OS_SETTINGS_SYSTEM_DIR        OS_GLOBAL_DIR         OS_SETTING_PATH
+# define OS_SETTINGS_MACHINE_DIR       OS_MACHINE_DIR        OS_SETTING_PATH
+
+#else
+
+# define OS_USER_DIR    "~/."
+# define OS_GLOBAL_DIR  "/usr/share/"
+# define OS_MACHINE_DIR "/var/"
+
+# define OS_ICC_PATH         "color/" OPENICC_ICCDIRNAME
+# define OS_ICC_USER_DIR               OS_USER_DIR "local/share/" OS_ICC_PATH
+# define OS_ICC_SYSTEM_DIR             OS_GLOBAL_DIR         OS_ICC_PATH
+# define OS_ICC_MACHINE_DIR            OS_MACHINE_DIR "lib/" OS_ICC_PATH
+
+# define OS_CACHE_PATH       "cache/color/" OPENICC_COLOR_DL_CACHE_PATH
+# define OS_SETTING_PATH     "color/" OPENICC_SETTINGSDIRNAME
+# define OS_SETTINGS_USER_DIR          OS_USER_DIR "config/" OS_SETTING_PATH
+# define OS_SETTINGS_SYSTEM_DIR        OS_GLOBAL_DIR         OS_SETTING_PATH
+# define OS_SETTINGS_MACHINE_DIR       OS_MACHINE_DIR "lib/" OS_SETTING_PATH
+#endif
+
+# define OS_DL_CACHE_USER_DIR          OS_USER_DIR           OS_CACHE_PATH
+# define OS_DL_CACHE_SYSTEM_DIR        OS_MACHINE_DIR        OS_CACHE_PATH
+# define OS_DL_CACHE_MACHINE_DIR       OS_MACHINE_DIR        OS_CACHE_PATH
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */

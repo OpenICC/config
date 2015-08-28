@@ -385,6 +385,7 @@ oiTESTRESULT_e testDB()
 
   return result;
 }
+#endif
 
 
 oiTESTRESULT_e testPaths()
@@ -394,37 +395,38 @@ oiTESTRESULT_e testPaths()
   fprintf(stdout, "\n" );
 
   const char * type_names[] = {
-    "oiPATH_NONE", "oiPATH_ICC", "oiPATH_POLICY", "oiPATH_MODULE", "oiPATH_SCRIPT", "oiPATH_CACHE"
+    "openiccPATH_NONE", "openiccPATH_ICC", "openiccPATH_POLICY", "openiccPATH_MODULE", "openiccPATH_SCRIPT", "openiccPATH_CACHE"
   };
-  oiPATH_TYPE_e types[] = {
-    oiPATH_NONE, oiPATH_ICC, oiPATH_POLICY, oiPATH_MODULE, oiPATH_SCRIPT, oiPATH_CACHE
+  openiccPATH_TYPE_e types[] = {
+    openiccPATH_NONE, openiccPATH_ICC, openiccPATH_POLICY, openiccPATH_MODULE, openiccPATH_SCRIPT, openiccPATH_CACHE
   };
   const char * scope_names[] = {
-    "oiSCOPE_USER_SYS", "oiSCOPE_USER", "oiSCOPE_SYSTEM", "oiSCOPE_OPENICC", "oiSCOPE_MACHINE"
+    "openiccSCOPE_USER_SYS", "openiccSCOPE_USER", "openiccSCOPE_SYSTEM", "openiccSCOPE_OPENICC", "openiccSCOPE_MACHINE"
   };
-  oiSCOPE_e scopes[] = {
-    oiSCOPE_USER_SYS, oiSCOPE_USER, oiSCOPE_SYSTEM, (oiSCOPE_e)oiSCOPE_OPENICC, (oiSCOPE_e)oiSCOPE_MACHINE
+  openiccSCOPE_e scopes[] = {
+    openiccSCOPE_USER_SYS, openiccSCOPE_USER, openiccSCOPE_SYSTEM, (openiccSCOPE_e)openiccSCOPE_OPENICC, (openiccSCOPE_e)openiccSCOPE_MACHINE
   };
+  int i,j;
 
-  for(int i = 1; i <= 5; ++i)
-  for(int j = 1; j <= 4; ++j)
+  for(i = 1; i <= 5; ++i)
+  for(j = 1; j <= 4; ++j)
   {
-  char * text = oiGetInstallPath( types[i], scopes[j], oiAllocateFunc_ );
+  char * text = openiccGetInstallPath( types[i], scopes[j], malloc );
   if(text)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "oiGetInstallPath( %s, %s ): %s", type_names[i],scope_names[j],
-                                                oiNoEmptyString_m_(text) );
+    "openiccGetInstallPath( %s, %s ): %s", type_names[i],scope_names[j],
+                                                openiccNoEmptyString_m_(text) );
+    free(text);
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
-    "oiGetInstallPath( %s, %s ): %s", type_names[i],scope_names[j],
-                                                oiNoEmptyString_m_(text) );
+    "openiccGetInstallPath( %s, %s ): %s", type_names[i],scope_names[j],
+                                                openiccNoEmptyString_m_(text) );
   }
   }
 
 
   return result;
 }
-#endif
 
 
 oiTESTRESULT_e testIO ()
@@ -491,15 +493,15 @@ oiTESTRESULT_e testIO ()
 
   if(t3) free(t3);
 
-  t3 = oyPathGetParent_(OPENICC_DEVICE_PATH);
+  t3 = openiccPathGetParent_(OPENICC_DEVICE_PATH);
   fprintf(zout, "name: %s\n", OPENICC_DEVICE_PATH );
   error = !t3 || (strlen(t3) >= strlen(OPENICC_DEVICE_PATH));
   if(!error)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "oyPathGetParent_() %s        ", t3 );
+    "openiccPathGetParent_() %s        ", t3 );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
-    "oyPathGetParent_() %s               ", t3?t3:"" );
+    "openiccPathGetParent_() %s               ", t3?t3:"" );
   }
 
   if(t1) free(t1);
@@ -583,13 +585,13 @@ oiTESTRESULT_e testStringRun ()
   }
 
 
-  openiccStringAddPrintf_( &t, OPENICC_BASE_PATH "%s", "/behaviour");
+  openiccStringAddPrintf( &t, OPENICC_BASE_PATH "%s", "/behaviour");
   if( t && strlen(t) > strlen(OPENICC_BASE_PATH) )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccStringAddPrintf_() %s", t );
+    "openiccStringAddPrintf() %s", t );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
-    "openiccStringAddPrintf_() ...                      " );
+    "openiccStringAddPrintf() ...                      " );
   }
 
   STRING_ADD( t, "/rendering_intent" );
@@ -830,7 +832,7 @@ int main(int argc, char** argv)
   TEST_RUN( testIO, "file i/o" );
   TEST_RUN( testStringRun, "String handling" );
   TEST_RUN( testDeviceJSON, "Device JSON handling" );
-  //TEST_RUN( testPaths, "Paths" );
+  TEST_RUN( testPaths, "Paths" );
 
   /* give a summary */
   if(!list)
