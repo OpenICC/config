@@ -611,9 +611,6 @@ oiTESTRESULT_e testDeviceJSON ()
 
   fprintf(stdout, "\n" );
 
-  int error = 0;
-
-
   OpeniccConfigs_s * configs, * config;
   const char * file_name = "../../../OpenICC_device_config_DB.json";
   char * text = 0;
