@@ -473,12 +473,12 @@ oiTESTRESULT_e testIO ()
     "openiccExtractPathFromFileName_() %s               ", t3?t3:"" );
   }
 
-  if(openiccIsDirFull_(t1))
+  if(openiccIsDirFull_("/usr/share/color/icc"))
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccIsDirFull_() %s", t1 );
+    "openiccIsDirFull_() %s", "/usr/share/color/icc" );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
-    "openiccIsDirFull_() %s               ", t1?t1:"" );
+    "openiccIsDirFull_() %s               ", "/usr/share/color/icc" );
   }
 
   if(openiccIsDirFull_(t2))
