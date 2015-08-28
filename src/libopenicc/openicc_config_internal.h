@@ -67,6 +67,10 @@ void         openiccStringAdd_       ( char             ** text,
 #define STRING_ADD( t, append ) openiccStringAdd_( &t, append )
 
 extern openiccMessage_f     openiccMessage_p;
+int  openiccMessageFunc              ( openiccMSG_e        code,
+                                       OpeniccConfigs_s  * context_object,
+                                       const char        * format,
+                                       ... );
 
 
 char * openiccOpenFile( const char * file_name,
