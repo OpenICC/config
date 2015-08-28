@@ -366,7 +366,7 @@ int main(int argc, char ** argv)
       {
         if(device_class)
         {
-          WARNc1_S("Can not write file %s  with single device class \"%s\"",
+          WARNc_S("Can not write file %s  with single device class \"%s\"",
                     db_file, device_class );
           exit(1);
         }
@@ -376,7 +376,7 @@ int main(int argc, char ** argv)
           size_t len = strlen(json_new) + 1;
           size_t s = openiccWriteFile( db_file, json_new, len );
           if(s != len)
-            WARNc1_S("Could not write file %s  %u!=%u", db_file, s, len );
+            WARNc_S("Could not write file %s  %u!=%u", db_file, s, len );
         } else
           remove(db_file);
       }

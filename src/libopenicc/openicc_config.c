@@ -41,8 +41,8 @@ OpeniccConfigs_s * openiccConfigs_FromMem( const char       * data )
     configs = calloc( sizeof(OpeniccConfigs_s), 1 );
     if(!configs)
     {
-      fprintf( stderr, "%s:%d ERROR: could not allocate %d bytes\n",
-               __FILE__,__LINE__, (int)sizeof(OpeniccConfigs_s));
+      ERRc_S( "could not allocate %d bytes",
+               (int)sizeof(OpeniccConfigs_s));
       return configs;
     }
 
@@ -52,7 +52,7 @@ OpeniccConfigs_s * openiccConfigs_FromMem( const char       * data )
     {
       char * msg = malloc(1024);
       configs->yajl = yajl_tree_parse( data, msg, 1024 );
-      fprintf(stderr, "%s:%d ERROR: %s\n", __FILE__,__LINE__, msg?msg:"");
+      WARNc_S( "%s\n", msg?msg:"" );
       openiccConfigs_Release( &configs );
     }
   }
@@ -75,18 +75,15 @@ void               openiccConfigs_Release (
       if(c->json_text)
         free(c->json_text);
       else
-        fprintf( stderr, "%s:%d ERROR: expected OpeniccConfigs_s::json_text\n",
-                  __FILE__,__LINE__ );
+        WARNcc_S( c, "expected OpeniccConfigs_s::json_text", 0 );
       if(c->yajl)
         yajl_tree_free(c->yajl);
       else
-        fprintf( stderr, "%s:%d ERROR: expected OpeniccConfigs_s::yajl\n",
-                 __FILE__,__LINE__ );
+        WARNcc_S( c, "expected OpeniccConfigs_s::yajl",0 );
       if(c->dbg_text)
         free(c->dbg_text);
       else
-        fprintf( stderr, "%s:%d ERROR: expected OpeniccConfigs_s::dbg_text\n",
-                  __FILE__,__LINE__ );
+        WARNcc_S( c, "expected OpeniccConfigs_s::dbg_text",0 );
       free(c);
     }
     *configs = NULL;
@@ -155,8 +152,8 @@ int                openiccConfigs_Count (
         }
       }
     } else
-      fprintf( stderr, "%s:%d ERROR: could not find " OPENICC_DEVICE_PATH " %s\n",
-               __FILE__,__LINE__, configs->dbg_text ? configs->dbg_text : "" );
+      WARNcc_S( configs, "could not find " OPENICC_DEVICE_PATH " %s",
+                configs->dbg_text ? configs->dbg_text : "" );
   }
 
   return n;
@@ -287,8 +284,8 @@ const char *       openiccConfigs_DeviceGet (
         }
       }
     } else
-      fprintf( stderr, "%s:%d ERROR: could not find " OPENICC_DEVICE_PATH " %s\n",
-               __FILE__,__LINE__, configs->dbg_text ? configs->dbg_text : "" );
+      WARNcc_S( configs, "could not find " OPENICC_DEVICE_PATH " %s",
+                configs->dbg_text ? configs->dbg_text : "" );
   }
 
   return actual_device_class;
@@ -350,8 +347,7 @@ const char *       openiccConfigs_DeviceGetJSON (
     txt[0] = '\000';
   else
   {
-    fprintf( stderr, "%s:%d ERROR: could not allocate 4096 bytes\n",
-             __FILE__,__LINE__ );
+    ERRcc_S( configs, "could not allocate 4096 bytes",0 );
     return txt;
   }
 
@@ -425,8 +421,8 @@ char *             openiccConfigs_DeviceClassGet (
       }
 
     } else
-      fprintf( stderr, "%s:%d ERROR: could not find " OPENICC_DEVICE_PATH " %s\n",
-               __FILE__,__LINE__, config->dbg_text ? config->dbg_text : "" );
+      WARNcc_S( config, "could not find " OPENICC_DEVICE_PATH " %s",
+                config->dbg_text ? config->dbg_text : "" );
   }
 
   return device_class;
@@ -480,8 +476,8 @@ int          openiccStringAddPrintf  ( char             ** string,
   text = malloc( sz );
   if(!text)
   {
-    fprintf(stderr,
-     "openicc_config.c openiccStringAddPrintf() Could not allocate 256 byte of memory.\n");
+    WARNc_S(
+     "Could not allocate 256 byte of memory.",0);
     return 1;
   }
 
@@ -538,7 +534,7 @@ char *       openiccStringCopy       ( const char        * text,
     text_copy = alloc( strlen(text) + 1 );
     if(text_copy == NULL)
     {
-      WARNc1_S("could not allocate enough memory: %d", strlen(text) + 1 );
+      WARNc_S("could not allocate enough memory: %d", strlen(text) + 1 );
       return NULL;
     }
 
@@ -643,7 +639,8 @@ int                openiccMessageFormat (
       fprintf( stderr, "GDB output:\n" );
       i = system("gdb -batch -x " TMP_FILE);
     } else
-      fprintf( stderr, "could not open " TMP_FILE "\n" );
+      fprintf(stderr,
+      OI_DBG_FORMAT_"Could not open " TMP_FILE "\n",OI_DBG_ARGS_);
   }
 
   free( text ); text = 0;
@@ -693,7 +690,7 @@ int  openiccMessageFunc              ( openiccMSG_e        code,
     if(!text)
     {
       fprintf(stderr,
-      "openicc_config.c openiccMessageFunc() Could not allocate 256 byte of memory.\n");
+      OI_DBG_FORMAT_"Could not allocate 256 byte of memory.\n",OI_DBG_ARGS_);
       return 1;
     }
     va_start( list, format);
@@ -770,7 +767,7 @@ int            openiccInit           ( void )
 
     bindtextdomain( "OpenICC", openicc_domain_path );
     if(openicc_debug)
-      WARNc1_S("bindtextdomain() to \"%s\"", openicc_domain_path );
+      WARNc_S("bindtextdomain() to \"%s\"", openicc_domain_path );
   }
   return openicc_i18n_init;
 #endif
@@ -905,12 +902,12 @@ char * openiccOpenFile( const char * file_name,
         s = fread(text, sizeof(char), size, fp);
         text[size] = '\000';
         if(s != size)
-          fprintf(stderr, "Error: fread %lu but should read %lu\n",
+          WARNc_S( "Error: fread %lu but should read %lu",
                   (long unsigned int) s, (long unsigned int)size);
         fclose( fp );
       } else
       {
-        fprintf(stderr, "Error: Could not open file - \"%s\"\n", file_name);
+        WARNc_S( "Error: Could not open file - \"%s\"", file_name);
       }
     }
 
@@ -981,16 +978,16 @@ int openiccIsDirFull_ (const char* name)
   if(r != 0 && openicc_debug > 1)
   switch (errno)
   {
-    case EACCES:       WARNc1_S("Permission denied: %s", name); break;
-    case EIO:          WARNc1_S("EIO : %s", name); break;
-    case ENAMETOOLONG: WARNc1_S("ENAMETOOLONG : %s", name); break;
-    case ENOENT:       WARNc1_S("A component of the name/file_name does not exist, or the file_name is an empty string: \"%s\"", name); break;
-    case ENOTDIR:      WARNc1_S("ENOTDIR : %s", name); break;
+    case EACCES:       WARNc_S("Permission denied: %s", name); break;
+    case EIO:          WARNc_S("EIO : %s", name); break;
+    case ENAMETOOLONG: WARNc_S("ENAMETOOLONG : %s", name); break;
+    case ENOENT:       WARNc_S("A component of the name/file_name does not exist, or the file_name is an empty string: \"%s\"", name); break;
+    case ENOTDIR:      WARNc_S("ENOTDIR : %s", name); break;
 #ifdef HAVE_POSIX
-    case ELOOP:        WARNc1_S("Too many symbolic links encountered while traversing the name: %s", name); break;
-    case EOVERFLOW:    WARNc1_S("EOVERFLOW : %s", name); break;
+    case ELOOP:        WARNc_S("Too many symbolic links encountered while traversing the name: %s", name); break;
+    case EOVERFLOW:    WARNc_S("EOVERFLOW : %s", name); break;
 #endif
-    default:           WARNc2_S("%s : %s", strerror(errno), name); break;
+    default:           WARNc_S("%s : %s", strerror(errno), name); break;
   }
   r = !r &&
        ((status.st_mode & S_IFMT) & S_IFDIR);
@@ -1055,16 +1052,16 @@ int openiccMakeDir_ (const char* path)
       if(rc && openicc_debug > 1)
       switch (errno)
       {
-        case EACCES:       WARNc1_S("Permission denied: %s", path); break;
-        case EIO:          WARNc1_S("EIO : %s", path); break;
-        case ENAMETOOLONG: WARNc1_S("ENAMETOOLONG : %s", path); break;
-        case ENOENT:       WARNc1_S("A component of the path/file_name does not exist, or the file_name is an empty string: \"%s\"", path); break;
-        case ENOTDIR:      WARNc1_S("ENOTDIR : %s", path); break;
+        case EACCES:       WARNc_S("Permission denied: %s", path); break;
+        case EIO:          WARNc_S("EIO : %s", path); break;
+        case ENAMETOOLONG: WARNc_S("ENAMETOOLONG : %s", path); break;
+        case ENOENT:       WARNc_S("A component of the path/file_name does not exist, or the file_name is an empty string: \"%s\"", path); break;
+        case ENOTDIR:      WARNc_S("ENOTDIR : %s", path); break;
 #ifdef HAVE_POSIX
-        case ELOOP:        WARNc1_S("Too many symbolic links encountered while traversing the path: %s", path); break;
-        case EOVERFLOW:    WARNc1_S("EOVERFLOW : %s", path); break;
+        case ELOOP:        WARNc_S("Too many symbolic links encountered while traversing the path: %s", path); break;
+        case EOVERFLOW:    WARNc_S("EOVERFLOW : %s", path); break;
 #endif
-        default:           WARNc2_S("%s : %s", strerror(errno), path); break;
+        default:           WARNc_S("%s : %s", strerror(errno), path); break;
       }
     }
     free( path_name );;
@@ -1110,22 +1107,22 @@ size_t openiccWriteFile(const char * filename,
       if(mem && size)
         r = errno;
       else
-        WARNc1_S("no data to write into: \"%s\"", filename );
+        WARNc_S("no data to write into: \"%s\"", filename );
 
     if(r && openicc_debug > 1)
     {
       switch (errno)
       {
-        case EACCES:       WARNc1_S("Permission denied: %s", filename); break;
-        case EIO:          WARNc1_S("EIO : %s", filename); break;
-        case ENAMETOOLONG: WARNc1_S("ENAMETOOLONG : %s", filename); break;
-        case ENOENT:       WARNc1_S("A component of the path/file_name does not exist, or the file_name is an empty string: \"%s\"", filename); break;
-        case ENOTDIR:      WARNc1_S("ENOTDIR : %s", filename); break;
+        case EACCES:       WARNc_S("Permission denied: %s", filename); break;
+        case EIO:          WARNc_S("EIO : %s", filename); break;
+        case ENAMETOOLONG: WARNc_S("ENAMETOOLONG : %s", filename); break;
+        case ENOENT:       WARNc_S("A component of the path/file_name does not exist, or the file_name is an empty string: \"%s\"", filename); break;
+        case ENOTDIR:      WARNc_S("ENOTDIR : %s", filename); break;
 #ifdef HAVE_POSIX
-        case ELOOP:        WARNc1_S("Too many symbolic links encountered while traversing the path: %s", filename); break;
-        case EOVERFLOW:    WARNc1_S("EOVERFLOW : %s", filename); break;
+        case ELOOP:        WARNc_S("Too many symbolic links encountered while traversing the path: %s", filename); break;
+        case EOVERFLOW:    WARNc_S("EOVERFLOW : %s", filename); break;
 #endif
-        default:           WARNc2_S("%s : %s", strerror(errno), filename);break;
+        default:           WARNc_S("%s : %s", strerror(errno), filename);break;
       }
     }
 
