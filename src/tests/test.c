@@ -507,13 +507,13 @@ oiTESTRESULT_e testIO ()
   if(t3) free(t3);
 
   size_t size = 0;
-  file_name = "../../../test.json";
+  file_name = "../../../OpenICC_device_config_DB.json";
   FILE * fp = fopen( file_name, "r" );
 
   if(fp)
     fclose(fp);
   else
-    file_name = "test.json";
+    file_name = "OpenICC_device_config_DB.json";
 
   t1 = openiccOpenFile( file_name, &size );
   if(t1)
@@ -607,7 +607,7 @@ oiTESTRESULT_e testDeviceJSON ()
 
 
   OpeniccConfigs_s * configs, * config;
-  const char * file_name = "../../../test.json";
+  const char * file_name = "../../../OpenICC_device_config_DB.json";
   char * text = 0;
   char            ** keys = 0;
   char            ** values = 0;
@@ -622,7 +622,7 @@ oiTESTRESULT_e testDeviceJSON ()
   if(fp)
     fclose(fp);
   else
-    file_name = "test.json";
+    file_name = "OpenICC_device_config_DB.json";
 
   /* read JSON input file */
   text = openiccOpenFile( file_name, &size );
@@ -666,7 +666,7 @@ oiTESTRESULT_e testDeviceJSON ()
   fprintf(zout, "\n" );
 
   /* get a single JSON device */
-  i = 1; /* select the second one, we start counting from zero */
+  i = 2; /* select the second one, we start counting from zero */
   d = openiccConfigs_DeviceGetJSON ( configs, NULL, i, 0,
                                      old_device_class, &json, malloc );
   config = openiccConfigs_FromMem( json );
