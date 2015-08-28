@@ -327,7 +327,7 @@ int main(int argc, char ** argv)
           if(d)
           {
             if(!old_d)
-              openiccStringAddPrintf_( &json_new, OPENICC_DEVICE_JSON_HEADER, d );
+              openiccStringAddPrintf( &json_new, OPENICC_DEVICE_JSON_HEADER, d );
             STRING_ADD( json_new, json );
             old_d = d;
           }
@@ -345,7 +345,7 @@ int main(int argc, char ** argv)
           if(d)
           {
             if(!old_d)
-              openiccStringAddPrintf_( &json_new, OPENICC_DEVICE_JSON_HEADER, d );
+              openiccStringAddPrintf( &json_new, OPENICC_DEVICE_JSON_HEADER, d );
             STRING_ADD( json_new, json );
             old_d = d;
           }

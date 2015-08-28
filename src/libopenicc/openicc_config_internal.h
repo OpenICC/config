@@ -59,12 +59,15 @@ struct OpeniccConfigs_s {
   char     * dbg_text;
 };
 
-int          openiccStringAddPrintf_ ( char             ** string,
+int          openiccStringAddPrintf  ( char             ** string,
                                        const char        * format,
                                                            ... );
 void         openiccStringAdd_       ( char             ** text,
                                        const char        * append );
 #define STRING_ADD( t, append ) openiccStringAdd_( &t, append )
+char *       openiccStringCopy       ( const char        * text,
+                                       openiccAlloc_f      alloc );
+#define openiccNoEmptyString_m_(t) (t?t:"")
 
 extern openiccMessage_f     openiccMessage_p;
 int  openiccMessageFunc              ( openiccMSG_e        code,
@@ -83,7 +86,7 @@ size_t openiccWriteFile(const char * file_name,
                         size_t       size );
 char * openiccExtractPathFromFileName_(const char        * file_name );
 int    openiccIsDirFull_             ( const char        * name );
-char * oyPathGetParent_              ( const char        * name );
+char * openiccPathGetParent_         ( const char        * name );
 
 #ifdef __cplusplus
 } /* extern "C" */
