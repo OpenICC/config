@@ -513,7 +513,14 @@ oiTESTRESULT_e testIO ()
   if(fp)
     fclose(fp);
   else
-    file_name = "OpenICC_device_config_DB.json";
+  {
+    file_name = "../OpenICC_device_config_DB.json";
+    fp = fopen( file_name, "r" );
+    if(fp)
+      fclose(fp);
+    else
+      file_name = "OpenICC_device_config_DB.json";
+  }
 
   t1 = openiccOpenFile( file_name, &size );
   if(t1)
@@ -564,6 +571,7 @@ oiTESTRESULT_e testStringRun ()
   char * t = NULL;
   OpeniccConfigs_s * configs = NULL;
 
+  openiccMessageFuncSet( openiccMessageFunc );
   error = openiccMessage_p( openiccMSG_WARN, configs, "test message %s", OPENICC_VERSION_NAME );
 
   if( !error )
@@ -622,7 +630,14 @@ oiTESTRESULT_e testDeviceJSON ()
   if(fp)
     fclose(fp);
   else
-    file_name = "OpenICC_device_config_DB.json";
+  {
+    file_name = "../OpenICC_device_config_DB.json";
+    fp = fopen( file_name, "r" );
+    if(fp)
+      fclose(fp);
+    else
+      file_name = "OpenICC_device_config_DB.json";
+  }
 
   /* read JSON input file */
   text = openiccOpenFile( file_name, &size );
@@ -649,11 +664,11 @@ oiTESTRESULT_e testDeviceJSON ()
     const char * d = openiccConfigs_DeviceGet( configs, NULL, i,
                                                &keys, &values, malloc );
 
-    if(i)
+    if(i && openicc_debug)
       fprintf( zout,"\n");
 
     n = 0; if(keys) while(keys[n]) ++n;
-    fprintf( zout, "[%d] device class:\"%s\" with %d keys/values pairs\n", i, d, n);
+    fprintf( zout, "[%d] device class:\"%s\" with %d key/value pairs\n", i, d, n);
     for( j = 0; j < n; ++j )
     {
       if(openicc_debug)
