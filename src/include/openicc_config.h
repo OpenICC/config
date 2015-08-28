@@ -51,6 +51,7 @@ extern "C" {
   "}\n"
 
 typedef void * (*OpeniccConfigAlloc_f)(size_t              size );
+typedef void (*OpeniccConfigDeAlloc_f)(void              * data );
 
 typedef struct OpeniccConfigs_s OpeniccConfigs_s;
 
