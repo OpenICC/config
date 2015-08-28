@@ -12,4 +12,4 @@ SET( CHEADERS_PUBLIC
 INSTALL( FILES
 	openicc_config.h
         "${CMAKE_BINARY_DIR}/src/include/openicc_version.h"
-	DESTINATION include/${PACKAGE_NAME})
+	DESTINATION include/${PROJECT_DOWN_NAME})
