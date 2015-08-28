@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-27 20:28+0200\n"
+"POT-Creation-Date: 2015-08-28 16:19+0200\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -15,11 +15,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libopenicc/openicc_config.c:637
+#: libopenicc/openicc_config.c:596
 msgid "!!! ERROR"
 msgstr "!!! CHYBA"
 
-#: libopenicc/openicc_config.c:634
+#: libopenicc/openicc_config.c:593
 msgid "WARNING"
 msgstr "VAROVÁNÍ"
 

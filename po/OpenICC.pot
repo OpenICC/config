@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenICC 0.1\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-28 13:48+0200\n"
+"POT-Creation-Date: 2015-08-28 16:33+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,10 +17,10 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libopenicc/openicc_config.c:634
+#: libopenicc/openicc_config.c:593
 msgid "WARNING"
 msgstr ""
 
-#: libopenicc/openicc_config.c:637
+#: libopenicc/openicc_config.c:596
 msgid "!!! ERROR"
 msgstr ""
