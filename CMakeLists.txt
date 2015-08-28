@@ -8,8 +8,9 @@ SET( ${PROJECT_NAME}_MICRO_VERSION 0)
 SET( ${PROJECT_NAME}_VERSION ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_MICRO_VERSION} )
 
 SET (PROJECT_UP_NAME "OPENICC" )
+SET (PROJECT_DOWN_NAME "openicc" )
 SET (PACKAGE_NAME ${PROJECT_NAME} )
-SET (PACKAGE_DESCRIPTION "The OpenICC configuration data base allows to story, share and manipulate
+SET (PACKAGE_DESCRIPTION "The OpenICC configuration data base allows to store, share and manipulate
 color management informations.")
 
 SET( OI_CMMSUBPATH     "color/modules" )
