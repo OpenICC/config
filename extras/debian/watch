@@ -6,4 +6,4 @@
 # Compulsory line, this is a version 3 file
 version=3
 
-http://sourceforge.net/projects/oyranos/files/Oyranos/Oyranos%200.9/oyranos-([\d\.]+)\.tar\.(?:bz2|gz|xz)
+http://sourceforge.net/projects/openicc/files/OpenICC/openicc-([\d\.]+)\.tar\.(?:bz2|gz|xz)
