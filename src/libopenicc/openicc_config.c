@@ -432,47 +432,6 @@ char *             openiccConfigs_DeviceClassGet (
   return device_class;
 }
 
-int                openiccConfigs_Search (
-                                       OpeniccConfigs_s  * config,
-                                       const char       ** search_keys,
-                                       const char       ** search_values,
-                                       int              ** hits,
-                                       OpeniccConfigAlloc_f alloc )
-{
-  char            ** keys = 0;
-  char            ** values = 0;
-  int i,j,k, n = 0, devices_n, keys_n = 0;
-  int hits_n = 0;
-
-  while(keys[keys_n++]) ;
-
-  devices_n = openiccConfigs_Count(config, NULL);
-
-  for(i = 0; i < devices_n; ++i)
-  {
-    const char * d = openiccConfigs_DeviceGet( config, NULL, i,
-                                               &keys, &values, malloc );
-
-    if(i)
-      fprintf( stderr,"\n");
-
-    n = 0; if(keys) while(keys[n]) ++n;
-    fprintf( stderr, "[%d] device class:\"%s\" with %d keys/values pairs\n", i, d, n);
-    for( j = 0; j < n; ++j )
-    {
-      for(k = 0; k < keys_n; ++k)
-      {
-        fprintf(stderr, "%s:\"%s\"\n", keys[j], values[j]);
-        free(keys[j]);
-        free(values[j]);
-      }
-    }
-    free(keys); free(values);
-  }
-
-  return hits_n;
-}
-
 static char *  openiccStringAppend_  ( const char        * text,
                                        const char        * append )
 {

@@ -104,12 +104,6 @@ const char *       openiccConfigs_DeviceGetJSON (
 char *             openiccConfigs_DeviceClassGet (
                                        OpeniccConfigs_s  * config,
                                        OpeniccConfigAlloc_f alloc );
-int                openiccConfigs_Search (
-                                       OpeniccConfigs_s  * config,
-                                       const char       ** keys,
-                                       const char       ** values,
-                                       int              ** hits,
-                                       OpeniccConfigAlloc_f alloc );
 const char** const openiccConfigs_GetClasses (
                                        const char       ** device_classes,
                                        int               * count );
