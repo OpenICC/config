@@ -638,6 +638,17 @@ oiTESTRESULT_e testDeviceJSON ()
       file_name = "OpenICC_device_config_DB.json";
   }
 
+  const char * non_json = "{\"org\":{\"free{\"openicc\")))";
+  configs = openiccConfigs_FromMem( non_json );
+  if( !configs )
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccConfigs_FromMem(\"%s\") ", non_json );
+  } else
+  { PRINT_SUB( oiTESTRESULT_XFAIL,
+    "openiccConfigs_FromMem(\"%s\") ", non_json );
+  }
+
+
   /* read JSON input file */
   text = openiccOpenFile( file_name, &size );
 
