@@ -178,7 +178,7 @@ const char *       openiccConfigs_DeviceGet (
                                        int                 pos,
                                        char            *** keys,
                                        char            *** values,
-                                       OpeniccConfigAlloc_f alloc )
+                                       openiccAlloc_f      alloc )
 {
   int n = 0;
   const char * actual_device_class = 0;
@@ -331,7 +331,7 @@ const char *       openiccConfigs_DeviceGetJSON (
                                        int                 flags,
                                        const char        * device_class,
                                        char             ** json,
-                                       OpeniccConfigAlloc_f alloc )
+                                       openiccAlloc_f      alloc )
 {
   char            ** keys = 0;
   char            ** values = 0;
@@ -404,7 +404,7 @@ const char *       openiccConfigs_DeviceGetJSON (
  */
 char *             openiccConfigs_DeviceClassGet (
                                        OpeniccConfigs_s  * config,
-                                       OpeniccConfigAlloc_f alloc )
+                                       openiccAlloc_f      alloc )
 {
   char * device_class = 0;
 

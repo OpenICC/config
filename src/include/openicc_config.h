@@ -50,8 +50,8 @@ extern "C" {
   "  }\n" \
   "}\n"
 
-typedef void * (*OpeniccConfigAlloc_f)(size_t              size );
-typedef void (*OpeniccConfigDeAlloc_f)(void              * data );
+typedef void * (*openiccAlloc_f)     ( size_t              size );
+typedef void   (*openiccDeAlloc_f)   ( void              * data );
 
 typedef struct OpeniccConfigs_s OpeniccConfigs_s;
 
@@ -91,7 +91,7 @@ const char *       openiccConfigs_DeviceGet (
                                        int                 pos,
                                        char            *** keys,
                                        char            *** values,
-                                       OpeniccConfigAlloc_f alloc );
+                                       openiccAlloc_f      alloc );
 #define OPENICC_CONFIGS_SKIP_HEADER 0x01
 #define OPENICC_CONFIGS_SKIP_FOOTER 0x02
 const char *       openiccConfigs_DeviceGetJSON (
@@ -101,10 +101,10 @@ const char *       openiccConfigs_DeviceGetJSON (
                                        int                 flags,
                                        const char        * device_class,
                                        char             ** json,
-                                       OpeniccConfigAlloc_f alloc );
+                                       openiccAlloc_f      alloc );
 char *             openiccConfigs_DeviceClassGet (
                                        OpeniccConfigs_s  * config,
-                                       OpeniccConfigAlloc_f alloc );
+                                       openiccAlloc_f      alloc );
 const char** const openiccConfigs_GetClasses (
                                        const char       ** device_classes,
                                        int               * count );
