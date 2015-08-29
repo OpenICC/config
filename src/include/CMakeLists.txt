@@ -7,10 +7,13 @@ CONFIGURE_FILE (
 SET( CHEADERS_PUBLIC
 	openicc_config.h
 	openicc_db.h
+   )
+SET( CHEADERS_PUBLIC
+	${CHEADERS_PUBLIC}
         PARENT_SCOPE
    )
 
 INSTALL( FILES
-	openicc_config.h
+	${CHEADERS_PUBLIC}
         "${CMAKE_BINARY_DIR}/src/include/openicc_version.h"
 	DESTINATION include/${PROJECT_DOWN_NAME})
