@@ -6,6 +6,7 @@ CONFIGURE_FILE (
 
 SET( CHEADERS_PUBLIC
 	openicc_config.h
+	openicc_db.h
         PARENT_SCOPE
    )
 

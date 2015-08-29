@@ -1,6 +1,7 @@
 SET( CFILES_OBJECT_CONFIG_PUBLIC
 	aglob.c
 	openicc_config.c
+	openicc_db.c
 	xdg_bds.c
    )
 SET( CFILES_OBJECT_CONFIG_PUBLIC ${CFILES_OBJECT_CONFIG_PUBLIC} PARENT_SCOPE )
