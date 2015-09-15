@@ -613,7 +613,7 @@ oiTESTRESULT_e testDeviceJSON ()
 
   fprintf(stdout, "\n" );
 
-  openiccConfig_s * config;
+  openiccConfig_s * config, * config2;
   const char * file_name = "../../../OpenICC_device_config_DB.json";
   char * text = 0;
   char            ** keys = 0;
@@ -694,9 +694,9 @@ oiTESTRESULT_e testDeviceJSON ()
   i = 2; /* select the second one, we start counting from zero */
   d = openiccConfig_DeviceGetJSON ( config, NULL, i, 0,
                                      old_device_class, &json, malloc );
-  config = openiccConfig_FromMem( json );
-  openiccConfig_SetInfo ( config, file_name );
-  device_class = openiccConfig_DeviceClassGet( config, malloc );
+  config2 = openiccConfig_FromMem( json );
+  openiccConfig_SetInfo ( config2, file_name );
+  device_class = openiccConfig_DeviceClassGet( config2, malloc );
   if( strcmp(device_class,"camera") == 0 )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
     "openiccConfig_DeviceClassGet([%d]) %s      ", i, device_class );
@@ -706,7 +706,7 @@ oiTESTRESULT_e testDeviceJSON ()
   }
   if(json) free(json);
   if(device_class) free(device_class);
-  openiccConfig_Release( &config );
+  openiccConfig_Release( &config2 );
 
 
   /* we want a single device class DB for lets say cameras */
