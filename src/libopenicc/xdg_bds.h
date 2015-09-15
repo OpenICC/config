@@ -96,7 +96,7 @@ int xdg_bds(
 	xdg_storage_type st,	/* Specify the storage type */
 	xdg_op_type op,			/* Operation type */
 	xdg_scope sc,			/* Scope if write */
-	char *spath				/* Sub-path and file name or file pattern */
+	const char *spath		/* Sub-path and file name or file pattern */
 );
 
 /* Free the list */

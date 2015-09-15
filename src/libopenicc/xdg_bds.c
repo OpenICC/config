@@ -268,7 +268,7 @@ int xdg_bds(
 	xdg_storage_type st,	/* Specify the storage type */
 	xdg_op_type op,			/* Operation type */
 	xdg_scope sc,			/* Scope if write */
-	char *pfname			/* Sub-path and file name(s) */
+	const char *pfname			/* Sub-path and file name(s) */
 ) {
 	char *path = NULL;		/* Directory paths to search, separated by ':' or ';' */
 	char **fnames = NULL;	/* Filename component of each path being returned */
@@ -550,7 +550,7 @@ int xdg_bds(
 		/* For each search path */
 		for (cp = path; *cp != '\000';) {
 			char *sname = NULL;		/* sub name out of pfnames */
-			char *ncp, *nep;
+			const char *ncp, *nep;
 
 			/* Copy search path */
 			if ((ep = strchr(cp, SSEP)) == NULL)
