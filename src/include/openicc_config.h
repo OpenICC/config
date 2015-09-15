@@ -54,7 +54,7 @@ extern "C" {
 typedef void * (*openiccAlloc_f)     ( size_t              size );
 typedef void   (*openiccDeAlloc_f)   ( void              * data );
 
-typedef struct OpeniccConfigs_s OpeniccConfigs_s;
+typedef struct openiccConfig_s openiccConfig_s;
 
 /** @brief customisable messages */
 extern int openicc_debug;
@@ -69,25 +69,25 @@ typedef enum {
 } openiccMSG_e;
 
 typedef int  (*openiccMessage_f)     ( openiccMSG_e        error_code,
-                                       OpeniccConfigs_s  * context_object,
+                                       openiccConfig_s   * context_object,
                                        const char        * format,
                                        ... );
 int            openiccMessageFuncSet ( openiccMessage_f    message_func );
 int            openiccVersion        ( void );
 
-OpeniccConfigs_s * openiccConfigs_FromMem (
+openiccConfig_s  * openiccConfig_FromMem (
                                        const char        * data );
-void               openiccConfigs_Release (
-                                       OpeniccConfigs_s ** configs );
+void               openiccConfig_Release (
+                                       openiccConfig_s  ** configs );
 
-int                openiccConfigs_Count (
-                                       OpeniccConfigs_s  * configs,
+int                openiccConfig_Count (
+                                       openiccConfig_s   * configs,
                                        const char       ** device_classes );
-void               openiccConfigs_SetInfo (
-                                       OpeniccConfigs_s  * configs,
+void               openiccConfig_SetInfo (
+                                       openiccConfig_s   * configs,
                                        const char        * debug_info );
-const char *       openiccConfigs_DeviceGet (
-                                       OpeniccConfigs_s  * configs,
+const char *       openiccConfig_DeviceGet (
+                                       openiccConfig_s   * configs,
                                        const char       ** device_classes,
                                        int                 pos,
                                        char            *** keys,
@@ -95,18 +95,18 @@ const char *       openiccConfigs_DeviceGet (
                                        openiccAlloc_f      alloc );
 #define OPENICC_CONFIGS_SKIP_HEADER 0x01
 #define OPENICC_CONFIGS_SKIP_FOOTER 0x02
-const char *       openiccConfigs_DeviceGetJSON (
-                                       OpeniccConfigs_s  * configs,
+const char *       openiccConfig_DeviceGetJSON (
+                                       openiccConfig_s   * configs,
                                        const char       ** device_classes,
                                        int                 pos,
                                        int                 flags,
                                        const char        * device_class,
                                        char             ** json,
                                        openiccAlloc_f      alloc );
-char *             openiccConfigs_DeviceClassGet (
-                                       OpeniccConfigs_s  * config,
+char *             openiccConfig_DeviceClassGet (
+                                       openiccConfig_s   * config,
                                        openiccAlloc_f      alloc );
-const char** const openiccConfigs_GetClasses (
+const char** const openiccConfig_GetClasses (
                                        const char       ** device_classes,
                                        int               * count );
 

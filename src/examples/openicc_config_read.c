@@ -26,7 +26,7 @@
 
 int main(int argc, char ** argv)
 {
-  OpeniccConfigs_s * configs, * config;
+  openiccConfig_s * config, * db;
   const char * file_name = argc > 1 ? argv[1] : "../test.json";
   FILE * fp = NULL;
   char * text = 0;
@@ -65,17 +65,17 @@ int main(int argc, char ** argv)
  
 
   /* parse JSON */
-  configs = openiccConfigs_FromMem( text );
-  openiccConfigs_SetInfo ( configs, file_name );
-  devices_n = openiccConfigs_Count(configs, NULL);
+  db = openiccConfig_FromMem( text );
+  openiccConfig_SetInfo ( db, file_name );
+  devices_n = openiccConfig_Count(db, NULL);
   fprintf(stderr, "Found %d devices.\n", devices_n );
 
   
   /* print all found key/value pairs */
   for(i = 0; i < devices_n; ++i)
   {
-    const char * d = openiccConfigs_DeviceGet( configs, NULL, i,
-                                               &keys, &values, malloc );
+    const char * d = openiccConfig_DeviceGet( db, NULL, i,
+                                              &keys, &values, malloc );
 
     if(i)
       fprintf( stderr,"\n");
@@ -93,17 +93,18 @@ int main(int argc, char ** argv)
 
   /* get a single JSON device */
   i = 1; /* select the second one, we start counting from zero */
-  d = openiccConfigs_DeviceGetJSON ( configs, NULL, i, 0,
-                                     old_device_class, &json, malloc );
-  config = openiccConfigs_FromMem( json );
-  device_class = openiccConfigs_DeviceClassGet( config, malloc );
+  d = openiccConfig_DeviceGetJSON ( db, NULL, i, 0,
+                                    old_device_class, &json, malloc );
+  config = openiccConfig_FromMem( json );
+  device_class = openiccConfig_DeviceClassGet( config, malloc );
+  openiccConfig_Release( &config );
   fprintf( stderr, "\ndevice class[%d]: \"%s\"\n", i, device_class);
   printf( "%s\n", json );
   free(json);
 
 
   /* we want a single device class DB for lets say cameras */
-  devices_n = openiccConfigs_Count(configs, devices_filter);
+  devices_n = openiccConfig_Count( db, devices_filter );
   fprintf(stderr, "Found %d %s devices.\n", devices_n, devices_filter[0] );
   old_device_class = NULL;
   for(i = 0; i < devices_n; ++i)
@@ -114,14 +115,14 @@ int main(int argc, char ** argv)
     if(i != devices_n - 1) /* not the last */
       flags |= OPENICC_CONFIGS_SKIP_FOOTER;
 
-    d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i, flags,
-                                      old_device_class, &json, malloc );
+    d = openiccConfig_DeviceGetJSON( db, devices_filter, i, flags,
+                                     old_device_class, &json, malloc );
     old_device_class = d;
     printf( "%s\n", json );
     free(json);
   }
 
-  openiccConfigs_Release( &configs );
+  openiccConfig_Release( &db );
 
   return 0;
 }

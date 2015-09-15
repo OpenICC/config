@@ -110,13 +110,13 @@ int main(int argc, char ** argv)
   int show_path = 0;
   char *conf_name = NULL;		/* Configuration path to use */
   ucmm_scope scope = ucmm_user;		/* Scope of instalation */
-  OpeniccConfigs_s * configs = NULL;
+  openiccConfig_s * config = NULL;
   int devices_n = 0, devices_new_n = 0;
   const char * device_classes_[] = {NULL, NULL};
   const char ** device_classes = 0;
   int device_classes_n = 0;
 
-  OpeniccConfigs_s * configs_new = NULL;
+  openiccConfig_s * config_new = NULL;
   char * json_new = NULL;
   const char * d = NULL,
              * old_d = NULL,
@@ -248,9 +248,9 @@ int main(int argc, char ** argv)
     text = openiccOpenFile( db_file, &size );
 
     /* parse JSON */
-    configs = openiccConfigs_FromMem( text );
+    config = openiccConfig_FromMem( text );
     if(text) free(text); text = NULL;
-    openiccConfigs_SetInfo ( configs, db_file );
+    openiccConfig_SetInfo ( config, db_file );
 
     if(device_class)
     {
@@ -258,11 +258,11 @@ int main(int argc, char ** argv)
       device_classes = device_classes_;
       device_classes_n = 1;
     } else
-      device_classes = openiccConfigs_GetClasses( device_classes,
+      device_classes = openiccConfig_GetClasses( device_classes,
                                                   &device_classes_n );
 
-    devices_n = openiccConfigs_Count(configs, device_classes);
-    DBG( configs, "Found %d devices.", devices_n );
+    devices_n = openiccConfig_Count(config, device_classes);
+    DBG( config, "Found %d devices.", devices_n );
   }
 
   if(add_device)
@@ -273,11 +273,11 @@ int main(int argc, char ** argv)
       text = openiccReadFileSToMem( stdin, &size );
 
     /* parse JSON */
-    configs_new = openiccConfigs_FromMem( text );
+    config_new = openiccConfig_FromMem( text );
     if(text) free(text); text = NULL;
-    openiccConfigs_SetInfo ( configs_new, file_name );
-    devices_new_n = openiccConfigs_Count(configs_new, NULL);
-    DBG( configs_new, "Found %d devices.", devices_new_n );
+    openiccConfig_SetInfo ( config_new, file_name );
+    devices_new_n = openiccConfig_Count(config_new, NULL);
+    DBG( config_new, "Found %d devices.", devices_new_n );
     if(devices_new_n)
       list_devices = 1;
   }
@@ -306,12 +306,12 @@ int main(int argc, char ** argv)
     {
       pos = -1;
 
-      n = openiccConfigs_Count(configs, NULL);
+      n = openiccConfig_Count(config, NULL);
 
       for(j = 0; j < device_classes_n; ++j)
       {
         devices_filter[0] = device_classes[j];
-        devices_n = openiccConfigs_Count(configs, devices_filter);
+        devices_n = openiccConfig_Count(config, devices_filter);
 
         for(i = 0; i < devices_n; ++i)
         {
@@ -321,7 +321,7 @@ int main(int argc, char ** argv)
                                 (erase_device && pos == list_pos)))
             continue;
 
-          d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i,
+          d = openiccConfig_DeviceGetJSON( config, devices_filter, i,
                                             flags, old_d, &json, malloc );
 
           if(d)
@@ -334,12 +334,12 @@ int main(int argc, char ** argv)
           if(json) free(json); json = NULL;
         }
 
-        count = openiccConfigs_Count(configs_new, devices_filter);
+        count = openiccConfig_Count(config_new, devices_filter);
         for(i = 0; i < count; ++i)
         {
           ++pos;
 
-          d = openiccConfigs_DeviceGetJSON( configs_new, devices_filter, i,
+          d = openiccConfig_DeviceGetJSON( config_new, devices_filter, i,
                                             flags, old_d, &json, malloc );
 
           if(d)
@@ -394,7 +394,7 @@ int main(int argc, char ** argv)
                               (erase_device && pos == list_pos)))
           continue;
 
-        d = openiccConfigs_DeviceGet( configs, device_classes, i,
+        d = openiccConfig_DeviceGet( config, device_classes, i,
                                       &keys, &values, malloc );
 
         if(i && list_long)
@@ -442,7 +442,7 @@ int main(int argc, char ** argv)
     }
   }
 
-  openiccConfigs_Release( &configs );
+  openiccConfig_Release( &config );
 
   if(conf_name)
     free(conf_name);

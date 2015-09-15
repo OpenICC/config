@@ -52,6 +52,10 @@
 #endif
 
 #define DBG_UHR_ (double)clock()/(double)CLOCKS_PER_SEC
+#define DBGc_S( format_,...) openiccMessage_p( openiccMSG_DBG, NULL, \
+                                                OI_DBG_FORMAT_ format_, OI_DBG_ARGS_, __VA_ARGS__)
+#define DBGcc_S( obj, format_,...) openiccMessage_p( openiccMSG_DBG, obj, \
+                                                OI_DBG_FORMAT_ format_, OI_DBG_ARGS_, __VA_ARGS__)
 #define WARNc_S( format_,...) openiccMessage_p( openiccMSG_WARN, NULL, \
                                                 OI_DBG_FORMAT_ format_, OI_DBG_ARGS_, __VA_ARGS__)
 #define WARNcc_S( obj, format_,...) openiccMessage_p( openiccMSG_WARN, obj, \
@@ -66,7 +70,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-struct OpeniccConfigs_s {
+struct openiccConfig_s {
   char     * json_text;
   yajl_val   yajl;
   char     * dbg_text;
@@ -84,7 +88,7 @@ char *       openiccStringCopy       ( const char        * text,
 
 extern openiccMessage_f     openiccMessage_p;
 int  openiccMessageFunc              ( openiccMSG_e        code,
-                                       OpeniccConfigs_s  * context_object,
+                                       openiccConfig_s   * context_object,
                                        const char        * format,
                                        ... );
 

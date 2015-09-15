@@ -571,10 +571,10 @@ oiTESTRESULT_e testStringRun ()
   int error = 0;
 
   char * t = NULL;
-  OpeniccConfigs_s * configs = NULL;
+  openiccConfig_s * config = NULL;
 
   openiccMessageFuncSet( openiccMessageFunc );
-  error = openiccMessage_p( openiccMSG_WARN, configs, "test message %s", OPENICC_VERSION_NAME );
+  error = openiccMessage_p( openiccMSG_WARN, config, "test message %s", OPENICC_VERSION_NAME );
 
   if( !error )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
@@ -613,7 +613,7 @@ oiTESTRESULT_e testDeviceJSON ()
 
   fprintf(stdout, "\n" );
 
-  OpeniccConfigs_s * configs, * config;
+  openiccConfig_s * config;
   const char * file_name = "../../../OpenICC_device_config_DB.json";
   char * text = 0;
   char            ** keys = 0;
@@ -639,31 +639,31 @@ oiTESTRESULT_e testDeviceJSON ()
   }
 
   const char * non_json = "{\"org\":{\"free{\"openicc\")))";
-  configs = openiccConfigs_FromMem( non_json );
-  if( !configs )
+  config = openiccConfig_FromMem( non_json );
+  if( !config )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccConfigs_FromMem(\"%s\") ", non_json );
+    "openiccConfig_FromMem(\"%s\") ", non_json );
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
-    "openiccConfigs_FromMem(\"%s\") ", non_json );
+    "openiccConfig_FromMem(\"%s\") ", non_json );
   }
-
+  openiccConfig_Release( &config );
 
   /* read JSON input file */
   text = openiccOpenFile( file_name, &size );
 
   /* parse JSON */
-  configs = openiccConfigs_FromMem( text );
+  config = openiccConfig_FromMem( text );
   if(text) free(text);
-  openiccConfigs_SetInfo ( configs, file_name );
-  devices_n = openiccConfigs_Count(configs, NULL);
+  openiccConfig_SetInfo ( config, file_name );
+  devices_n = openiccConfig_Count(config, NULL);
   fprintf( zout, "Found %d devices.\n", devices_n );
   if( devices_n )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccConfigs_FromMem(\"%s\") %d ", file_name, devices_n );
+    "openiccConfig_FromMem(\"%s\") %d ", file_name, devices_n );
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
-    "openiccConfigs_FromMem()...                        " );
+    "openiccConfig_FromMem()...                        " );
   }
 
 
@@ -671,7 +671,7 @@ oiTESTRESULT_e testDeviceJSON ()
   /* print all found key/value pairs */
   for(i = 0; i < devices_n; ++i)
   {
-    const char * d = openiccConfigs_DeviceGet( configs, NULL, i,
+    const char * d = openiccConfig_DeviceGet( config, NULL, i,
                                                &keys, &values, malloc );
 
     if(i && openicc_debug)
@@ -692,31 +692,31 @@ oiTESTRESULT_e testDeviceJSON ()
 
   /* get a single JSON device */
   i = 2; /* select the second one, we start counting from zero */
-  d = openiccConfigs_DeviceGetJSON ( configs, NULL, i, 0,
+  d = openiccConfig_DeviceGetJSON ( config, NULL, i, 0,
                                      old_device_class, &json, malloc );
-  config = openiccConfigs_FromMem( json );
-  openiccConfigs_SetInfo ( config, file_name );
-  device_class = openiccConfigs_DeviceClassGet( config, malloc );
+  config = openiccConfig_FromMem( json );
+  openiccConfig_SetInfo ( config, file_name );
+  device_class = openiccConfig_DeviceClassGet( config, malloc );
   if( strcmp(device_class,"camera") == 0 )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccConfigs_DeviceClassGet([%d]) %s      ", i, device_class );
+    "openiccConfig_DeviceClassGet([%d]) %s      ", i, device_class );
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
-    "openiccConfigs_DeviceClassGet()...                 " );
+    "openiccConfig_DeviceClassGet()...                 " );
   }
   if(json) free(json);
   if(device_class) free(device_class);
-  openiccConfigs_Release( &config );
+  openiccConfig_Release( &config );
 
 
   /* we want a single device class DB for lets say cameras */
-  devices_n = openiccConfigs_Count(configs, devices_filter);
+  devices_n = openiccConfig_Count(config, devices_filter);
   if( devices_n == 2 )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccConfigs_Count(%s) %d                 ", OPENICC_DEVICE_CAMERA, devices_n );
+    "openiccConfig_Count(%s) %d                 ", OPENICC_DEVICE_CAMERA, devices_n );
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
-    "openiccConfigs_Count()...                        " );
+    "openiccConfig_Count()...                        " );
   }
   old_device_class = NULL;
   for(i = 0; i < devices_n; ++i)
@@ -727,27 +727,27 @@ oiTESTRESULT_e testDeviceJSON ()
     if(i != devices_n - 1) /* not the last */
       flags |= OPENICC_CONFIGS_SKIP_FOOTER;
 
-    d = openiccConfigs_DeviceGetJSON( configs, devices_filter, i, flags,
-                                      old_device_class, &json, malloc );
+    d = openiccConfig_DeviceGetJSON( config, devices_filter, i, flags,
+                                     old_device_class, &json, malloc );
     old_device_class = d;
     STRING_ADD( full_json, json );
     free(json);
   }
-  openiccConfigs_Release( &configs );
+  openiccConfig_Release( &config );
 
 
-  configs = openiccConfigs_FromMem( full_json );
-  openiccConfigs_SetInfo ( configs, "full_json" );
+  config = openiccConfig_FromMem( full_json );
+  openiccConfig_SetInfo ( config, "full_json" );
   if(full_json) free(full_json);
-  devices_n = openiccConfigs_Count(configs, NULL);
+  devices_n = openiccConfig_Count(config, NULL);
   if( devices_n == 2 )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccConfigs_DeviceGetJSON()                     " );
+    "openiccConfig_DeviceGetJSON()                     " );
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
-    "openiccConfigs_DeviceGetJSON()                     " );
+    "openiccConfig_DeviceGetJSON()                     " );
   }
-  openiccConfigs_Release( &configs );
+  openiccConfig_Release( &config );
 
 
   return result;

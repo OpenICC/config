@@ -33,16 +33,16 @@ int openicc_backtrace = 0;
  *  @brief   load configurations from in memory JSON text
  *  
  */
-OpeniccConfigs_s * openiccConfigs_FromMem( const char       * data )
+openiccConfig_s *  openiccConfig_FromMem( const char       * data )
 {
-  OpeniccConfigs_s * configs = NULL;
+  openiccConfig_s * configs = NULL;
   if(data && data[0])
   {
-    configs = calloc( sizeof(OpeniccConfigs_s), 1 );
+    configs = calloc( sizeof(openiccConfig_s), 1 );
     if(!configs)
     {
       ERRc_S( "could not allocate %d bytes",
-               (int)sizeof(OpeniccConfigs_s));
+               (int)sizeof(openiccConfig_s));
       return configs;
     }
 
@@ -53,7 +53,7 @@ OpeniccConfigs_s * openiccConfigs_FromMem( const char       * data )
       char * msg = malloc(1024);
       configs->yajl = yajl_tree_parse( data, msg, 1024 );
       WARNc_S( "%s\n", msg?msg:"" );
-      openiccConfigs_Release( &configs );
+      openiccConfig_Release( &configs );
     }
   }
 
@@ -63,10 +63,10 @@ OpeniccConfigs_s * openiccConfigs_FromMem( const char       * data )
 /**
  *  @brief   release the data base object
  */
-void               openiccConfigs_Release (
-                                       OpeniccConfigs_s ** configs )
+void               openiccConfig_Release (
+                                       openiccConfig_s  ** configs )
 {
-  OpeniccConfigs_s * c = 0;
+  openiccConfig_s * c = 0;
   if(configs)
   {
     c = *configs;
@@ -75,15 +75,15 @@ void               openiccConfigs_Release (
       if(c->json_text)
         free(c->json_text);
       else
-        WARNcc_S( c, "expected OpeniccConfigs_s::json_text", 0 );
+        WARNcc_S( c, "expected openiccConfig_s::json_text", 0 );
       if(c->yajl)
         yajl_tree_free(c->yajl);
       else
-        WARNcc_S( c, "expected OpeniccConfigs_s::yajl",0 );
+        WARNcc_S( c, "expected openiccConfig_s::yajl",0 );
       if(c->dbg_text)
         free(c->dbg_text);
       else
-        WARNcc_S( c, "expected OpeniccConfigs_s::dbg_text",0 );
+        WARNcc_S( c, "expected openiccConfig_s::dbg_text",0 );
       free(c);
     }
     *configs = NULL;
@@ -98,7 +98,7 @@ static const char * dev_cl[] = {
 /**
  *  @brief   get default device class
  */
-const char** const openiccConfigs_GetClasses (
+const char** const openiccConfig_GetClasses (
                                        const char       ** device_classes,
                                        int               * count )
 {
@@ -124,8 +124,8 @@ const char** const openiccConfigs_GetClasses (
  *  @param[in]     device_classes      the device class filter
  *  @return                            count of matching device configurations
  */
-int                openiccConfigs_Count (
-                                       OpeniccConfigs_s  * configs,
+int                openiccConfig_Count (
+                                       openiccConfig_s   * configs,
                                        const char       ** device_classes )
 {
   int n = 0;
@@ -140,7 +140,7 @@ int                openiccConfigs_Count (
       {
         int i = 0, device_classes_n = 0;
 
-        device_classes = openiccConfigs_GetClasses( device_classes,
+        device_classes = openiccConfig_GetClasses( device_classes,
                                        &device_classes_n );
 
         for(i = 0; i < device_classes_n; ++i)
@@ -169,8 +169,8 @@ int                openiccConfigs_Count (
  *  @param[out]    values              a zero terminated list of device values
  *  @param[in]     alloc               user allocation function
  */
-const char *       openiccConfigs_DeviceGet (
-                                       OpeniccConfigs_s  * configs,
+const char *       openiccConfig_DeviceGet (
+                                       openiccConfig_s   * configs,
                                        const char       ** device_classes,
                                        int                 pos,
                                        char            *** keys,
@@ -191,7 +191,7 @@ const char *       openiccConfigs_DeviceGet (
       {
         int i = 0, device_classes_n = 0;
 
-        device_classes = openiccConfigs_GetClasses( device_classes,
+        device_classes = openiccConfig_GetClasses( device_classes,
                                        &device_classes_n );
 
         for(i = 0; i < device_classes_n; ++i)
@@ -294,8 +294,8 @@ const char *       openiccConfigs_DeviceGet (
 /**
  *  @brief   add a string for debugging and error messages
  */
-void               openiccConfigs_SetInfo (
-                                       OpeniccConfigs_s  * configs,
+void               openiccConfig_SetInfo (
+                                       openiccConfig_s   * configs,
                                        const char        * debug_info )
 {
   if(configs && debug_info)
@@ -321,8 +321,8 @@ void               openiccConfigs_SetInfo (
  *  @param[in]     alloc               user allocation function
  *  @return                            device class
  */
-const char *       openiccConfigs_DeviceGetJSON (
-                                       OpeniccConfigs_s  * configs,
+const char *       openiccConfig_DeviceGetJSON (
+                                       openiccConfig_s   * configs,
                                        const char       ** device_classes,
                                        int                 pos,
                                        int                 flags,
@@ -335,8 +335,8 @@ const char *       openiccConfigs_DeviceGetJSON (
   int j, n = 0;
   char * txt = 0;
 
-  const char * d = openiccConfigs_DeviceGet( configs, device_classes, pos,
-                                               &keys, &values, malloc );
+  const char * d = openiccConfig_DeviceGet( configs, device_classes, pos,
+                                            &keys, &values, malloc );
 
   if(alloc)
     txt = alloc(4096);
@@ -398,8 +398,8 @@ const char *       openiccConfigs_DeviceGetJSON (
  *  @param[in]     config              a data base entry object
  *  @param[in]     alloc               user allocation function
  */
-char *             openiccConfigs_DeviceClassGet (
-                                       OpeniccConfigs_s  * config,
+char *             openiccConfig_DeviceClassGet (
+                                       openiccConfig_s   * config,
                                        openiccAlloc_f      alloc )
 {
   char * device_class = 0;
@@ -559,7 +559,7 @@ char *       openiccStringCopy       ( const char        * text,
 int                openiccMessageFormat (
                                        char             ** message_text,
                                        int                 code,
-                                       OpeniccConfigs_s  * context_object,
+                                       openiccConfig_s   * context_object,
                                        const char        * string )
 {
   char * text = 0, * t = 0;
@@ -573,14 +573,14 @@ int                openiccMessageFormat (
   FILE * fp = 0;
   const char * id_text = 0;
   char * id_text_tmp = 0;
-  OpeniccConfigs_s * c = (OpeniccConfigs_s*) context_object;
+  openiccConfig_s * c = (openiccConfig_s*) context_object;
 
   if(code == openiccMSG_DBG && !openicc_debug)
     return 0;
 
   if(c)
   {
-    type_name = "OpeniccConfigs_s";
+    type_name = "openiccConfig_s";
     id_text = c->dbg_text;
     if(id_text)
       id_text_tmp = strdup(id_text);
@@ -659,7 +659,7 @@ int                openiccMessageFormat (
  *
  *  @param         code                a message code understood be your message
  *                                     handler or openiccMSG_e
- *  @param         context_object      a OpeniccConfigs_s is expected
+ *  @param         context_object      a openiccConfig_s is expected
  *  @param         format              the text format string for following args
  *  @param         ...                 the variable args fitting to format
  *  @return                            0 - success; 1 - error
@@ -669,7 +669,7 @@ int                openiccMessageFormat (
  *  @since   2008/04/03 (OpenICC: 0.1.0)
  */
 int  openiccMessageFunc              ( openiccMSG_e        code,
-                                       OpeniccConfigs_s  * context_object,
+                                       openiccConfig_s   * context_object,
                                        const char        * format,
                                        ... )
 {
@@ -678,7 +678,7 @@ int  openiccMessageFunc              ( openiccMSG_e        code,
   va_list list;
   size_t sz = 0;
   int len = 0;
-  OpeniccConfigs_s * c = context_object;
+  openiccConfig_s * c = context_object;
 
 
   va_start( list, format);
