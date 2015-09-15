@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-29 21:37+0200\n"
+"POT-Creation-Date: 2015-08-31 22:06+0200\n"
 "PO-Revision-Date: 2015-02-20 17:32+0100\n"
 "Last-Translator: Kai-Uwe Behrmann <ku.b@gmx.de>\n"
 "Language-Team: russian <ru@li.org>\n"
@@ -23,6 +23,14 @@ msgstr ""
 
 #: libopenicc/openicc_config.c:610
 msgid "!!! ERROR"
+msgstr ""
+
+#: libopenicc/openicc_db.c:50
+msgid "Could not find config"
+msgstr ""
+
+#: libopenicc/openicc_db.c:55
+msgid "Paths:"
 msgstr ""
 
 #: libopenicc/openicc_config.c:607

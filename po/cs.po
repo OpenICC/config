@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-29 21:37+0200\n"
+"POT-Creation-Date: 2015-08-31 22:06+0200\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -18,6 +18,16 @@ msgstr ""
 #: libopenicc/openicc_config.c:610
 msgid "!!! ERROR"
 msgstr "!!! CHYBA"
+
+#: libopenicc/openicc_db.c:50
+#, fuzzy
+msgid "Could not find config"
+msgstr "Nelze otevřít profil"
+
+#: libopenicc/openicc_db.c:55
+#, fuzzy
+msgid "Paths:"
+msgstr "Cesty"
 
 #: libopenicc/openicc_config.c:607
 msgid "WARNING"
@@ -853,10 +863,6 @@ msgstr "VAROVÁNÍ"
 
 #~ msgid "Could not open device"
 #~ msgstr "Nelze otevřít zařízení"
-
-#, fuzzy
-#~ msgid "Could not open file"
-#~ msgstr "Nelze otevřít profil"
 
 #, fuzzy
 #~ msgid "Could not open instrument"
@@ -2237,9 +2243,6 @@ msgstr "VAROVÁNÍ"
 #, fuzzy
 #~ msgid "Path can not be written"
 #~ msgstr "Profil neni ulozen."
-
-#~ msgid "Paths"
-#~ msgstr "Cesty"
 
 #~ msgid "Paths where ICC Profiles can be found"
 #~ msgstr "Cesty, kde jsou uloženy profily ICC"

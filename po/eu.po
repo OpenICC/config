@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-29 21:37+0200\n"
+"POT-Creation-Date: 2015-08-31 22:06+0200\n"
 "PO-Revision-Date: 2007-11-07 11:11+0100\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
 "Language-Team: Basque <itzulpena@euskalgnu.org>\n"
@@ -22,6 +22,16 @@ msgstr ""
 #: libopenicc/openicc_config.c:610
 msgid "!!! ERROR"
 msgstr ""
+
+#: libopenicc/openicc_db.c:50
+#, fuzzy
+msgid "Could not find config"
+msgstr "Ezin izan da letra-tipoa ireki:"
+
+#: libopenicc/openicc_db.c:55
+#, fuzzy
+msgid "Paths:"
+msgstr "Pausarazi"
 
 #: libopenicc/openicc_config.c:607
 msgid "WARNING"
@@ -594,10 +604,6 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "Could not open device"
-#~ msgstr "Ezin izan da letra-tipoa ireki:"
-
-#, fuzzy
-#~ msgid "Could not open file"
 #~ msgstr "Ezin izan da letra-tipoa ireki:"
 
 #, fuzzy
@@ -1511,10 +1517,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Path can not be written"
 #~ msgstr "Profila ez da idatzi."
-
-#, fuzzy
-#~ msgid "Paths"
-#~ msgstr "Pausarazi"
 
 #, fuzzy
 #~ msgid "Perceptual"

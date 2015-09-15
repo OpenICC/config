@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-29 21:37+0200\n"
+"POT-Creation-Date: 2015-08-31 22:06+0200\n"
 "PO-Revision-Date: 2006-06-29 19:31+0200\n"
 "Last-Translator: Pascal LACROIX <lacroixpascal at vfemail.net>\n"
 "Language-Team: <fr@li.org>\n"
@@ -18,6 +18,15 @@ msgstr ""
 
 #: libopenicc/openicc_config.c:610
 msgid "!!! ERROR"
+msgstr ""
+
+#: libopenicc/openicc_db.c:50
+#, fuzzy
+msgid "Could not find config"
+msgstr "Ouvrir Profil"
+
+#: libopenicc/openicc_db.c:55
+msgid "Paths:"
 msgstr ""
 
 #: libopenicc/openicc_config.c:607
@@ -359,10 +368,6 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "Could not open device"
-#~ msgstr "Ouvrir Profil"
-
-#, fuzzy
-#~ msgid "Could not open file"
 #~ msgstr "Ouvrir Profil"
 
 #, fuzzy

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-29 21:37+0200\n"
+"POT-Creation-Date: 2015-08-31 22:06+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -22,6 +22,14 @@ msgstr ""
 #: libopenicc/openicc_config.c:610
 msgid "!!! ERROR"
 msgstr "!!! Fehler"
+
+#: libopenicc/openicc_db.c:50
+msgid "Could not find config"
+msgstr "Konnte Konfiguration nicht finden"
+
+#: libopenicc/openicc_db.c:55
+msgid "Paths:"
+msgstr "Pfade:"
 
 #: libopenicc/openicc_config.c:607
 msgid "WARNING"
@@ -861,10 +869,6 @@ msgstr "WARNUNG"
 
 #~ msgid "Could not open device"
 #~ msgstr "Konnte Gerät nicht öffnen"
-
-#, fuzzy
-#~ msgid "Could not open file"
-#~ msgstr "Konnte Profil nicht laden"
 
 #~ msgid "Could not open instrument"
 #~ msgstr "Konnte Instrument nicht öffnen"
@@ -2267,9 +2271,6 @@ msgstr "WARNUNG"
 
 #~ msgid "Path can not be written"
 #~ msgstr "Verzeichnis kann nicht beschrieben werden."
-
-#~ msgid "Paths"
-#~ msgstr "Pfade"
 
 #~ msgid "Paths where ICC Profiles can be found"
 #~ msgstr "Pfad zu ICC Farbprofilen"

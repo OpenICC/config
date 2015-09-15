@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: eo\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-29 21:37+0200\n"
+"POT-Creation-Date: 2015-08-31 22:06+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  <eo@li.org>\n"
@@ -21,6 +21,14 @@ msgstr ""
 
 #: libopenicc/openicc_config.c:610
 msgid "!!! ERROR"
+msgstr ""
+
+#: libopenicc/openicc_db.c:50
+msgid "Could not find config"
+msgstr ""
+
+#: libopenicc/openicc_db.c:55
+msgid "Paths:"
 msgstr ""
 
 #: libopenicc/openicc_config.c:607
