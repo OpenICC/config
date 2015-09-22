@@ -35,41 +35,42 @@ int openicc_backtrace = 0;
  */
 openiccConfig_s *  openiccConfig_FromMem( const char       * data )
 {
-  openiccConfig_s * configs = NULL;
+  openiccConfig_s * config = NULL;
   if(data && data[0])
   {
-    configs = calloc( sizeof(openiccConfig_s), 1 );
-    if(!configs)
+    config = calloc( sizeof(openiccConfig_s), 1 );
+    if(!config)
     {
       ERRc_S( "could not allocate %d bytes",
                (int)sizeof(openiccConfig_s));
-      return configs;
+      return config;
     }
 
-    configs->json_text = strdup( (char*)data );
-    configs->yajl = yajl_tree_parse( data, NULL, 0 );
-    if(!configs->yajl)
+    config->json_text = strdup( (char*)data );
+    config->yajl = yajl_tree_parse( data, NULL, 0 );
+    if(!config->yajl)
     {
       char * msg = malloc(1024);
-      configs->yajl = yajl_tree_parse( data, msg, 1024 );
+      config->yajl = yajl_tree_parse( data, msg, 1024 );
       WARNc_S( "%s\n", msg?msg:"" );
-      openiccConfig_Release( &configs );
+      if( msg ) free(msg);
+      openiccConfig_Release( &config );
     }
   }
 
-  return configs;
+  return config;
 }
 
 /**
  *  @brief   release the data base object
  */
 void               openiccConfig_Release (
-                                       openiccConfig_s  ** configs )
+                                       openiccConfig_s  ** config )
 {
   openiccConfig_s * c = 0;
-  if(configs)
+  if(config)
   {
-    c = *configs;
+    c = *config;
     if(c)
     {
       if(c->json_text)
@@ -86,7 +87,7 @@ void               openiccConfig_Release (
         WARNcc_S( c, "expected openiccConfig_s::dbg_text",0 );
       free(c);
     }
-    *configs = NULL;
+    *config = NULL;
   }
 }
 
@@ -98,7 +99,7 @@ static const char * dev_cl[] = {
 /**
  *  @brief   get default device class
  */
-const char** const openiccConfig_GetClasses (
+const char** const openiccConfigGetDeviceClasses (
                                        const char       ** device_classes,
                                        int               * count )
 {
@@ -120,27 +121,27 @@ const char** const openiccConfig_GetClasses (
 /**
  *  @brief count devices in data base object
  *
- *  @param[in]     configs             the data base object
+ *  @param[in]     config              the data base object
  *  @param[in]     device_classes      the device class filter
  *  @return                            count of matching device configurations
  */
-int                openiccConfig_Count (
-                                       openiccConfig_s   * configs,
+int                openiccConfig_CountDevice (
+                                       openiccConfig_s   * config,
                                        const char       ** device_classes )
 {
   int n = 0;
 
-  if(configs)
+  if(config)
   {
     const char * base_path[] = {"org","freedesktop","openicc","device",0};
-    yajl_val base = yajl_tree_get( configs->yajl, base_path, yajl_t_object );
+    yajl_val base = yajl_tree_get( config->yajl, base_path, yajl_t_object );
     if(base)
     {
       yajl_val dev_class;
       {
         int i = 0, device_classes_n = 0;
 
-        device_classes = openiccConfig_GetClasses( device_classes,
+        device_classes = openiccConfigGetDeviceClasses( device_classes,
                                        &device_classes_n );
 
         for(i = 0; i < device_classes_n; ++i)
@@ -152,8 +153,8 @@ int                openiccConfig_Count (
         }
       }
     } else
-      WARNcc_S( configs, "could not find " OPENICC_DEVICE_PATH " %s",
-                configs->dbg_text ? configs->dbg_text : "" );
+      WARNcc_S( config, "could not find " OPENICC_DEVICE_PATH " %s",
+                config->dbg_text ? config->dbg_text : "" );
   }
 
   return n;
@@ -162,7 +163,7 @@ int                openiccConfig_Count (
 /**
  *  @brief   get keys and their values
  *
- *  @param[in]     configs             the data base object
+ *  @param[in]     config              the data base object
  *  @param[in]     device_classes      the device class filter
  *  @param[in]     pos                 the device position
  *  @param[out]    keys                a zero terminated list of device keys
@@ -170,7 +171,7 @@ int                openiccConfig_Count (
  *  @param[in]     alloc               user allocation function
  */
 const char *       openiccConfig_DeviceGet (
-                                       openiccConfig_s   * configs,
+                                       openiccConfig_s   * config,
                                        const char       ** device_classes,
                                        int                 pos,
                                        char            *** keys,
@@ -180,10 +181,10 @@ const char *       openiccConfig_DeviceGet (
   int n = 0;
   const char * actual_device_class = 0;
 
-  if(configs)
+  if(config)
   {
     const char * base_path[] = {"org","freedesktop","openicc","device",0};
-    yajl_val base = yajl_tree_get( configs->yajl, (const char**)base_path,
+    yajl_val base = yajl_tree_get( config->yajl, (const char**)base_path,
                                    yajl_t_object );
     if(base)
     {
@@ -191,7 +192,7 @@ const char *       openiccConfig_DeviceGet (
       {
         int i = 0, device_classes_n = 0;
 
-        device_classes = openiccConfig_GetClasses( device_classes,
+        device_classes = openiccConfigGetDeviceClasses( device_classes,
                                        &device_classes_n );
 
         for(i = 0; i < device_classes_n; ++i)
@@ -284,8 +285,8 @@ const char *       openiccConfig_DeviceGet (
         }
       }
     } else
-      WARNcc_S( configs, "could not find " OPENICC_DEVICE_PATH " %s",
-                configs->dbg_text ? configs->dbg_text : "" );
+      WARNcc_S( config, "could not find " OPENICC_DEVICE_PATH " %s",
+                config->dbg_text ? config->dbg_text : "" );
   }
 
   return actual_device_class;
@@ -295,21 +296,21 @@ const char *       openiccConfig_DeviceGet (
  *  @brief   add a string for debugging and error messages
  */
 void               openiccConfig_SetInfo (
-                                       openiccConfig_s   * configs,
+                                       openiccConfig_s   * config,
                                        const char        * debug_info )
 {
-  if(configs && debug_info)
+  if(config && debug_info)
   {
-    if(configs->dbg_text)
-      free(configs->dbg_text);
-    configs->dbg_text = strdup( (char*)debug_info );
+    if(config->dbg_text)
+      free(config->dbg_text);
+    config->dbg_text = strdup( (char*)debug_info );
   }
 }
 
 /**
  *  @brief   obtain a JSON string
  * 
- *  @param[in]     configs             a data base object
+ *  @param[in]     config              a data base object
  *  @param[in]     device_classes      a zero terminated list of device class
  *                                     strings
  *  @param[in]     pos                 device position in list
@@ -322,7 +323,7 @@ void               openiccConfig_SetInfo (
  *  @return                            device class
  */
 const char *       openiccConfig_DeviceGetJSON (
-                                       openiccConfig_s   * configs,
+                                       openiccConfig_s   * config,
                                        const char       ** device_classes,
                                        int                 pos,
                                        int                 flags,
@@ -335,7 +336,7 @@ const char *       openiccConfig_DeviceGetJSON (
   int j, n = 0;
   char * txt = 0;
 
-  const char * d = openiccConfig_DeviceGet( configs, device_classes, pos,
+  const char * d = openiccConfig_DeviceGet( config, device_classes, pos,
                                             &keys, &values, malloc );
 
   if(alloc)
@@ -347,7 +348,7 @@ const char *       openiccConfig_DeviceGetJSON (
     txt[0] = '\000';
   else
   {
-    ERRcc_S( configs, "could not allocate 4096 bytes",0 );
+    ERRcc_S( config, "could not allocate 4096 bytes",0 );
     return txt;
   }
 

@@ -78,16 +78,16 @@ int            openiccVersion        ( void );
 openiccConfig_s  * openiccConfig_FromMem (
                                        const char        * data );
 void               openiccConfig_Release (
-                                       openiccConfig_s  ** configs );
+                                       openiccConfig_s  ** config );
 
-int                openiccConfig_Count (
-                                       openiccConfig_s   * configs,
+int                openiccConfig_CountDevices (
+                                       openiccConfig_s   * config,
                                        const char       ** device_classes );
 void               openiccConfig_SetInfo (
-                                       openiccConfig_s   * configs,
+                                       openiccConfig_s   * config,
                                        const char        * debug_info );
 const char *       openiccConfig_DeviceGet (
-                                       openiccConfig_s   * configs,
+                                       openiccConfig_s   * config,
                                        const char       ** device_classes,
                                        int                 pos,
                                        char            *** keys,
@@ -96,7 +96,7 @@ const char *       openiccConfig_DeviceGet (
 #define OPENICC_CONFIGS_SKIP_HEADER 0x01
 #define OPENICC_CONFIGS_SKIP_FOOTER 0x02
 const char *       openiccConfig_DeviceGetJSON (
-                                       openiccConfig_s   * configs,
+                                       openiccConfig_s   * config,
                                        const char       ** device_classes,
                                        int                 pos,
                                        int                 flags,
@@ -106,7 +106,7 @@ const char *       openiccConfig_DeviceGetJSON (
 char *             openiccConfig_DeviceClassGet (
                                        openiccConfig_s   * config,
                                        openiccAlloc_f      alloc );
-const char** const openiccConfig_GetClasses (
+const char** const openiccConfigGetDeviceClasses (
                                        const char       ** device_classes,
                                        int               * count );
 
