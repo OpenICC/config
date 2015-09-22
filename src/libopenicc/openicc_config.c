@@ -125,7 +125,7 @@ const char** const openiccConfigGetDeviceClasses (
  *  @param[in]     device_classes      the device class filter
  *  @return                            count of matching device configurations
  */
-int                openiccConfig_CountDevice (
+int                openiccConfig_CountDevices (
                                        openiccConfig_s   * config,
                                        const char       ** device_classes )
 {
