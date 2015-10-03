@@ -150,10 +150,7 @@ oiTESTRESULT_e testI18N()
   fprintf(stdout, "\n" );
 
   setlocale(LC_ALL,"");
-  int old_openicc_debug = openicc_debug;
-  openicc_debug = 1;
   openiccInit();
-  openicc_debug = old_openicc_debug;
 
   lang = setlocale(LC_ALL, NULL);
   if(lang && (strcmp(lang, "C") != 0))
@@ -754,6 +751,73 @@ oiTESTRESULT_e testDeviceJSON ()
 }
 
 
+#include "xdg_bds.h"
+oiTESTRESULT_e testXDG()
+{
+  oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
+  const char * config_file = OPENICC_DB_PREFIX OPENICC_SLASH OPENICC_DB;
+  int i;
+  /* Locate the directories where the config file is, */
+  /* and where we should copy the profile to. */
+  int npaths;
+  xdg_error er;
+  char **paths;
+  openiccSCOPE_e scope = openiccSCOPE_USER;
+
+  fprintf(stdout, "\n" );
+
+  if ((npaths = xdg_bds(&er, &paths, xdg_conf, xdg_write, 
+                        (scope == openiccSCOPE_SYSTEM) ? xdg_local : xdg_user,
+                        config_file)) == 0)
+  {
+    ERRc_S("%s %d", _("Could not find config"), scope );
+    return 1;
+  }
+
+  if(openicc_debug)
+    fprintf( zout, "%s\n", _("Paths:") );
+  for(i=0; i < npaths; ++i)
+    if(openicc_debug)
+      fprintf( zout, "%s\n", paths[i]);
+
+  xdg_free(paths, npaths);
+
+  if(npaths == 1)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "xdg_bds openiccSCOPE_USER found %d             ", npaths );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "xdg_bds openiccSCOPE_USER found %d             ", npaths );
+  }
+
+  scope = openiccSCOPE_SYSTEM;
+  if ((npaths = xdg_bds(&er, &paths, xdg_conf, xdg_write, 
+                        (scope == openiccSCOPE_SYSTEM) ? xdg_local : xdg_user,
+                        config_file)) == 0)
+  {
+    ERRc_S("%s %d", _("Could not find config"), scope );
+  }
+
+  if(openicc_debug)
+    fprintf( zout, "%s\n", _("Paths:") );
+  for(i=0; i < npaths; ++i)
+    if(openicc_debug)
+      fprintf( zout, "%s\n", paths[i]);
+
+  xdg_free(paths, npaths);
+
+  if(npaths == 1)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "xdg_bds openiccSCOPE_SYSTEM found %d           ", npaths );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "xdg_bds openiccSCOPE_SYSTEM found %d           ", npaths );
+  }
+
+  return result;
+}
+
+
 
 
 static int test_number = 0;
@@ -844,7 +908,7 @@ int main(int argc, char** argv)
   TEST_RUN( testStringRun, "String handling" );
   TEST_RUN( testDeviceJSON, "Device JSON handling" );
   TEST_RUN( testPaths, "Paths" );
-
+  TEST_RUN( testXDG, "XDG" );
   /* give a summary */
   if(!list)
   {
