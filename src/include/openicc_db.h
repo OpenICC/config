@@ -28,19 +28,19 @@ extern "C" {
 
 
 typedef struct openiccDB_s openiccDB_s;
-openiccDB_s * openiccDB_newFrom      ( const char        * top_key_name,
+openiccDB_s * openiccDB_NewFrom      ( const char        * top_key_name,
                                        openiccSCOPE_e      scope );
-void     openiccDB_release           ( openiccDB_s      ** db );
-char *   openiccDB_getString         ( openiccDB_s       * db,
+void     openiccDB_Release           ( openiccDB_s      ** db );
+char *   openiccDB_RetString         ( openiccDB_s       * db,
                                        const char        * key_name );
-int      openiccDB_getStrings        ( openiccDB_s       * db,
+int      openiccDB_GetStrings        ( openiccDB_s       * db,
                                        const char       ** key_names,
                                        char            *** values,
                                        openiccAlloc_f      allocFunc );
-char **  openiccDB_getKeyNames       ( openiccDB_s       * db,
+char **  openiccDB_GetKeyNames       ( openiccDB_s       * db,
                                        const char        * key_name,
                                        int               * n );
-char **  openiccDB_getKeyNamesOneLevel(openiccDB_s       * db,
+char **  openiccDB_GetKeyNamesOneLevel(openiccDB_s       * db,
                                        const char        * key_name,
                                        int               * n );
   
