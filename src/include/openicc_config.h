@@ -57,6 +57,7 @@ typedef void   (*openiccDeAlloc_f)   ( void              * data );
 typedef struct openiccConfig_s openiccConfig_s;
 
 /** @brief customisable messages */
+#define OI_DEBUG                       "OI_DEBUG"
 extern int openicc_debug;
 extern int openicc_backtrace;
 
