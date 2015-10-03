@@ -817,6 +817,29 @@ oiTESTRESULT_e testXDG()
   return result;
 }
 
+#include "openicc_db.h"
+oiTESTRESULT_e testODB()
+{
+  oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
+  openiccSCOPE_e scope = openiccSCOPE_USER_SYS;
+  const char * top_key_name = OPENICC_DEVICE_PATH;
+  openiccDB_s * db = openiccDB_NewFrom( top_key_name, scope );
+
+  fprintf(stdout, "\n" );
+
+  if(db)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "db created                                     " );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "db created                                     " );
+  }
+
+  openiccDB_Release( &db );
+
+  return result;
+}
+
 
 
 
@@ -909,6 +932,7 @@ int main(int argc, char** argv)
   TEST_RUN( testDeviceJSON, "Device JSON handling" );
   TEST_RUN( testPaths, "Paths" );
   TEST_RUN( testXDG, "XDG" );
+  TEST_RUN( testODB, "ODB" );
   /* give a summary */
   if(!list)
   {
