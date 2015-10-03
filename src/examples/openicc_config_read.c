@@ -67,7 +67,7 @@ int main(int argc, char ** argv)
   /* parse JSON */
   db = openiccConfig_FromMem( text );
   openiccConfig_SetInfo ( db, file_name );
-  devices_n = openiccConfig_Count(db, NULL);
+  devices_n = openiccConfig_CountDevices(db, NULL);
   fprintf(stderr, "Found %d devices.\n", devices_n );
 
   
@@ -104,7 +104,7 @@ int main(int argc, char ** argv)
 
 
   /* we want a single device class DB for lets say cameras */
-  devices_n = openiccConfig_Count( db, devices_filter );
+  devices_n = openiccConfig_CountDevices( db, devices_filter );
   fprintf(stderr, "Found %d %s devices.\n", devices_n, devices_filter[0] );
   old_device_class = NULL;
   for(i = 0; i < devices_n; ++i)
