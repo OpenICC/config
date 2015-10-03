@@ -753,6 +753,14 @@ int openicc_i18n_init = 0;
  */
 int            openiccInit           ( void )
 {
+  if(getenv(OI_DEBUG))
+  {
+    int v = openiccVersion();
+    openicc_debug = atoi(getenv(OI_DEBUG));
+    if(openicc_debug)
+      DBGc_S( "OpenICC v%s config: %d", OPENICC_VERSION_NAME, v );
+  }
+
 #ifdef USE_GETTEXT
   if(!openicc_i18n_init)
   {
