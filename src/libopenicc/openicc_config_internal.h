@@ -86,6 +86,7 @@ char *       openiccStringCopy       ( const char        * text,
                                        openiccAlloc_f      alloc );
 #define openiccNoEmptyString_m_(t) (t?t:"")
 
+
 extern openiccMessage_f     openiccMessage_p;
 int  openiccMessageFunc              ( openiccMSG_e        code,
                                        openiccConfig_s   * context_object,
