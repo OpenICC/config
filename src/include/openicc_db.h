@@ -31,7 +31,7 @@ typedef struct openiccDB_s openiccDB_s;
 openiccDB_s * openiccDB_NewFrom      ( const char        * top_key_name,
                                        openiccSCOPE_e      scope );
 void     openiccDB_Release           ( openiccDB_s      ** db );
-char *   openiccDB_RetString         ( openiccDB_s       * db,
+char *   openiccDB_GetString         ( openiccDB_s       * db,
                                        const char        * key_name );
 int      openiccDB_GetStrings        ( openiccDB_s       * db,
                                        const char       ** key_names,
