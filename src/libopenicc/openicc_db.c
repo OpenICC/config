@@ -197,7 +197,7 @@ void     openiccDB_Release           ( openiccDB_s      ** db )
     free( s->ks );
     s->ks_array_reserved_n = 0;
     free( s );
-    db = 0;
+    *db = 0;
   }
 }
 
