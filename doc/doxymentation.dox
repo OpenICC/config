@@ -1,0 +1,79 @@
+/**
+    @mainpage OpenICC Configuration API Documentation
+
+    @section text_contents Descriptive Contents
+    @ref intro |
+    @ref api |
+    @ref links
+
+ *  @par License:
+ *            MIT http://www.opensource.org/licenses/mit-license.php
+
+    @par Internet:
+          http://www.openicc.org
+
+    @author Kai-Uwe Behrmann and others
+    @since  September 2011-2016
+
+    @n@n
+    @section intro Introduction
+  
+    OpenICC Configuration API provides a platformindependent C interface to persistently store
+    settings across applications and services.
+
+    @section api API Documentation
+    The OpenICC Configuration API is declared in the openicc_config.h and openicc_db.h header files.
+    - @ref OpenICC_config - Configuration Access API's
+    - @ref path_names - Configuration Location API
+ */
+
+/** \addtogroup OpenICC_config OpenICC Color Management Configuration API's
+ *
+ *  The Configuration API provides a way to store key/value pairs in a canonical way into JSON format DB files.
+ *
+ */
+
+
+/** @page links References
+    @section projects_links Links
+    - OpenICC: http://www.openicc.org
+    - ColourWiki: http://www.openicc.info/
+    - Configuration data <a href="http://www.openicc.info/wiki/index.php?title=OpenICC_Configuration_0.1">OpenICC Configuration at ColourWiki</a>
+    - Directory paths for colour profiles and other configuration data <a href="http://www.openicc.info/index.php?title=OpenIccDirectoryProposal">OpenIccDirectoryProposal at ColourWiki</a>
+    - Bug reports: https://sourceforge.net/p/openicc/bugs/
+ */
+
+/** \addtogroup misc Miscellaneous
+ *
+ *  @{ */
+
+/** @enum    openiccMSG_e
+ *  @brief   message classes
+ *
+ *  @version OpenICC Config: 0.0.1
+ *  @date    2013/09/16
+ *  @since   2013/09/16 (OpenICC Config: 0.0.1)
+ */
+/** @} *//* misc */
+
+
+/** @struct  openiccConfig_s
+ *  @ingroup OpenICC_config
+ *  @brief   Low level Configuration Object
+ *
+ *  Hold a set of keys inside a text/json representation.
+ *
+ *  @version OpenICC Config: 0.0.1
+ *  @date    2013/09/17
+ *  @since   2013/09/17 (OpenICC Config: 0.0.1)
+ */
+/** @struct  openiccDB_s
+ *  @ingroup OpenICC_config
+ *  @brief   High level Configuration Object
+ *
+ *  Holds cascaded sets of keys inside a text/json representation.
+ *
+ *  @version OpenICC Config: 0.1.0
+ *  @date    2015/10/03
+ *  @since   2015/10/03 (OpenICC Config: 0.1.0)
+ */

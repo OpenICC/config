@@ -21,11 +21,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-/** \addtogroup OpenICC_config OpenICC Color Management Configuration API's
+/** \addtogroup OpenICC_config
 
  *  @{
  */
-
 
 typedef struct openiccDB_s openiccDB_s;
 openiccDB_s * openiccDB_NewFrom      ( const char        * top_key_name,

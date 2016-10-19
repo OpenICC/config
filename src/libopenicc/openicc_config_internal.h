@@ -76,6 +76,13 @@ struct openiccConfig_s {
   char     * dbg_text;
 };
 
+struct openiccDB_s {
+  openiccSCOPE_e   scope;
+  char * top_key_name;
+  openiccConfig_s ** ks;
+  int ks_array_reserved_n;
+};
+
 int          openiccStringAddPrintf  ( char             ** string,
                                        const char        * format,
                                                            ... );

@@ -24,12 +24,6 @@
 #include <stdarg.h>  /* vsnprintf() */
 #include <stdio.h>   /* vsnprintf() */
 
-typedef struct openiccDB_s {
-  openiccSCOPE_e   scope;
-  char * top_key_name;
-  openiccConfig_s ** ks;
-  int ks_array_reserved_n;
-} openiccDB_s;
 
 typedef struct {
   int dummy;
@@ -82,6 +76,10 @@ int      openiccArray_Push           ( openiccArray_s    * array )
 }
 
 
+/**
+ *  @brief    add a openiccConfig_s
+ *  @memberof openiccDB_s
+ */
 int           openiccDB_AddScope     ( openiccDB_s       * db,
                                        const char        * top_key_name,
                                        openiccSCOPE_e      scope )
@@ -141,6 +139,10 @@ int           openiccDB_AddScope     ( openiccDB_s       * db,
   return error;
 }
 
+/**
+ *  @brief    create a new DB object
+ *  @memberof openiccDB_s
+ */
 openiccDB_s * openiccDB_NewFrom      ( const char        * top_key_name,
                                        openiccSCOPE_e      scope )
 {
@@ -178,6 +180,10 @@ openiccDB_s * openiccDB_NewFrom      ( const char        * top_key_name,
 }
 
 
+/**
+ *  @brief    free a DB object
+ *  @memberof openiccDB_s
+ */
 void     openiccDB_Release           ( openiccDB_s      ** db )
 {
   openiccDB_s * s;

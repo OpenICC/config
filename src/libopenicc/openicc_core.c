@@ -29,7 +29,11 @@ int openicc_backtrace = 0;
 #include <stdio.h>   /* vsnprintf() */
 
 
-/** @func    openiccMessageFormat
+/** \addtogroup misc
+ *  @{
+ */
+
+/** @fn        openiccMessageFormat
  *  @brief   default function to form a message string
  *
  *  This default message function is used as a message formatter.
@@ -137,7 +141,7 @@ int                openiccMessageFormat (
   return 0;
 }
 
-/** @func    openiccMessageFunc
+/** @fn      openiccMessageFunc
  *  @brief   default message function to console
  *
  *  The default message function is used as a message printer to the console 
@@ -197,8 +201,8 @@ int  openiccMessageFunc              ( openiccMSG_e        code,
 
 openiccMessage_f     openiccMessage_p = openiccMessageFunc;
 
-/** @func    openiccMessageFuncSet
- *  @brief
+/** @fn      openiccMessageFuncSet
+ *  @brief   set a custom message listener
  *
  *  @version OpenICC: 0.1.0
  *  @date    2011/10/21
@@ -211,8 +215,8 @@ int            openiccMessageFuncSet ( openiccMessage_f    message_func )
   return 0;
 }
 
-/** @func    openiccVersion
- *  @brief
+/** @fn      openiccVersion
+ *  @brief   runtime version
  *
  *  @version OpenICC: 0.1.0
  *  @date    2015/08/27
@@ -225,7 +229,7 @@ int            openiccVersion        ( void )
 
 const char * openicc_domain_path = OPENICC_LOCALEDIR;
 int openicc_i18n_init = 0;
-/** @func    openiccInit
+/** @fn      openiccInit
  *  @brief   init the library; optionally
  *
  *  Additionally use setlocale() somewhere in your application.
@@ -267,4 +271,6 @@ int            openiccInit           ( void )
 #endif
   return -1;
 }
+
+/*  @} *//* misc */
 

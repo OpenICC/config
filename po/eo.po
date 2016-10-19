@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: eo\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-31 22:06+0200\n"
+"POT-Creation-Date: 2016-10-18 23:53+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  <eo@li.org>\n"
@@ -19,19 +19,27 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: KBabel 1.9\n"
 
-#: libopenicc/openicc_config.c:610
+#: libopenicc/openicc_core.c:100
 msgid "!!! ERROR"
 msgstr ""
 
-#: libopenicc/openicc_db.c:50
+#: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:128
+msgid "Could not alloc memory"
+msgstr ""
+
+#: libopenicc/openicc_db.c:100
 msgid "Could not find config"
 msgstr ""
 
-#: libopenicc/openicc_db.c:55
+#: libopenicc/openicc_db.c:176
+msgid "Could not setup db objetc"
+msgstr ""
+
+#: libopenicc/openicc_db.c:105
 msgid "Paths:"
 msgstr ""
 
-#: libopenicc/openicc_config.c:607
+#: libopenicc/openicc_core.c:97
 msgid "WARNING"
 msgstr ""
 

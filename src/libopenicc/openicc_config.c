@@ -25,6 +25,7 @@
 
 /**
  *  @brief   load configurations from in memory JSON text
+ *  @memberof openiccConfig_s
  *  
  */
 openiccConfig_s *  openiccConfig_FromMem( const char       * data )
@@ -57,6 +58,7 @@ openiccConfig_s *  openiccConfig_FromMem( const char       * data )
 
 /**
  *  @brief   release the data base object
+ *  @memberof openiccConfig_s
  */
 void               openiccConfig_Release (
                                        openiccConfig_s  ** config )
@@ -114,6 +116,7 @@ const char** const openiccConfigGetDeviceClasses (
 
 /**
  *  @brief count devices in data base object
+ *  @memberof openiccConfig_s
  *
  *  @param[in]     config              the data base object
  *  @param[in]     device_classes      the device class filter
@@ -156,6 +159,7 @@ int                openiccConfig_CountDevices (
 
 /**
  *  @brief   get keys and their values
+ *  @memberof openiccConfig_s
  *
  *  @param[in]     config              the data base object
  *  @param[in]     device_classes      the device class filter
@@ -288,6 +292,7 @@ const char *       openiccConfig_DeviceGet (
 
 /**
  *  @brief   add a string for debugging and error messages
+ *  @memberof openiccConfig_s
  */
 void               openiccConfig_SetInfo (
                                        openiccConfig_s   * config,
@@ -303,6 +308,7 @@ void               openiccConfig_SetInfo (
 
 /**
  *  @brief   obtain a JSON string
+ *  @memberof openiccConfig_s
  * 
  *  @param[in]     config              a data base object
  *  @param[in]     device_classes      a zero terminated list of device class
@@ -389,6 +395,7 @@ const char *       openiccConfig_DeviceGetJSON (
 
 /**
  *  @brief   find out the device class of a given data base entry
+ *  @memberof openiccConfig_s
  *
  *  @param[in]     config              a data base entry object
  *  @param[in]     alloc               user allocation function
@@ -435,7 +442,7 @@ char *             openiccConfig_DeviceClassGet (
  *  So be careful and test the result.
  *
  *  ::openiccPATH_MODULE + ::openiccSCOPE_USER and ::openiccPATH_MODULE + ::openiccSCOPE_OPENICC are
- *  supported. ::openiccPATH_SCRIPT gives no result at all.
+ *  supported.
  *
  *  @version OpenICC: 0.1.0
  *  @date    2015/08/28

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-31 22:06+0200\n"
+"POT-Creation-Date: 2016-10-18 23:53+0200\n"
 "PO-Revision-Date: 2015-02-20 17:32+0100\n"
 "Last-Translator: Kai-Uwe Behrmann <ku.b@gmx.de>\n"
 "Language-Team: russian <ru@li.org>\n"
@@ -21,19 +21,27 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Language: ru_RU\n"
 
-#: libopenicc/openicc_config.c:610
+#: libopenicc/openicc_core.c:100
 msgid "!!! ERROR"
 msgstr ""
 
-#: libopenicc/openicc_db.c:50
+#: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:128
+msgid "Could not alloc memory"
+msgstr ""
+
+#: libopenicc/openicc_db.c:100
 msgid "Could not find config"
 msgstr ""
 
-#: libopenicc/openicc_db.c:55
+#: libopenicc/openicc_db.c:176
+msgid "Could not setup db objetc"
+msgstr ""
+
+#: libopenicc/openicc_db.c:105
 msgid "Paths:"
 msgstr ""
 
-#: libopenicc/openicc_config.c:607
+#: libopenicc/openicc_core.c:97
 msgid "WARNING"
 msgstr ""
 

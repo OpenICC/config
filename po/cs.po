@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-08-31 22:06+0200\n"
+"POT-Creation-Date: 2016-10-18 23:53+0200\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -15,21 +15,31 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libopenicc/openicc_config.c:610
+#: libopenicc/openicc_core.c:100
 msgid "!!! ERROR"
 msgstr "!!! CHYBA"
 
-#: libopenicc/openicc_db.c:50
+#: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:128
+#, fuzzy
+msgid "Could not alloc memory"
+msgstr "Nelze alokovat paměť pro:"
+
+#: libopenicc/openicc_db.c:100
 #, fuzzy
 msgid "Could not find config"
 msgstr "Nelze otevřít profil"
 
-#: libopenicc/openicc_db.c:55
+#: libopenicc/openicc_db.c:176
+#, fuzzy
+msgid "Could not setup db objetc"
+msgstr "Nelze rozpoznat zařízení"
+
+#: libopenicc/openicc_db.c:105
 #, fuzzy
 msgid "Paths:"
 msgstr "Cesty"
 
-#: libopenicc/openicc_config.c:607
+#: libopenicc/openicc_core.c:97
 msgid "WARNING"
 msgstr "VAROVÁNÍ"
 
@@ -839,9 +849,6 @@ msgstr "VAROVÁNÍ"
 #~ msgid "Copyright:       "
 #~ msgstr "Copyright:       "
 
-#~ msgid "Could not allocate memory for:"
-#~ msgstr "Nelze alokovat paměť pro:"
-
 #~ msgid "Could not download from WWW. Please install curl or wget."
 #~ msgstr "Nelze stáhnout z WWW. Nainstalujte prosím \"curl\" nebo \"wget\"."
 
@@ -880,9 +887,6 @@ msgstr "VAROVÁNÍ"
 
 #~ msgid "Could not open: "
 #~ msgstr "Nelze otevřít:"
-
-#~ msgid "Could not resolve device"
-#~ msgstr "Nelze rozpoznat zařízení"
 
 #, fuzzy
 #~ msgid "Could not resolve device."

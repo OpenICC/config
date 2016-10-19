@@ -3,7 +3,7 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2011-2015 (C) Kai-Uwe Behrmann
+ *            2011-2016 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
  *  @internal
@@ -20,9 +20,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define OPENICC_SLASH "/"
+typedef void * (*openiccAlloc_f)     ( size_t              size );
+typedef void   (*openiccDeAlloc_f)   ( void              * data );
 
-/** \addtogroup OpenICC_config OpenICC Color Management Configuration API's
+/** \addtogroup OpenICC_config
 
  *  @{
  */
@@ -51,30 +52,8 @@ extern "C" {
   "  }\n" \
   "}\n"
 
-typedef void * (*openiccAlloc_f)     ( size_t              size );
-typedef void   (*openiccDeAlloc_f)   ( void              * data );
 
 typedef struct openiccConfig_s openiccConfig_s;
-
-/** @brief customisable messages */
-#define OI_DEBUG                       "OI_DEBUG"
-extern int openicc_debug;
-extern int openicc_backtrace;
-
-int            openiccInit           ( void );
-
-typedef enum {
-  openiccMSG_ERROR = 300,              /**< @brief fatal user messages */
-  openiccMSG_WARN,                     /**< @brief log messages */
-  openiccMSG_DBG,                      /**< @brief developer messages */
-} openiccMSG_e;
-
-typedef int  (*openiccMessage_f)     ( openiccMSG_e        error_code,
-                                       openiccConfig_s   * context_object,
-                                       const char        * format,
-                                       ... );
-int            openiccMessageFuncSet ( openiccMessage_f    message_func );
-int            openiccVersion        ( void );
 
 openiccConfig_s  * openiccConfig_FromMem (
                                        const char        * data );
@@ -117,6 +96,9 @@ char **            openiccConfig_GetKeyNames (
                                        const char        * key_name,
                                        int               * n );
 #endif
+/** 
+ *  @} *//* OpenICC_config
+ */
 
 /** \addtogroup path_names Path Names
  *  @brief   Access to data path names for Installation
@@ -153,7 +135,36 @@ char *       openiccGetInstallPath   ( openiccPATH_TYPE_e  type,
                                        openiccAlloc_f      allocFunc );
 
 /** 
- *  @} *//*OpenICC_config
+ *  @} *//* path_names
+ */
+
+/** \addtogroup misc
+
+ *  @{ */
+#define OPENICC_SLASH "/"
+
+/** @brief customisable messages */
+#define OI_DEBUG                       "OI_DEBUG"
+extern int openicc_debug;
+extern int openicc_backtrace;
+
+int            openiccInit           ( void );
+
+typedef enum {
+  openiccMSG_ERROR = 300,              /**< @brief fatal user messages */
+  openiccMSG_WARN,                     /**< @brief log messages */
+  openiccMSG_DBG,                      /**< @brief developer messages */
+} openiccMSG_e;
+
+typedef int  (*openiccMessage_f)     ( openiccMSG_e        error_code,
+                                       openiccConfig_s   * context_object,
+                                       const char        * format,
+                                       ... );
+int            openiccMessageFuncSet ( openiccMessage_f    message_func );
+int            openiccVersion        ( void );
+
+/** 
+ *  @} *//* misc
  */
 
 #ifdef __cplusplus

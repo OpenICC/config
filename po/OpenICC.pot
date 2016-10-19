@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenICC 0.1\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2015-09-15 07:11+0200\n"
+"POT-Creation-Date: 2016-10-18 23:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,18 +17,26 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libopenicc/openicc_config.c:607
+#: libopenicc/openicc_core.c:97
 msgid "WARNING"
 msgstr ""
 
-#: libopenicc/openicc_config.c:610
+#: libopenicc/openicc_core.c:100
 msgid "!!! ERROR"
 msgstr ""
 
-#: libopenicc/openicc_db.c:50
+#: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:128
+msgid "Could not alloc memory"
+msgstr ""
+
+#: libopenicc/openicc_db.c:100
 msgid "Could not find config"
 msgstr ""
 
-#: libopenicc/openicc_db.c:55
+#: libopenicc/openicc_db.c:105
 msgid "Paths:"
+msgstr ""
+
+#: libopenicc/openicc_db.c:176
+msgid "Could not setup db objetc"
 msgstr ""

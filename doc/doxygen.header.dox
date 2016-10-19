@@ -1,0 +1,15 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="keywords" content="OpenICC,Config,ICC,C,doxygen,API,documentation"/>
+<meta name="description" content="C source code API documentation for the OpenICC Configuration API project."/>
+<title>$title</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head><body>
+
+<table class="title">
+<tr>
+<td>$projectname - Version $projectnumber</td>
+</tr>
+</table>
