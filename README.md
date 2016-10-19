@@ -13,12 +13,17 @@ according library for easy access.
 * [Copyright](docs/COPYING) - MIT
 * [ChangeLog](docs/ChangeLog)
 * [Authors](docs/AUTHORS)
-* [Code](http://sourceforge.net/p/openicc/code/ci/master/tree/)
+* [Code](https://github.com/OpenICC/config)
 * [OpenICC](http://www.openicc.info) - open source color management discussion group
  
 
 ### Dependencies
 * [Yajl](http://lloyd.github.com/yajl/) - a JSON parser library
+#### Optional
+* [gettext](https://www.gnu.org/software/gettext/) - i18n
+* [LCOV](http://ltp.sourceforge.net/coverage/lcov.php) - coverage docu
+* For the documentation use doxygen, graphviz and graphviz-gd packages.
+  * [Doxygen v1.5.8 or higher is recommended](http://www.doxygen.org)
 
 ### Building
 Supported are autotools and cmake style builds.
