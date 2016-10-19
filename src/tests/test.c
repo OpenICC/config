@@ -619,7 +619,7 @@ const char * oiGetConfigFileName()
       fp = fopen( file_name, "r" );
       if(!fp)
       {
-        file_name = "../config/OpenICC_device_config_DB.json";
+        file_name = "../../../config/OpenICC_device_config_DB.json";
         fp = fopen( file_name, "r" );
         if(!fp)
           file_name = NULL;
@@ -641,13 +641,15 @@ oiTESTRESULT_e testConfig()
   oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
   const char * top_key_name = OPENICC_DEVICE_PATH;
   openiccConfig_s * config;
-  const char * file_name = oiGetConfigFileName();
+  const char * file_name;
   char * text;
   size_t size = 0;
   int n = 0,i,error = 0;
   char ** key_names;
 
   fprintf(stdout, "\n" );
+
+  file_name = oiGetConfigFileName();
 
   /* read JSON input file */
   text = openiccOpenFile( file_name, &size );
@@ -686,10 +688,8 @@ oiTESTRESULT_e testDeviceJSON ()
 {
   oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
 
-  fprintf(stdout, "\n" );
-
   openiccConfig_s * config, * config2;
-  const char * file_name = oiGetConfigFileName();
+  const char * file_name;
   char * text = 0;
   char            ** keys = 0;
   char            ** values = 0;
@@ -701,6 +701,9 @@ oiTESTRESULT_e testDeviceJSON ()
   size_t size = 0;
 
   const char * non_json = "{\"org\":{\"free{\"openicc\")))";
+
+  fprintf(stdout, "\n" );
+
   config = openiccConfig_FromMem( non_json );
   if( !config )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
@@ -711,6 +714,7 @@ oiTESTRESULT_e testDeviceJSON ()
   }
   openiccConfig_Release( &config );
 
+  file_name = oiGetConfigFileName();
   /* read JSON input file */
   text = openiccOpenFile( file_name, &size );
 
