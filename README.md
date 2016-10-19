@@ -1,4 +1,4 @@
-# OpenICC
+# OpenICC [![Build Status](https://travis-ci.org/OpenICC/config.svg?branch=master)](https://travis-ci.org/OpenICC/config)
 
 The OpenICC configuration data base allows to store, share and manipulate
 colour management informations.
