@@ -2,15 +2,15 @@ LINK_DIRECTORIES( ${LINK_DIRECTORIES} "${CMAKE_BINARY_DIR}/src/liboyranos/" ${EL
 ADD_EXECUTABLE( test-openicc "${CMAKE_CURRENT_SOURCE_DIR}/test.c" )
 TARGET_LINK_LIBRARIES( test-openicc OpenICC )
 ADD_EXECUTABLE( test-openicc-static "${CMAKE_CURRENT_SOURCE_DIR}/test.c" )
-TARGET_LINK_LIBRARIES( test-openicc-static OpenICC )
+TARGET_LINK_LIBRARIES( test-openicc-static openicc-static )
 ADD_CUSTOM_TARGET(check
         "echo"
         DEPENDS test_openicc
         COMMENT "Test libOpenICC" VERBATIM )
 
 ADD_CUSTOM_COMMAND( OUTPUT test_openicc
-                    DEPENDS test-openicc
-                    COMMAND valgrind --leak-check=full --show-leak-kinds=all ./test-openicc )
+                    DEPENDS test-openicc-static
+                    COMMAND valgrind --leak-check=full --show-leak-kinds=all ./test-openicc-static )
 
 IF(USE_GCOV)
   MESSAGE("testing coverage using gcc's gcov; try target: coverage")
