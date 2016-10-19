@@ -43,11 +43,11 @@ openiccConfig_s *  openiccConfig_FromMem( const char       * data )
     }
 
     config->json_text = strdup( (char*)data );
-    config->yajl = yajl_tree_parse( data, NULL, 0 );
-    if(!config->yajl)
+    config->oyjl = oyjl_tree_parse( data, NULL, 0 );
+    if(!config->oyjl)
     {
       char * msg = malloc(1024);
-      config->yajl = yajl_tree_parse( data, msg, 1024 );
+      config->oyjl = oyjl_tree_parse( data, msg, 1024 );
       WARNc_S( "%s\n", msg?msg:"" );
       if( msg ) free(msg);
       openiccConfig_Release( &config );
@@ -74,10 +74,10 @@ void               openiccConfig_Release (
         free(c->json_text);
       else
         WARNcc_S( c, "expected openiccConfig_s::json_text", 0 );
-      if(c->yajl)
-        yajl_tree_free(c->yajl);
+      if(c->oyjl)
+        oyjl_tree_free(c->oyjl);
       else
-        WARNcc_S( c, "expected openiccConfig_s::yajl",0 );
+        WARNcc_S( c, "expected openiccConfig_s::oyjl",0 );
       if(c->dbg_text)
         free(c->dbg_text);
       else
@@ -132,10 +132,10 @@ int                openiccConfig_CountDevices (
   if(config)
   {
     const char * base_path[] = {"org","freedesktop","openicc","device",0};
-    yajl_val base = yajl_tree_get( config->yajl, base_path, yajl_t_object );
+    oyjl_val base = oyjl_tree_get( config->oyjl, base_path, oyjl_t_object );
     if(base)
     {
-      yajl_val dev_class;
+      oyjl_val dev_class;
       {
         int i = 0, device_classes_n = 0;
 
@@ -145,7 +145,7 @@ int                openiccConfig_CountDevices (
         for(i = 0; i < device_classes_n; ++i)
         {
           const char * obj_key[] = { device_classes[i], 0 };
-          dev_class = yajl_tree_get( base, obj_key, yajl_t_array );
+          dev_class = oyjl_tree_get( base, obj_key, oyjl_t_array );
           if(dev_class)
             n += dev_class->u.array.len;
         }
@@ -183,11 +183,11 @@ const char *       openiccConfig_DeviceGet (
   if(config)
   {
     const char * base_path[] = {"org","freedesktop","openicc","device",0};
-    yajl_val base = yajl_tree_get( config->yajl, (const char**)base_path,
-                                   yajl_t_object );
+    oyjl_val base = oyjl_tree_get( config->oyjl, (const char**)base_path,
+                                   oyjl_t_object );
     if(base)
     {
-      yajl_val dev_class;
+      oyjl_val dev_class;
       {
         int i = 0, device_classes_n = 0;
 
@@ -198,8 +198,8 @@ const char *       openiccConfig_DeviceGet (
         {
           const char * obj_key[] = { device_classes[i], 0 };
           int j = 1;
-          yajl_val device = 0;
-          dev_class = yajl_tree_get( base, obj_key, yajl_t_array );
+          oyjl_val device = 0;
+          dev_class = oyjl_tree_get( base, obj_key, oyjl_t_array );
           if(dev_class)
           {
             int elements = dev_class->u.array.len;
@@ -209,7 +209,7 @@ const char *       openiccConfig_DeviceGet (
               if(n == pos)
               {
                 actual_device_class = device_classes[i];
-                if(YAJL_IS_OBJECT( device ))
+                if(OYJL_IS_OBJECT( device ))
                 {
                   int count = device->u.object.len;
                   *keys = alloc( sizeof(char*) * (count + 1) );
@@ -230,11 +230,11 @@ const char *       openiccConfig_DeviceGet (
                       const char * tmp = NULL, * tmp2 = NULL;
                       switch(device->u.object.values[i]->type)
                       {
-                        case yajl_t_string:
+                        case oyjl_t_string:
                              tmp = device->u.object.values[i]->u.string; break;
-                        case yajl_t_number:
+                        case oyjl_t_number:
                              tmp = device->u.object.values[i]->u.number.r;break;
-                        case yajl_t_array:
+                        case oyjl_t_array:
                              {
                                int k = 0,
                                    n = device->u.object.values[i]->u.array.len;
@@ -242,12 +242,12 @@ const char *       openiccConfig_DeviceGet (
                                for(k = 0; k < n; ++k)
                                {
                                  if(device->u.object.values[i]->
-                                    u.array.values[k]->type == yajl_t_string)
+                                    u.array.values[k]->type == oyjl_t_string)
                                    tmp2 = device->u.object.values[i]->
                                          u.array.values[k]->u.string;
                                  else
                                  if(device->u.object.values[i]->
-                                    u.array.values[k]->type == yajl_t_number)
+                                    u.array.values[k]->type == oyjl_t_number)
                                    tmp2 = device->u.object.values[i]->
                                          u.array.values[k]->u.number.r;
 
@@ -410,11 +410,11 @@ char *             openiccConfig_DeviceClassGet (
   if(config)
   {
     const char * base_path[] = {"org","freedesktop","openicc","device",0};
-    yajl_val base = yajl_tree_get( config->yajl, (const char**)base_path,
-                                   yajl_t_object );
-    if(base && YAJL_IS_OBJECT( base ))
+    oyjl_val base = oyjl_tree_get( config->oyjl, (const char**)base_path,
+                                   oyjl_t_object );
+    if(base && OYJL_IS_OBJECT( base ))
     {
-      yajl_val v = base;
+      oyjl_val v = base;
 
       if(v->u.object.keys[0] && v->u.object.keys[0][0])
       {
@@ -450,7 +450,7 @@ int                openiccConfig_GetKeyNames (
                                        int               * n )
 {
   int error = !config;
-  yajl_val list = oyjl_tree_get_value( config->yajl, xpath );
+  oyjl_val list = oyjl_tree_get_value( config->oyjl, xpath );
   int count = oyjl_value_count( list ), i, pos = 0;
   size_t size = sizeof(char*) * (count + 1);
   char ** keys = NULL;
@@ -469,8 +469,8 @@ int                openiccConfig_GetKeyNames (
   if(error <= 0)
   for( i = 0; i < count; ++i )
   {
-    yajl_val v = oyjl_value_pos_get( list, i );
-    if(list->type == yajl_t_object)
+    oyjl_val v = oyjl_value_pos_get( list, i );
+    if(list->type == oyjl_t_object)
     {
       if(alloc)
         keys[pos] = openiccStringCopy( list->u.object.keys[i], alloc );

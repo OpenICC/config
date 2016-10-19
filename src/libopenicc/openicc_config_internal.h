@@ -22,7 +22,6 @@
 #include <stdarg.h>           /* va_list */
 #include <time.h>
 
-#include <yajl/yajl_tree.h>
 #include "oyjl_tree.h"
 
 #include "openicc_conf.h"
@@ -73,7 +72,7 @@ extern "C" {
 
 struct openiccConfig_s {
   char     * json_text;
-  yajl_val   yajl;
+  oyjl_val   oyjl;
   char     * dbg_text;
 };
 
