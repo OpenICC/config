@@ -628,7 +628,10 @@ const char * oiGetConfigFileName()
   }
 
   if(fp)
+  {
     fclose(fp);
+    fprintf(zout, "\tfile_name: %s\n", file_name );
+  }
 
   return file_name;
 }
