@@ -25,7 +25,9 @@
 /**
  *  @brief   load configurations from in memory JSON text
  *  @memberof openiccConfig_s
- *  
+ *
+ *  Create a config object from JSON text. Add a ID afterwards
+ *  for better error messages with openiccConfig_SetInfo() = source_file_name.
  */
 openiccConfig_s *  openiccConfig_FromMem( const char       * data )
 {
@@ -430,25 +432,58 @@ char *             openiccConfig_DeviceClassGet (
 }
 
 /**
- *  @brief    get a filterd list of key names
+ *  @brief    get a filtered list of key names
  *  @memberof openiccConfig_s
  *
  *  @param[in]     config              a data base entry object
- *  @param[in]     key_name            top key name to filter for
+ *  @param[in]     xpath               top key name to filter for
  *  @param[in]     alloc               user allocation function
  *  @param[out]    n                   number of found keys
  *  @param[out]    key_names           found keys
- *  return                             0 - success, >=1 - error, <0 - issue
+ *  @return                            0 - success, >=1 - error, <0 - issue
  */
 int                openiccConfig_GetKeyNames (
                                        openiccConfig_s   * config,
-                                       const char        * key_name,
+                                       const char        * xpath,
                                        openiccAlloc_f      alloc,
-                                       char             ** key_names,
+                                       char            *** key_names,
                                        int               * n )
 {
+  int error = !config;
+  yajl_val list = oyjl_tree_get_value( config->yajl, xpath );
+  int count = oyjl_value_count( list ), i, pos = 0;
+  size_t size = sizeof(char*) * (count + 1);
   char ** keys = NULL;
-  int error = 0;
+
+  if(!error)
+    error = !list ? -1:0;
+
+  if(alloc)
+  {
+    keys = alloc(size);
+    error = !keys;
+    if(!error)
+      memset( keys, 0, size );
+  }
+
+  if(error <= 0)
+  for( i = 0; i < count; ++i )
+  {
+    yajl_val v = oyjl_value_pos_get( list, i );
+    if(list->type == yajl_t_object)
+    {
+      if(alloc)
+        keys[pos] = openiccStringCopy( list->u.object.keys[i], alloc );
+      pos++;
+    }
+  }
+
+  if(key_names)
+    *key_names = keys;
+
+  if(n)
+    *n = pos;
+
   return error;
 }
 

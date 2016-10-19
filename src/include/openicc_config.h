@@ -89,13 +89,13 @@ char *             openiccConfig_DeviceClassGet (
 const char** const openiccConfigGetDeviceClasses (
                                        const char       ** device_classes,
                                        int               * count );
-#if 0
-TODO
-char **            openiccConfig_GetKeyNames (
+
+int                openiccConfig_GetKeyNames (
                                        openiccConfig_s   * config,
-                                       const char        * key_name,
+                                       const char        * xpath,
+                                       openiccAlloc_f      alloc,
+                                       char            *** key_names,
                                        int               * n );
-#endif
 /** 
  *  @} *//* OpenICC_config
  */
