@@ -609,17 +609,27 @@ const char * oiGetConfigFileName()
   const char * file_name = "../../../OpenICC_device_config_DB.json";
   FILE * fp = fopen( file_name, "r" );
 
-  if(fp)
-    fclose(fp);
-  else
+  if(!fp)
   {
     file_name = "../OpenICC_device_config_DB.json";
     fp = fopen( file_name, "r" );
-    if(fp)
-      fclose(fp);
-    else
+    if(!fp)
+    {
       file_name = "OpenICC_device_config_DB.json";
+      fp = fopen( file_name, "r" );
+      if(!fp)
+      {
+        file_name = "../config/OpenICC_device_config_DB.json";
+        fp = fopen( file_name, "r" );
+        if(!fp)
+          file_name = NULL;
+      }
+    }
   }
+
+  if(fp)
+    fclose(fp);
+
   return file_name;
 }
 
