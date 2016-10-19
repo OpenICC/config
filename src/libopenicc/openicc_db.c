@@ -3,10 +3,9 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2015 (C) Kai-Uwe Behrmann
+ *            2015-2016 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
- *  @internal
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
  *  @par License:
  *            MIT <http://www.opensource.org/licenses/mit-license.php>
@@ -77,6 +76,7 @@ int      openiccArray_Push           ( openiccArray_s    * array )
 
 
 /**
+ *  @internal
  *  @brief    add a openiccConfig_s
  *  @memberof openiccDB_s
  */
@@ -142,6 +142,9 @@ int           openiccDB_AddScope     ( openiccDB_s       * db,
 /**
  *  @brief    create a new DB object
  *  @memberof openiccDB_s
+ *
+ *  Create a DB by scope. Locate the physical configuration DB's and 
+ *  store them inside a single object.
  */
 openiccDB_s * openiccDB_NewFrom      ( const char        * top_key_name,
                                        openiccSCOPE_e      scope )

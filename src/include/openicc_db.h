@@ -3,10 +3,9 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2015 (C) Kai-Uwe Behrmann
+ *            2015-2016 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
- *  @internal
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
  *  @par License:
  *            MIT <http://www.opensource.org/licenses/mit-license.php>

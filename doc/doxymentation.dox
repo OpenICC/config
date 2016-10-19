@@ -23,11 +23,11 @@
 
     @section api API Documentation
     The OpenICC Configuration API is declared in the openicc_config.h and openicc_db.h header files.
-    - @ref OpenICC_config - Configuration Access API's
+    - @ref OpenICC_config - Configuration Access API
     - @ref path_names - Configuration Location API
  */
 
-/** \addtogroup OpenICC_config OpenICC Color Management Configuration API's
+/** \addtogroup OpenICC_config Configuration API
  *
  *  The Configuration API provides a way to store key/value pairs in a canonical way into JSON format DB files.
  *

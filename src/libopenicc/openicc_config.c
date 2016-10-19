@@ -6,7 +6,6 @@
  *            2011-2016 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
- *  @internal
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
  *  @par License:
  *            MIT <http://www.opensource.org/licenses/mit-license.php>
@@ -430,6 +429,28 @@ char *             openiccConfig_DeviceClassGet (
   return device_class;
 }
 
+/**
+ *  @brief    get a filterd list of key names
+ *  @memberof openiccConfig_s
+ *
+ *  @param[in]     config              a data base entry object
+ *  @param[in]     key_name            top key name to filter for
+ *  @param[in]     alloc               user allocation function
+ *  @param[out]    n                   number of found keys
+ *  @param[out]    key_names           found keys
+ *  return                             0 - success, >=1 - error, <0 - issue
+ */
+int                openiccConfig_GetKeyNames (
+                                       openiccConfig_s   * config,
+                                       const char        * key_name,
+                                       openiccAlloc_f      alloc,
+                                       char             ** key_names,
+                                       int               * n )
+{
+  char ** keys = NULL;
+  int error = 0;
+  return error;
+}
 
 /** \addtogroup path_names
  *  @{
