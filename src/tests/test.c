@@ -2,7 +2,7 @@
  *
  *  libOpenICC - OpenICC Colour Management Configuration
  *
- *  Copyright (C) 2011-2015  Kai-Uwe Behrmann
+ *  Copyright (C) 2011-2016  Kai-Uwe Behrmann
  *
  *  @brief    OpenICC test suite
  *  @internal
@@ -604,23 +604,9 @@ oiTESTRESULT_e testStringRun ()
   return result;
 }
 
-oiTESTRESULT_e testDeviceJSON ()
+const char * oiGetConfigFileName()
 {
-  oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
-
-  fprintf(stdout, "\n" );
-
-  openiccConfig_s * config, * config2;
   const char * file_name = "../../../OpenICC_device_config_DB.json";
-  char * text = 0;
-  char            ** keys = 0;
-  char            ** values = 0;
-  int i,j, n = 0, devices_n, flags;
-  char * json, * full_json = NULL, * device_class;
-  const char * devices_filter[] = {OPENICC_DEVICE_CAMERA,NULL},
-             * old_device_class = NULL,
-             * d = NULL;
-  size_t size = 0;
   FILE * fp = fopen( file_name, "r" );
 
   if(fp)
@@ -634,6 +620,72 @@ oiTESTRESULT_e testDeviceJSON ()
     else
       file_name = "OpenICC_device_config_DB.json";
   }
+  return file_name;
+}
+
+oiTESTRESULT_e testConfig()
+{
+  oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
+  const char * top_key_name = OPENICC_DEVICE_PATH;
+  openiccConfig_s * config;
+  const char * file_name = oiGetConfigFileName();
+  char * text;
+  size_t size = 0;
+  int n = 0,i,error = 0;
+  char ** key_names;
+
+  fprintf(stdout, "\n" );
+
+  /* read JSON input file */
+  text = openiccOpenFile( file_name, &size );
+
+  /* parse JSON */
+  config = openiccConfig_FromMem( text );
+  if(text) free(text);
+  openiccConfig_SetInfo ( config, file_name );
+
+  if(config)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "config created                                 " );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "config created                                 " );
+  }
+
+  error = openiccConfig_GetKeyNames( config, "org/freedesktop/openicc/device/camera/[1]",
+                                     myAllocFunc, &key_names, &n );
+  if(n)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "openiccConfig_GetKeyNames()                  %d", n );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "openiccConfig_GetKeyNames()                    " );
+  }
+  for(i = 0; i < n; ++i)
+    fprintf(zout, "\tkey: %s\n", key_names[i] );
+
+  openiccConfig_Release( &config );
+
+  return result;
+}
+
+oiTESTRESULT_e testDeviceJSON ()
+{
+  oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
+
+  fprintf(stdout, "\n" );
+
+  openiccConfig_s * config, * config2;
+  const char * file_name = oiGetConfigFileName();
+  char * text = 0;
+  char            ** keys = 0;
+  char            ** values = 0;
+  int i,j, n = 0, devices_n, flags;
+  char * json, * full_json = NULL, * device_class;
+  const char * devices_filter[] = {OPENICC_DEVICE_CAMERA,NULL},
+             * old_device_class = NULL,
+             * d = NULL;
+  size_t size = 0;
 
   const char * non_json = "{\"org\":{\"free{\"openicc\")))";
   config = openiccConfig_FromMem( non_json );
@@ -929,6 +981,7 @@ int main(int argc, char** argv)
   TEST_RUN( testI18N, "i18n" );
   TEST_RUN( testIO, "file i/o" );
   TEST_RUN( testStringRun, "String handling" );
+  TEST_RUN( testConfig, "JSON handling" );
   TEST_RUN( testDeviceJSON, "Device JSON handling" );
   TEST_RUN( testPaths, "Paths" );
   TEST_RUN( testXDG, "XDG" );
