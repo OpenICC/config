@@ -425,6 +425,38 @@ oiTESTRESULT_e testPaths()
   return result;
 }
 
+const char * oiGetConfigFileName()
+{
+  const char * file_name = "../../../OpenICC_device_config_DB.json";
+  FILE * fp = fopen( file_name, "r" );
+
+  if(!fp)
+  {
+    file_name = "../OpenICC_device_config_DB.json";
+    fp = fopen( file_name, "r" );
+    if(!fp)
+    {
+      file_name = "OpenICC_device_config_DB.json";
+      fp = fopen( file_name, "r" );
+      if(!fp)
+      {
+        file_name = "../../../config/OpenICC_device_config_DB.json";
+        fp = fopen( file_name, "r" );
+        if(!fp)
+          file_name = NULL;
+      }
+    }
+  }
+
+  if(fp)
+  {
+    fclose(fp);
+    fprintf(zout, "\tfile_name: %s\n", file_name );
+  }
+
+  return file_name;
+}
+
 
 oiTESTRESULT_e testIO ()
 {
@@ -436,6 +468,8 @@ oiTESTRESULT_e testIO ()
 
   char * t1, *t2, *t3;
   const char * file_name = "/usr/share/color/icc/OpenICC/sRGB.icc";
+  size_t size = 0;
+  FILE * fp;
 
   t1 = openiccExtractPathFromFileName_( file_name );
   fprintf(zout, "file_name: %s\n", file_name );
@@ -505,22 +539,7 @@ oiTESTRESULT_e testIO ()
   if(t2) free(t2);
   if(t3) free(t3);
 
-  size_t size = 0;
-  file_name = "../../../OpenICC_device_config_DB.json";
-  FILE * fp = fopen( file_name, "r" );
-
-  if(fp)
-    fclose(fp);
-  else
-  {
-    file_name = "../OpenICC_device_config_DB.json";
-    fp = fopen( file_name, "r" );
-    if(fp)
-      fclose(fp);
-    else
-      file_name = "OpenICC_device_config_DB.json";
-  }
-
+  file_name = oiGetConfigFileName();
   t1 = openiccOpenFile( file_name, &size );
   if(t1)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
@@ -602,38 +621,6 @@ oiTESTRESULT_e testStringRun ()
   if(t) free(t);
 
   return result;
-}
-
-const char * oiGetConfigFileName()
-{
-  const char * file_name = "../../../OpenICC_device_config_DB.json";
-  FILE * fp = fopen( file_name, "r" );
-
-  if(!fp)
-  {
-    file_name = "../OpenICC_device_config_DB.json";
-    fp = fopen( file_name, "r" );
-    if(!fp)
-    {
-      file_name = "OpenICC_device_config_DB.json";
-      fp = fopen( file_name, "r" );
-      if(!fp)
-      {
-        file_name = "../../../config/OpenICC_device_config_DB.json";
-        fp = fopen( file_name, "r" );
-        if(!fp)
-          file_name = NULL;
-      }
-    }
-  }
-
-  if(fp)
-  {
-    fclose(fp);
-    fprintf(zout, "\tfile_name: %s\n", file_name );
-  }
-
-  return file_name;
 }
 
 oiTESTRESULT_e testConfig()
