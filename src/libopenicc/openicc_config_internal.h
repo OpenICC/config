@@ -23,6 +23,7 @@
 #include <time.h>
 
 #include <yajl/yajl_tree.h>
+#include "oyjl_tree.h"
 
 #include "openicc_conf.h"
 #include "openicc_config.h"
