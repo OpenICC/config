@@ -42,13 +42,15 @@ openiccConfig_s *  openiccConfig_FromMem( const char       * data )
       return config;
     }
 
+    config->type = openiccOBJECT_CONFIG;
     config->json_text = strdup( (char*)data );
+    config->dbg_text = openiccStringCopy( "openiccConfig_FromMem()", malloc );
     config->oyjl = oyjl_tree_parse( data, NULL, 0 );
     if(!config->oyjl)
     {
       char * msg = malloc(1024);
       config->oyjl = oyjl_tree_parse( data, msg, 1024 );
-      WARNc_S( "%s\n", msg?msg:"" );
+      WARNcc_S( config, "%s\n", msg?msg:"" );
       if( msg ) free(msg);
       openiccConfig_Release( &config );
     }
@@ -417,11 +419,7 @@ char *             openiccConfig_DeviceClassGet (
       oyjl_val v = base;
 
       if(v->u.object.keys[0] && v->u.object.keys[0][0])
-      {
-        device_class = alloc( sizeof(char) *
-                              (strlen(v->u.object.keys[0]) + 1) );
-        strcpy( device_class, v->u.object.keys[0] );
-      }
+        device_class = openiccStringCopy((v->u.object.keys[0]), alloc);
 
     } else
       WARNcc_S( config, "could not find " OPENICC_DEVICE_PATH " %s",
@@ -458,7 +456,10 @@ int                openiccConfig_GetKeyNames (
   if(!error)
     error = !list ? -1:0;
 
-  if(alloc)
+  if(!alloc)
+    alloc = malloc;
+
+  if(key_names)
   {
     keys = alloc(size);
     error = !keys;
@@ -472,7 +473,7 @@ int                openiccConfig_GetKeyNames (
     oyjl_val v = oyjl_value_pos_get( list, i );
     if(list->type == oyjl_t_object)
     {
-      if(alloc)
+      if(key_names)
         keys[pos] = openiccStringCopy( list->u.object.keys[i], alloc );
       pos++;
     }
