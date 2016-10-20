@@ -90,6 +90,10 @@ const char** const openiccConfigGetDeviceClasses (
                                        const char       ** device_classes,
                                        int               * count );
 
+int                openiccConfig_GetString (
+                                       openiccConfig_s   * config,
+                                       const char        * xpath,
+                                       const char       ** value );
 int                openiccConfig_GetKeyNames (
                                        openiccConfig_s   * config,
                                        const char        * xpath,

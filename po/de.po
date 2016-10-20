@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-10-19 10:00+0200\n"
+"POT-Creation-Date: 2016-10-20 08:51+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: vim 6.0\n"
 
-#: libopenicc/openicc_core.c:100
+#: libopenicc/openicc_core.c:124
 msgid "!!! ERROR"
 msgstr "!!! Fehler"
 
@@ -31,7 +31,7 @@ msgstr "Kann keinen Speicher reservieren"
 msgid "Could not find config"
 msgstr "Konnte Konfiguration nicht finden"
 
-#: libopenicc/openicc_db.c:179
+#: libopenicc/openicc_db.c:180
 msgid "Could not setup db objetc"
 msgstr "Konnte DB Objekt nicht erstellen"
 
@@ -39,7 +39,7 @@ msgstr "Konnte DB Objekt nicht erstellen"
 msgid "Paths:"
 msgstr "Pfade:"
 
-#: libopenicc/openicc_core.c:97
+#: libopenicc/openicc_core.c:121
 msgid "WARNING"
 msgstr "WARNUNG"
 

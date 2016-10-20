@@ -30,8 +30,10 @@
 
 #ifdef USE_NEW
 void* myAllocFunc(size_t size) { return new char [size]; }
+void  myDeAllocFunc(void* data) { delete data[]; }
 #else
 void* myAllocFunc(size_t size) { return calloc(size,1); }
+void  myDeAllocFunc(void* data) { free(data); }
 #endif
 
 #include <math.h>
@@ -633,6 +635,7 @@ oiTESTRESULT_e testConfig()
   size_t size = 0;
   int n = 0,i,error = 0;
   char ** key_names;
+  const char * base_key = "org/freedesktop/openicc/device/camera/[1]";
 
   fprintf(stdout, "\n" );
 
@@ -654,7 +657,7 @@ oiTESTRESULT_e testConfig()
     "config created                                 " );
   }
 
-  error = openiccConfig_GetKeyNames( config, "org/freedesktop/openicc/device/camera/[1]",
+  error = openiccConfig_GetKeyNames( config, base_key,
                                      myAllocFunc, &key_names, &n );
   if(n)
   { PRINT_SUB( oiTESTRESULT_SUCCESS, 
@@ -664,7 +667,21 @@ oiTESTRESULT_e testConfig()
     "openiccConfig_GetKeyNames()                    " );
   }
   for(i = 0; i < n; ++i)
-    fprintf(zout, "\tkey: %s\n", key_names[i] );
+  {
+    char * key = NULL;
+    const char * t = NULL;
+    openiccStringAddPrintf( &key, "%s/[%d]", base_key, i );
+    openiccConfig_GetString( config, key, &t );
+    if(!t)
+    { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "openiccConfig_GetString()                      " );
+    }
+    free( key );
+    fprintf(zout, "\t%s:\t\"%s\"\n", key_names[i]?key_names[i]:"????", t?t:"????" );
+    free( key_names[i] );
+  }
+
+  if( key_names ) myDeAllocFunc(key_names); key_names = NULL;
 
   openiccConfig_Release( &config );
 

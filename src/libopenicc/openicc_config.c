@@ -435,9 +435,10 @@ char *             openiccConfig_DeviceClassGet (
  *
  *  @param[in]     config              a data base entry object
  *  @param[in]     xpath               top key name to filter for
- *  @param[in]     alloc               user allocation function
- *  @param[out]    n                   number of found keys
- *  @param[out]    key_names           found keys
+ *  @param[in]     alloc               user allocation function; optional -
+ *                                     default: malloc
+ *  @param[out]    n                   number of found keys; optional
+ *  @param[out]    key_names           found keys; optional
  *  @return                            0 - success, >=1 - error, <0 - issue
  */
 int                openiccConfig_GetKeyNames (
@@ -447,11 +448,18 @@ int                openiccConfig_GetKeyNames (
                                        char            *** key_names,
                                        int               * n )
 {
-  int error = !config;
-  oyjl_val list = oyjl_tree_get_value( config->oyjl, xpath );
-  int count = oyjl_value_count( list ), i, pos = 0;
-  size_t size = sizeof(char*) * (count + 1);
+  int error = !config || !xpath;
+  oyjl_val list;
+  int count, i, pos = 0;
+  size_t size;
   char ** keys = NULL;
+
+  if(!error)
+  {
+    list = oyjl_tree_get_value( config->oyjl, xpath );
+    count = oyjl_value_count( list );
+    size = sizeof(char*) * (count + 1);
+  }
 
   if(!error)
     error = !list ? -1:0;
@@ -484,6 +492,50 @@ int                openiccConfig_GetKeyNames (
 
   if(n)
     *n = pos;
+
+  return error;
+}
+
+/**
+ *  @brief    get a value
+ *  @memberof openiccConfig_s
+ *
+ *  @param[in]     config              a data base entry object
+ *  @param[in]     xpath               top key name to filter for
+ *  @param[in]     alloc               user allocation function
+ *  @param[out]    value               found value
+ *  @return                            0 - success, >=1 - error, <0 - issue
+ */
+int                openiccConfig_GetString (
+                                       openiccConfig_s   * config,
+                                       const char        * xpath,
+                                       const char       ** value )
+{
+  int error = !config;
+  oyjl_val o;
+  const char * string = NULL;
+
+  if(error == 0)
+  {
+    o = oyjl_tree_get_value( config->oyjl, xpath );
+    error = !o ? -1:0;
+  }
+
+  if(error == 0)
+  {
+    switch(o->type)
+    {
+      case oyjl_t_string:
+        string = o->u.string; break;
+      case oyjl_t_number:
+        string = o->u.number.r; break;
+      default:
+        string = "no string or number"; break;
+    }
+  }
+
+  if(value)
+    *value = string;
 
   return error;
 }
