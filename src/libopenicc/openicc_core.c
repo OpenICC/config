@@ -277,15 +277,15 @@ int            openiccInit           ( void )
 #ifdef USE_GETTEXT
   if(!openicc_i18n_init)
   {
-    char * temp = 0;
+    char * var = 0;
     ++openicc_i18n_init;
 
     if(getenv("OI_LOCALEDIR") && strlen(getenv("OI_LOCALEDIR")))
       openicc_domain_path = strdup(getenv("OI_LOCALEDIR"));
 
-    openiccStringAdd_( &temp, "NLSPATH=");
-    openiccStringAdd_( &temp, openicc_domain_path);
-    putenv(temp); /* Solaris */
+    openiccStringAdd_( &var, "NLSPATH=");
+    openiccStringAdd_( &var, openicc_domain_path);
+    putenv(var); /* Solaris */
 
     bindtextdomain( "OpenICC", openicc_domain_path );
     if(openicc_debug)
