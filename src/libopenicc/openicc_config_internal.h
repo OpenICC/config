@@ -1,4 +1,5 @@
-/*  @file openicc_config_internal.h
+/** @internal
+ *  @file openicc_config_internal.h
  *
  *  libOpenICC - OpenICC Colour Management Configuration
  *
