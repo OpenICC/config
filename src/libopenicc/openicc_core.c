@@ -33,6 +33,27 @@ int openicc_backtrace = 0;
  *  @{
  */
 
+openiccOBJECT_e    openiccObjectToType(void              * contextObject )
+{
+  struct { openiccOBJECT_e type; } * x = contextObject;
+  if(x)
+    return x->type;
+  return openiccOBJECT_NONE;
+}
+
+const char *       openiccObjectTypeToString (
+                                       openiccOBJECT_e     type )
+{
+  const char * type_name = "unknown";
+  switch(type)
+  {
+    case openiccOBJECT_NONE: type_name = ""; break;
+    case openiccOBJECT_CONFIG: type_name = "openiccConfig_s"; break;
+    case openiccOBJECT_DB: type_name = "openiccDB_s"; break;
+  }
+  return type_name;
+}
+
 /** @fn        openiccMessageFormat
  *  @brief   default function to form a message string
  *
@@ -49,12 +70,13 @@ int openicc_backtrace = 0;
 int                openiccMessageFormat (
                                        char             ** message_text,
                                        int                 code,
-                                       openiccConfig_s   * context_object,
+                                       void              * context_object,
                                        const char        * string )
 {
   char * text = 0, * t = 0;
   int i;
-  const char * type_name = "";
+  openiccOBJECT_e type = openiccObjectToType( context_object );
+  const char * type_name = openiccObjectTypeToString( type );
 #ifdef HAVE_POSIX
   pid_t pid = 0;
 #else
@@ -63,14 +85,16 @@ int                openiccMessageFormat (
   FILE * fp = 0;
   const char * id_text = 0;
   char * id_text_tmp = 0;
-  openiccConfig_s * c = (openiccConfig_s*) context_object;
+  openiccConfig_s * c = NULL;
 
   if(code == openiccMSG_DBG && !openicc_debug)
     return 0;
 
+  if(type == openiccOBJECT_CONFIG)
+    c = (openiccConfig_s*) context_object;
+
   if(c)
   {
-    type_name = "openiccConfig_s";
     id_text = c->dbg_text;
     if(id_text)
       id_text_tmp = strdup(id_text);
@@ -149,7 +173,7 @@ int                openiccMessageFormat (
  *
  *  @param         code                a message code understood be your message
  *                                     handler or openiccMSG_e
- *  @param         context_object      a openiccConfig_s is expected
+ *  @param         context_object      a openicc object is expected
  *  @param         format              the text format string for following args
  *  @param         ...                 the variable args fitting to format
  *  @return                            0 - success; 1 - error
@@ -159,7 +183,7 @@ int                openiccMessageFormat (
  *  @since   2008/04/03 (OpenICC: 0.1.0)
  */
 int  openiccMessageFunc              ( openiccMSG_e        code,
-                                       openiccConfig_s   * context_object,
+                                       void              * context_object,
                                        const char        * format,
                                        ... )
 {

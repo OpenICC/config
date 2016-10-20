@@ -153,6 +153,7 @@ openiccDB_s * openiccDB_NewFrom      ( const char        * top_key_name,
 
   if(db)
   {
+    db->type = openiccOBJECT_DB;
     db->top_key_name = openiccStringCopy( top_key_name, malloc );
     db->scope = scope;
     db->ks_array_reserved_n = 10;
