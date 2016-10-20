@@ -47,5 +47,4 @@ Supported are autotools and cmake style builds.
 * The source code provides currently no mechanism for a write lock.
 
 ### TODO
-* XDG API exposure
-* cascading config files or keys
+* cascading config files or keys in openiccDB\_s
