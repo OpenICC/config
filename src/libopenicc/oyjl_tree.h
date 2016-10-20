@@ -65,6 +65,7 @@ typedef enum {
 typedef struct oyjl_val_s * oyjl_val;
 
 /**
+ * @internal
  * A JSON value representation capable of holding one of the seven
  * types above. For "string", "number", "object", and "array"
  * additional data is available in the union.  The "OYJL_IS_*"
@@ -103,6 +104,7 @@ struct oyjl_val_s
 };
 
 /**
+ * @internal
  * Parse a string.
  *
  * Parses an null-terminated string containing JSON data and returns a pointer
@@ -128,6 +130,7 @@ OYJL_API oyjl_val oyjl_tree_parse (const char *input,
                                    char *error_buffer, size_t error_buffer_size);
 
 /**
+ * @internal
  * Free a parse tree returned by "oyjl_tree_parse".
  *
  * \param v Pointer to a JSON value returned by "oyjl_tree_parse". Passing NULL
@@ -136,6 +139,7 @@ OYJL_API oyjl_val oyjl_tree_parse (const char *input,
 OYJL_API void oyjl_tree_free (oyjl_val v);
 
 /**
+ * @internal
  * Access a nested value inside a tree.
  *
  * \param parent the node under which you'd like to extract values.
@@ -163,25 +167,31 @@ OYJL_API oyjl_val oyjl_tree_get(oyjl_val parent, const char ** path, oyjl_type t
 #define OYJL_IS_NULL(v)   (((v) != NULL) && ((v)->type == oyjl_t_null  ))
 
 /** Given a oyjl_val_string return a ptr to the bare string it contains,
- *  or NULL if the value is not a string. */
+ *  or NULL if the value is not a string.
+ * @internal */
 #define OYJL_GET_STRING(v) (OYJL_IS_STRING(v) ? (v)->u.string : NULL)
 
 /** Get the string representation of a number.  You should check type first,
- *  perhaps using OYJL_IS_NUMBER */
+ *  perhaps using OYJL_IS_NUMBER
+ * @internal */
 #define OYJL_GET_NUMBER(v) ((v)->u.number.r)
 
 /** Get the double representation of a number.  You should check type first,
- *  perhaps using OYJL_IS_DOUBLE */
+ *  perhaps using OYJL_IS_DOUBLE
+ * @internal */
 #define OYJL_GET_DOUBLE(v) ((v)->u.number.d)
 
 /** Get the 64bit (long long) integer representation of a number.  You should
- *  check type first, perhaps using OYJL_IS_INTEGER */
+ *  check type first, perhaps using OYJL_IS_INTEGER
+ * @internal */
 #define OYJL_GET_INTEGER(v) ((v)->u.number.i)
 
-/** Get a pointer to a oyjl_val_object or NULL if the value is not an object. */
+/** Get a pointer to a oyjl_val_object or NULL if the value is not an object.
+ * @internal */
 #define OYJL_GET_OBJECT(v) (OYJL_IS_OBJECT(v) ? &(v)->u.object : NULL)
 
-/** Get a pointer to a oyjl_val_array or NULL if the value is not an object. */
+/** Get a pointer to a oyjl_val_array or NULL if the value is not an object.
+ * @internal */
 #define OYJL_GET_ARRAY(v)  (OYJL_IS_ARRAY(v)  ? &(v)->u.array  : NULL)
 
 void       oyjl_tree_to_json         ( oyjl_val            v,

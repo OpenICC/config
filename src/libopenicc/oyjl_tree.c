@@ -847,6 +847,7 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
 
 /** Function oyjl_tree_get_valuef
  *  @brief   get a child node
+ *  @internal
  *
  *  @param[in]     v                   the oyjl node
  *  @param[in]     format              the xpath format
