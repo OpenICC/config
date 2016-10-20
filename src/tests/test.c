@@ -723,7 +723,7 @@ oiTESTRESULT_e testDeviceJSON ()
   config = openiccConfig_FromMem( text );
   if(text) free(text);
   openiccConfig_SetInfo ( config, file_name );
-  devices_n = openiccConfig_CountDevices(config, NULL);
+  devices_n = openiccConfig_DevicesCount(config, NULL);
   fprintf( zout, "Found %d devices.\n", devices_n );
   if( devices_n )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
@@ -777,13 +777,13 @@ oiTESTRESULT_e testDeviceJSON ()
 
 
   /* we want a single device class DB for lets say cameras */
-  devices_n = openiccConfig_CountDevices(config, devices_filter);
+  devices_n = openiccConfig_DevicesCount(config, devices_filter);
   if( devices_n == 2 )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccConfig_CountDevices(%s) %d          ", OPENICC_DEVICE_CAMERA, devices_n );
+    "openiccConfig_DevicesCount(%s) %d          ", OPENICC_DEVICE_CAMERA, devices_n );
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
-    "openiccConfig_CountDevices()...                 " );
+    "openiccConfig_DevicesCount()...                 " );
   }
   old_device_class = NULL;
   for(i = 0; i < devices_n; ++i)
@@ -806,7 +806,7 @@ oiTESTRESULT_e testDeviceJSON ()
   config = openiccConfig_FromMem( full_json );
   openiccConfig_SetInfo ( config, "full_json" );
   if(full_json) free(full_json);
-  devices_n = openiccConfig_CountDevices(config, NULL);
+  devices_n = openiccConfig_DevicesCount(config, NULL);
   if( devices_n == 2 )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
     "openiccConfig_DeviceGetJSON()                     " );

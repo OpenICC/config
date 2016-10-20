@@ -261,7 +261,7 @@ int main(int argc, char ** argv)
       device_classes = openiccConfigGetDeviceClasses( device_classes,
                                                   &device_classes_n );
 
-    devices_n = openiccConfig_CountDevices(config, device_classes);
+    devices_n = openiccConfig_DevicesCount(config, device_classes);
     DBG( config, "Found %d devices.", devices_n );
   }
 
@@ -276,7 +276,7 @@ int main(int argc, char ** argv)
     config_new = openiccConfig_FromMem( text );
     if(text) free(text); text = NULL;
     openiccConfig_SetInfo ( config_new, file_name );
-    devices_new_n = openiccConfig_CountDevices(config_new, NULL);
+    devices_new_n = openiccConfig_DevicesCount(config_new, NULL);
     DBG( config_new, "Found %d devices.", devices_new_n );
     if(devices_new_n)
       list_devices = 1;
@@ -306,12 +306,12 @@ int main(int argc, char ** argv)
     {
       pos = -1;
 
-      n = openiccConfig_CountDevices(config, NULL);
+      n = openiccConfig_DevicesCount(config, NULL);
 
       for(j = 0; j < device_classes_n; ++j)
       {
         devices_filter[0] = device_classes[j];
-        devices_n = openiccConfig_CountDevices(config, devices_filter);
+        devices_n = openiccConfig_DevicesCount(config, devices_filter);
 
         for(i = 0; i < devices_n; ++i)
         {
@@ -334,7 +334,7 @@ int main(int argc, char ** argv)
           if(json) free(json); json = NULL;
         }
 
-        count = openiccConfig_CountDevices(config_new, devices_filter);
+        count = openiccConfig_DevicesCount(config_new, devices_filter);
         for(i = 0; i < count; ++i)
         {
           ++pos;

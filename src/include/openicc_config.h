@@ -59,13 +59,13 @@ openiccConfig_s  * openiccConfig_FromMem (
                                        const char        * data );
 void               openiccConfig_Release (
                                        openiccConfig_s  ** config );
-
-int                openiccConfig_CountDevices (
-                                       openiccConfig_s   * config,
-                                       const char       ** device_classes );
 void               openiccConfig_SetInfo (
                                        openiccConfig_s   * config,
                                        const char        * debug_info );
+
+int                openiccConfig_DevicesCount (
+                                       openiccConfig_s   * config,
+                                       const char       ** device_classes );
 const char *       openiccConfig_DeviceGet (
                                        openiccConfig_s   * config,
                                        const char       ** device_classes,
