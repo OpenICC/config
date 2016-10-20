@@ -9,11 +9,12 @@
  *  @par License:
  *            MIT http://www.opensource.org/licenses/mit-license.php
 
-    @par Internet:
-          https://github.com/OpenICC/config
-
     @author Kai-Uwe Behrmann and others
     @since  September 2011-2016
+
+    @par Development Sources:
+          https://github.com/OpenICC/config
+
 
     @n@n
     @section intro Introduction
