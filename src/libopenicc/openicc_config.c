@@ -502,7 +502,6 @@ int                openiccConfig_GetKeyNames (
  *
  *  @param[in]     config              a data base entry object
  *  @param[in]     xpath               top key name to filter for
- *  @param[in]     alloc               user allocation function
  *  @param[out]    value               found value
  *  @return                            0 - success, >=1 - error, <0 - issue
  */
@@ -536,6 +535,57 @@ int                openiccConfig_GetString (
 
   if(value)
     *value = string;
+
+  return error;
+}
+
+/**
+ *  @brief    get a value
+ *  @memberof openiccConfig_s
+ *
+ *  @param[in]     config              a data base entry object
+ *  @param[out]    value               found value
+ *  @param[in]     format              top key name to filter for
+ *
+ *  @return                            0 - success, >=1 - error, <0 - issue
+ */
+int                openiccConfig_GetStringf (
+                                       openiccConfig_s   * config,
+                                       const char       ** value,
+                                       const char        * format,
+                                       ... )
+{
+  int error;
+
+  char * text = 0;
+  va_list list;
+  int len;
+  size_t sz = strlen(format) * 2;
+
+  text = malloc( sz );
+  if(!text)
+  {
+    fprintf( stderr, "!!! ERROR: could not allocate memory\n" );
+    return 0;
+  }
+
+  text[0] = 0;
+
+  va_start( list, format);
+  len = vsnprintf( text, sz, format, list );
+  va_end  ( list );
+
+  if (len >= sz)
+  {
+    text = realloc( text, (len+1)*sizeof(char) );
+    va_start( list, format);
+    len = vsnprintf( text, len+1, format, list );
+    va_end  ( list );
+  }
+
+  error = openiccConfig_GetString( config, text, value );
+
+  if(text) free(text);
 
   return error;
 }

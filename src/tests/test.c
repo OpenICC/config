@@ -668,15 +668,12 @@ oiTESTRESULT_e testConfig()
   }
   for(i = 0; i < n; ++i)
   {
-    char * key = NULL;
     const char * t = NULL;
-    openiccStringAddPrintf( &key, "%s/[%d]", base_key, i );
-    openiccConfig_GetString( config, key, &t );
+    openiccConfig_GetStringf( config, &t, "%s/[%d]", base_key, i );
     if(!t)
     { PRINT_SUB( oiTESTRESULT_FAIL, 
     "openiccConfig_GetString()                      " );
     }
-    free( key );
     fprintf(zout, "\t%s:\t\"%s\"\n", key_names[i]?key_names[i]:"????", t?t:"????" );
     free( key_names[i] );
   }
