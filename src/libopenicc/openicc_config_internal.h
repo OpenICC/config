@@ -70,13 +70,21 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef enum {
+  openiccOBJECT_NONE,
+  openiccOBJECT_CONFIG = 312,
+  openiccOBJECT_DB
+} openiccOBJECT_e;
+
 struct openiccConfig_s {
+  openiccOBJECT_e type;
   char     * json_text;
   oyjl_val   oyjl;
   char     * dbg_text;
 };
 
 struct openiccDB_s {
+  openiccOBJECT_e type;
   openiccSCOPE_e   scope;
   char * top_key_name;
   openiccConfig_s ** ks;
@@ -96,7 +104,7 @@ char *       openiccStringCopy       ( const char        * text,
 
 extern openiccMessage_f     openiccMessage_p;
 int  openiccMessageFunc              ( openiccMSG_e        code,
-                                       openiccConfig_s   * context_object,
+                                       void              * context_object,
                                        const char        * format,
                                        ... );
 
