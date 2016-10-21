@@ -4,6 +4,7 @@
     @section text_contents Descriptive Contents
     @ref intro |
     @ref api |
+    @ref api_tutorial |
     @ref links
 
  *  @par License
@@ -26,6 +27,28 @@
     The OpenICC Configuration API is declared in the openicc_config.h and openicc_db.h header files.
     - @ref OpenICC_config - Configuration Access API
     - @ref path_names - Configuration Location API
+
+    @subsection api_tutorial Programming Tutorial
+    Frist you have to put a
+    @code
+    #include <openicc_config.h> @endcode
+    in your source text, in order to use the OpenICC Configuration API. 
+    @code
+    int main( int argc, char ** argv ) {
+      int openicc_version = openiccVersion( );
+      return 0;
+    }@endcode
+
+    Then you can put OpenICC functions in your code and compile with:
+    @verbatim
+    cc `pkg-config --cflags --libs openicc`  @endverbatim
+    to link OpenICC into your application.
+
+ */
+
+/**
+ *  @example openicc_config_read.c
+ *  This code sample will show how to handle device configurations from a JSON file.
  */
 
 /** \addtogroup OpenICC_config Configuration API
