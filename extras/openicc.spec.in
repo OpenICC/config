@@ -129,19 +129,19 @@ Header files, libraries and documentation for development.
 
 %files -f OpenICC.lang
 %defattr(-, root, root)
-%doc docs/AUTHORS docs/COPYING docs/ChangeLog README.md
+%doc docs/AUTHORS.md docs/COPYING.md docs/ChangeLog.md README.md
 %{_bindir}/%{name}-device
 #%{_mandir}/man1/%{name}-device*
 #%{pixmapdir}/openicc_logo.*
 
 %files -n lib%{name}0
 %defattr(-, root, root)
-%doc docs/AUTHORS docs/COPYING docs/ChangeLog README.md
+%doc docs/AUTHORS.md docs/COPYING.md docs/ChangeLog.md README.md
 %{_libdir}/libOpenICC.so.*
 
 %files -n lib%{name}-devel
 %defattr(-, root, root)
-%doc docs/AUTHORS docs/COPYING docs/ChangeLog README.md
+%doc docs/AUTHORS.md docs/COPYING.md docs/ChangeLog.md README.md
 %{_libdir}/libOpenICC.so
 %dir %{_includedir}/%{name}
 %{_includedir}/%{name}/*.h
