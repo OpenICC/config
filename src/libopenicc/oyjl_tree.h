@@ -187,6 +187,9 @@ OYJL_API oyjl_val oyjl_tree_get(oyjl_val parent, const char ** path, oyjl_type t
 void       oyjl_tree_to_json         ( oyjl_val            v,
                                        int               * level,
                                        char             ** json );
+void       oyjl_tree_to_xpath        ( oyjl_val            v,
+                                       int                 child_levels,
+                                       char            *** xpaths );
 char *     oyjl_value_text           ( oyjl_val            v,
                                        void*             (*alloc)(size_t size));
 oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
@@ -197,6 +200,9 @@ oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
 int            oyjl_value_count      ( oyjl_val            v );
 oyjl_val       oyjl_value_pos_get    ( oyjl_val            v,
                                        int                 pos );
+void       oyjl_string_list_release  ( char            *** l,
+                                       int                 size,
+                                       void              (*dealloc)(void*ptr));
 
 typedef enum {
   oyjl_message_info = 400 + yajl_status_ok,
