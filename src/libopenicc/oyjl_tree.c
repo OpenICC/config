@@ -925,7 +925,8 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
     return NULL;
 }
 
-/** Function oyjl_tree_get_valuef
+/** @internal
+ *  Function oyjl_tree_get_valuef
  *  @brief   get a child node
  *
  *  @param[in]     v                   the oyjl node

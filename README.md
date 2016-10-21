@@ -1,4 +1,5 @@
-# OpenICC [![Build Status](https://travis-ci.org/OpenICC/config.svg?branch=master)](https://travis-ci.org/OpenICC/config)
+# OpenICC Configuration README
+<a href="https://travis-ci.org/OpenICC/config"><img src="https://travis-ci.org/OpenICC/config.svg?branch=master"/></a> <a href="https://codedocs.xyz/OpenICC/config/"><img src="https://codedocs.xyz/OpenICC/config.svg"/></a>
 
 The OpenICC configuration data base allows to store, share and manipulate
 colour management informations.
@@ -47,5 +48,4 @@ Supported are autotools and cmake style builds.
 * The source code provides currently no mechanism for a write lock.
 
 ### TODO
-* XDG API exposure
-* cascading config files or keys
+* cascading config files or keys in openiccDB\_s

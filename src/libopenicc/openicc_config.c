@@ -90,6 +90,22 @@ void               openiccConfig_Release (
   }
 }
 
+/**
+ *  @brief   add a string for debugging and error messages
+ *  @memberof openiccConfig_s
+ */
+void               openiccConfig_SetInfo (
+                                       openiccConfig_s   * config,
+                                       const char        * debug_info )
+{
+  if(config && debug_info)
+  {
+    if(config->dbg_text)
+      free(config->dbg_text);
+    config->dbg_text = strdup( (char*)debug_info );
+  }
+}
+
 static const char * dev_cl[] = {
                 OPENICC_DEVICE_MONITOR,
                 OPENICC_DEVICE_SCANNER,
@@ -125,7 +141,7 @@ const char** const openiccConfigGetDeviceClasses (
  *  @param[in]     device_classes      the device class filter
  *  @return                            count of matching device configurations
  */
-int                openiccConfig_CountDevices (
+int                openiccConfig_DevicesCount (
                                        openiccConfig_s   * config,
                                        const char       ** device_classes )
 {
@@ -291,22 +307,6 @@ const char *       openiccConfig_DeviceGet (
   }
 
   return actual_device_class;
-}
-
-/**
- *  @brief   add a string for debugging and error messages
- *  @memberof openiccConfig_s
- */
-void               openiccConfig_SetInfo (
-                                       openiccConfig_s   * config,
-                                       const char        * debug_info )
-{
-  if(config && debug_info)
-  {
-    if(config->dbg_text)
-      free(config->dbg_text);
-    config->dbg_text = strdup( (char*)debug_info );
-  }
 }
 
 /**
