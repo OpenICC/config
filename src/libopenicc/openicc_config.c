@@ -435,6 +435,8 @@ char *             openiccConfig_DeviceClassGet (
  *
  *  @param[in]     config              a data base entry object
  *  @param[in]     xpath               top key name to filter for
+ *  @param[in]     child_levels        how deeply nested child levels are
+ *                                     desired; 0 - means all levels
  *  @param[in]     alloc               user allocation function; optional -
  *                                     default: malloc
  *  @param[out]    key_names           found full keys with path part; optional
@@ -444,65 +446,54 @@ char *             openiccConfig_DeviceClassGet (
 int                openiccConfig_GetKeyNames (
                                        openiccConfig_s   * config,
                                        const char        * xpath,
+                                       int                 child_levels,
                                        openiccAlloc_f      alloc,
                                        char            *** key_names,
                                        int               * n )
 {
   int error = !config || !xpath;
   oyjl_val list;
-  int count, i, pos = 0;
-  size_t size;
-  char ** keys = NULL;
+  int count = 0, i;
+  char ** keys = (char**)  calloc(sizeof(char*),2);
 
   if(!error)
-  {
     list = oyjl_tree_get_value( config->oyjl, xpath );
-    count = oyjl_value_count( list );
-    size = sizeof(char*) * (count + 1);
-  }
 
   if(!error)
     error = !list ? -1:0;
 
-  if(!alloc)
-    alloc = malloc;
-
-  if(key_names)
-  {
-    keys = alloc(size);
-    error = !keys;
-    if(!error)
-      memset( keys, 0, size );
-  }
-
-  if(error <= 0)
-  for( i = 0; i < count; ++i )
-  {
-    oyjl_val v = oyjl_value_pos_get( list, i );
-    if(list->type == oyjl_t_object)
-    {
-      if(key_names)
-      {
-        char * t = NULL;
-        openiccStringAddPrintf( &t,
-                                "%s%s%s", xpath,
-                                xpath[strlen(xpath)] == '/'?"":"/",
-                                list->u.object.keys[i] );
-        keys[pos] = openiccStringCopy( t, alloc );
-        if(t) free(t); t = NULL;
-      }
-      pos++;
-    }
-  }
-
-  if(key_names)
-    *key_names = keys;
+  keys[0] = openiccStringCopy( xpath, malloc );
+  oyjl_tree_to_xpath( list, child_levels, &keys );
 
   if(n)
-    *n = pos;
+  {
+    while(keys && keys[count]) ++count;
+    *n = count?count-1:0;
+  }
+
+  if(key_names && keys)
+  {
+    /* the first key comes from this function is is artifical: remove it */
+    free(keys[0]);
+    for(i=0; i < count-1; ++i)
+      keys[i] = keys[i+1];
+    keys[--count] = NULL;
+    if(alloc && alloc != malloc)
+    {
+      char ** l = (char**) alloc(sizeof(char*) * (count+1));
+      for(i=0; i < count; ++i)
+        l[i] = openiccStringCopy( keys[i], alloc );
+      oyjl_string_list_release( &keys, count, free );
+      keys = l;
+      l = NULL;
+    }
+    *key_names = keys;
+  } else
+    oyjl_string_list_release( &keys, count, free );
 
   return error;
 }
+
 
 /**
  *  @brief    get a value

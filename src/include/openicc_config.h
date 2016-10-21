@@ -60,6 +60,7 @@ openiccConfig_s  * openiccConfig_FromMem (
 void               openiccConfig_Release (
                                        openiccConfig_s  ** config );
 
+/* Device related APIs */
 int                openiccConfig_CountDevices (
                                        openiccConfig_s   * config,
                                        const char       ** device_classes );
@@ -90,6 +91,7 @@ const char** const openiccConfigGetDeviceClasses (
                                        const char       ** device_classes,
                                        int               * count );
 
+/* basic key/value APIs */
 int                openiccConfig_GetString (
                                        openiccConfig_s   * config,
                                        const char        * xpath,
@@ -108,6 +110,7 @@ int                openiccConfig_GetStrings (
 int                openiccConfig_GetKeyNames (
                                        openiccConfig_s   * config,
                                        const char        * xpath,
+                                       int                 child_levels,
                                        openiccAlloc_f      alloc,
                                        char            *** key_names,
                                        int               * n );
