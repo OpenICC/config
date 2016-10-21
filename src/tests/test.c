@@ -633,8 +633,8 @@ oiTESTRESULT_e testConfig()
   const char * file_name;
   char * text;
   size_t size = 0;
-  int n = 0,i,error = 0;
-  char ** key_names;
+  int key_names_n = 0, values_n = 0,i,error = 0;
+  char ** key_names, ** values;
   const char * base_key = "org/freedesktop/openicc/device/camera/[1]";
 
   fprintf(stdout, "\n" );
@@ -658,15 +658,28 @@ oiTESTRESULT_e testConfig()
   }
 
   error = openiccConfig_GetKeyNames( config, base_key,
-                                     myAllocFunc, &key_names, &n );
-  if(n)
+                                     myAllocFunc, &key_names, &key_names_n );
+  if(key_names_n)
   { PRINT_SUB( oiTESTRESULT_SUCCESS, 
-    "openiccConfig_GetKeyNames()                  %d", n );
+    "openiccConfig_GetKeyNames()                  %d", key_names_n );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL, 
     "openiccConfig_GetKeyNames()                    " );
   }
-  for(i = 0; i < n; ++i)
+
+  error = openiccConfig_GetStrings( config, key_names,
+                                    myAllocFunc, &values, &values_n );
+  i = 0;
+  while(values && values[i]) ++i;
+  if(key_names_n == values_n && values_n == i)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "openiccConfig_GetStrings()             %d==%d==%d", key_names_n,values_n,i );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "openiccConfig_GetStrings()             %d==%d==%d", key_names_n,values_n,i );
+  }
+
+  for(i = 0; i < key_names_n; ++i)
   {
     const char * t = NULL;
     openiccConfig_GetStringf( config, &t, "%s/[%d]", base_key, i );
@@ -675,10 +688,12 @@ oiTESTRESULT_e testConfig()
     "openiccConfig_GetString()                      " );
     }
     fprintf(zout, "\t%s:\t\"%s\"\n", key_names[i]?key_names[i]:"????", t?t:"????" );
-    free( key_names[i] );
+    myDeAllocFunc( key_names[i] );
+    if(values && values[i]) myDeAllocFunc(values[i]);
   }
 
   if( key_names ) myDeAllocFunc(key_names); key_names = NULL;
+  if( values ) myDeAllocFunc(values); values = NULL;
 
   openiccConfig_Release( &config );
 

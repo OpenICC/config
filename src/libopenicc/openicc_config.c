@@ -437,8 +437,8 @@ char *             openiccConfig_DeviceClassGet (
  *  @param[in]     xpath               top key name to filter for
  *  @param[in]     alloc               user allocation function; optional -
  *                                     default: malloc
+ *  @param[out]    key_names           found full keys with path part; optional
  *  @param[out]    n                   number of found keys; optional
- *  @param[out]    key_names           found keys; optional
  *  @return                            0 - success, >=1 - error, <0 - issue
  */
 int                openiccConfig_GetKeyNames (
@@ -482,7 +482,15 @@ int                openiccConfig_GetKeyNames (
     if(list->type == oyjl_t_object)
     {
       if(key_names)
-        keys[pos] = openiccStringCopy( list->u.object.keys[i], alloc );
+      {
+        char * t = NULL;
+        openiccStringAddPrintf( &t,
+                                "%s%s%s", xpath,
+                                xpath[strlen(xpath)] == '/'?"":"/",
+                                list->u.object.keys[i] );
+        keys[pos] = openiccStringCopy( t, alloc );
+        if(t) free(t); t = NULL;
+      }
       pos++;
     }
   }
@@ -501,8 +509,8 @@ int                openiccConfig_GetKeyNames (
  *  @memberof openiccConfig_s
  *
  *  @param[in]     config              a data base entry object
- *  @param[in]     xpath               top key name to filter for
- *  @param[out]    value               found value
+ *  @param[in]     xpath               key name to ask for
+ *  @param[out]    value               found value; optional
  *  @return                            0 - success, >=1 - error, <0 - issue
  */
 int                openiccConfig_GetString (
@@ -510,7 +518,7 @@ int                openiccConfig_GetString (
                                        const char        * xpath,
                                        const char       ** value )
 {
-  int error = !config;
+  int error = !config || !xpath;
   oyjl_val o;
   const char * string = NULL;
 
@@ -545,7 +553,7 @@ int                openiccConfig_GetString (
  *
  *  @param[in]     config              a data base entry object
  *  @param[out]    value               found value
- *  @param[in]     format              top key name to filter for
+ *  @param[in]     format              full key name to ask for
  *
  *  @return                            0 - success, >=1 - error, <0 - issue
  */
@@ -589,6 +597,72 @@ int                openiccConfig_GetStringf (
 
   return error;
 }
+
+/**
+ *  @brief    get a set of values
+ *  @memberof openiccConfig_s
+ *
+ *  @param[in]     config              a data base entry object
+ *  @param[in]     xpaths              key names to use
+ *  @param[in]     alloc               user allocation function; optional -
+ *                                     default: malloc
+ *  @param[out]    values              found values; optional
+ *  @param[out]    n                   number of found values; optional
+ *
+ *  @return                            0 - success, >=1 - error, <0 - issue
+ */
+int                openiccConfig_GetStrings (
+                                       openiccConfig_s   * config,
+                                       const char       ** xpaths,
+                                       openiccAlloc_f      alloc,
+                                       char            *** values,
+                                       int               * n )
+{
+  int error = !config || !xpaths;
+  int count = 0, i, pos = 0;
+  size_t size;
+  char ** vals = NULL;
+
+  if(!error)
+  {
+    count = 0;
+    while(xpaths[count]) ++count;
+    size = sizeof(char*) * (count + 1);
+  }
+
+  if(!alloc)
+    alloc = malloc;
+
+  if(count)
+  {
+    vals = alloc(size);
+    error = !vals;
+    if(!error)
+      memset( vals, 0, size );
+  }
+
+  if(error <= 0)
+  for( i = 0; i < count; ++i )
+  {
+    const char * t = NULL;
+    error = openiccConfig_GetString( config, xpaths[i], &t );
+    if(t)
+    {
+      if(values)
+        vals[pos] = openiccStringCopy( t, alloc );
+      pos++;
+    }
+  }
+
+  if(values)
+    *values = vals;
+
+  if(n)
+    *n = pos;
+
+  return error;
+}
+
 
 /** \addtogroup path_names
  *  @{

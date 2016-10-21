@@ -99,6 +99,12 @@ int                openiccConfig_GetStringf (
                                        const char       ** value,
                                        const char        * xpath_format,
                                        ... );
+int                openiccConfig_GetStrings (
+                                       openiccConfig_s   * config,
+                                       const char       ** xpaths,
+                                       openiccAlloc_f      alloc,
+                                       char            *** values,
+                                       int               * n );
 int                openiccConfig_GetKeyNames (
                                        openiccConfig_s   * config,
                                        const char        * xpath,
