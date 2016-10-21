@@ -44,6 +44,30 @@
     cc `pkg-config --cflags --libs openicc`  @endverbatim
     to link OpenICC into your application.
 
+    The following examples gives more details about parsing JSON and get
+    structured key/value device configurations.
+
+    @dontinclude openicc_config_read.c
+    First we init language:
+    @skip LC_ALL
+    @until openiccInit
+
+    Then we need to read the JSON by whatever is appropriate and start parsing JSON:
+    @skipline openiccConfig_FromMem
+
+    Providing debug infos is good behaviour and then the number of devices are available:
+    @skip openiccConfig_SetInfo
+    @until openiccConfig_DevicesCount
+
+    key/values pairs can be printed with openiccConfig_DeviceGet() or dumped again as JSON:
+    @skip print all
+    @until old_device_class
+
+    For a complete device class the JSON head and trail needs to be masked out appropriately:
+    @skip single device class
+    @until openiccConfig_Release
+
+    The complete code can be found in @ref openicc_config_read.c
  */
 
 /**
