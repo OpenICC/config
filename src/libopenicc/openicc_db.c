@@ -74,6 +74,9 @@ int      openiccArray_Push           ( openiccArray_s    * array )
   return openiccArray_Add( array, 1 );
 }
 
+/** \addtogroup OpenICC_config
+ *  @{
+ */
 
 /**
  *  @internal
@@ -211,3 +214,115 @@ void     openiccDB_Release           ( openiccDB_s      ** db )
   }
 }
 
+/**
+ *  @brief    get a value
+ *  @memberof openiccConfig_s
+ *
+ *  @param[in]     db                  a data base object
+ *  @param[in]     xpath               key name to ask for
+ *  @param[out]    value               found value; optional
+ *  @return                            0 - success, >=1 - error, <0 - issue
+ */
+int                openiccDB_GetString (
+                                       openiccDB_s       * db,
+                                       const char        * xpath,
+                                       const char       ** value )
+{
+  int error = !db || !xpath;
+
+  if(error == 0)
+  {
+    int count = openiccArray_Count( (openiccArray_s*)&db->ks ), i;
+    for(i = 0; i < count; ++i)
+    {
+      error = openiccConfig_GetString( db->ks[i], xpath, value );
+      if(error == 0) break;
+    }
+  }
+
+  return error;
+}
+
+/**
+ *  @brief    get a filtered list of key names
+ *  @memberof openiccDB_s
+ *
+ *  @param[in]     db                  a data base object
+ *  @param[in]     xpath               top key name to filter for
+ *  @param[in]     child_levels        how deeply nested child levels are
+ *                                     desired; 0 - means all levels
+ *  @param[in]     alloc               user allocation function; optional -
+ *                                     default: malloc
+ *  @param[out]    key_names           found full keys with path part; optional
+ *  @param[out]    n                   number of found keys; optional
+ *  @return                            0 - success, >=1 - error, <0 - issue
+ */
+int                openiccDB_GetKeyNames (
+                                       openiccDB_s       * db,
+                                       const char        * xpath,
+                                       int                 child_levels,
+                                       openiccAlloc_f      alloc,
+                                       openiccDeAlloc_f    dealloc,
+                                       char            *** key_names,
+                                       int               * n )
+{
+  int error = !db || !xpath;
+
+  if(!error)
+  {
+    int count = openiccArray_Count( (openiccArray_s*)&db->ks ), i;
+    char ** ks = NULL;
+    int     ks_n = 0;
+    for(i = 0; i < count; ++i)
+    {
+      char ** ks_tmp = NULL;
+      int     ks_tmp_n = 0;
+      
+      error = openiccConfig_GetKeyNames( db->ks[i], xpath, child_levels, alloc, key_names?&ks_tmp:NULL, &ks_tmp_n );
+      oyjl_string_list_add_list( &ks, &ks_n, (const char **)ks_tmp, ks_tmp_n,
+                                 alloc, dealloc );
+      oyjl_string_list_release( &ks_tmp, ks_tmp_n, dealloc );
+      oyjl_string_list_free_doubles( ks, &ks_n, dealloc );
+    }
+
+    if(key_names)
+      *key_names = ks;
+    if(n) *n = ks_n;
+  }
+
+  return error;
+}
+
+/**
+ *  @brief    get a plain key name
+ *
+ *  This function takes in a key of pattern:
+ *  "path1/path2/key.attribute" and returns a pure key: "key" without path
+ *  parts or attributes.
+ *
+ *  @param[in]     key                 a key name string
+ *  @param[in]     temp                a temporary string to be freed by the user
+ *  @return                            the short key name
+ */
+const char * openiccGetShortKeyFromFullKeyPath( const char * key, char ** temp )
+{
+  /* key starts after the path */
+  const char * key_short = strrchr( key, '/' ),
+             * k;
+  char * k_temp = NULL;
+  if(key_short) ++key_short; else key_short = key;
+  /* The key ends with before '.', which are essentially attributes, 
+   *  or end of string. Cut '.' parts off. */
+  k = strchr( key_short, '.' );
+  if(k)
+  {
+    k_temp = openiccStringCopy( key_short, malloc );
+    k_temp[strlen(key_short) - strlen(k)] = '\000';
+    key_short = k_temp;
+  }
+  *temp = k_temp;
+  return key_short;
+}
+
+
+/*  @} *//* OpenICC_config */
