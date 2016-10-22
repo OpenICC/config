@@ -666,6 +666,7 @@ oiTESTRESULT_e testConfig()
     "config created                                 " );
   }
 
+  /* Get key names below some point in the JSON tree. */
   error = openiccConfig_GetKeyNames( config, base_key, 0,
                                      myAllocFunc, &key_names, &key_names_n );
   if(key_names_n)
@@ -676,6 +677,7 @@ oiTESTRESULT_e testConfig()
     "openiccConfig_GetKeyNames()                    " );
   }
 
+  /* Get values for the above key names. */
   error = openiccConfig_GetStrings( config, (const char **)key_names,
                                     myAllocFunc, &values, &values_n );
   i = 0;
@@ -690,6 +692,9 @@ oiTESTRESULT_e testConfig()
 
   for(i = 0; i < key_names_n; ++i)
   {
+    /* Get a single value from the config object by conviniently contructing
+     * the key name.
+     */
     const char * t = NULL;
     openiccConfig_GetStringf( config, &t, "%s/[%d]", base_key, i );
     if(!t)

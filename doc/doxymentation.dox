@@ -74,6 +74,12 @@
  *  @example openicc_config_read.c
  *  This code sample will show how to handle device configurations from a JSON file.
  */
+/**
+ *  @example test.c
+ *  This code is used for testing API and can show use cases at the same time.
+ *  Be careful to only use the publicly declared and cross referenced APIs.
+ *  Some APIs are internal only.
+ */
 
 /** \addtogroup OpenICC_config Configuration API
  *
