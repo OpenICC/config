@@ -956,7 +956,7 @@ oiTESTRESULT_e testODB()
   oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
   openiccSCOPE_e scope = openiccSCOPE_USER_SYS;
   const char * top_key_name = OPENICC_DEVICE_PATH;
-  openiccDB_s * db = openiccDB_NewFrom( top_key_name, scope );
+  openiccDB_s * db;
   const char * key = "org/freedesktop/openicc/device/camera/[0]/key";
   char * temp;
   char ** key_names = NULL, ** values = NULL;
@@ -964,6 +964,7 @@ oiTESTRESULT_e testODB()
 
   fprintf(stdout, "\n" );
 
+  db = openiccDB_NewFrom( top_key_name, scope );
   if(db)
   { PRINT_SUB( oiTESTRESULT_SUCCESS, 
     "db created                                     " );
@@ -971,6 +972,38 @@ oiTESTRESULT_e testODB()
   { PRINT_SUB( oiTESTRESULT_FAIL, 
     "db created                                     " );
   }
+
+  error = openiccDB_GetKeyNames( db, "org", 0,
+                                 myAllocFunc, myDeAllocFunc,
+                                 NULL, &key_names_n );
+  if(!key_names_n)
+  {
+    const char * db_file = oiGetConfigFileName();
+
+    /* read JSON input file */
+    size_t size = 0;
+    char * text = openiccOpenFile( db_file, &size );
+
+    /* parse JSON */
+    if(text)
+    {
+      int count = openiccArray_Count( &db->ks );
+      openiccConfig_s * config = openiccConfig_FromMem( text );
+      if(text) free(text); text = NULL;
+      openiccConfig_SetInfo ( config, db_file );
+
+      /* reserve enough memory in list array */
+      if( openiccArray_Push( &db->ks ))
+      {
+        ERRc_S("%s", _("Could not alloc memory") );
+        return 1;
+      }
+
+      /* add new config to db */
+      db->ks[count] = config;
+    }
+  }
+
 
   key = openiccGetShortKeyFromFullKeyPath( key, &temp );
   if(strcmp(key,"key") == 0 && !temp)
