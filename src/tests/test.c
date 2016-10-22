@@ -950,12 +950,17 @@ oiTESTRESULT_e testXDG()
 }
 
 #include "openicc_db.h"
+const char * openiccGetShortKeyFromFullKeyPath( const char * key, char ** temp );
 oiTESTRESULT_e testODB()
 {
   oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
   openiccSCOPE_e scope = openiccSCOPE_USER_SYS;
   const char * top_key_name = OPENICC_DEVICE_PATH;
   openiccDB_s * db = openiccDB_NewFrom( top_key_name, scope );
+  const char * key = "org/freedesktop/openicc/device/camera/[0]/key";
+  char * temp;
+  char ** key_names = NULL, ** values = NULL;
+  int key_names_n = 0, values_n = 0,i,error = 0;
 
   fprintf(stdout, "\n" );
 
@@ -966,6 +971,88 @@ oiTESTRESULT_e testODB()
   { PRINT_SUB( oiTESTRESULT_FAIL, 
     "db created                                     " );
   }
+
+  key = openiccGetShortKeyFromFullKeyPath( key, &temp );
+  if(strcmp(key,"key") == 0 && !temp)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "openiccGetShortKeyFromFullKeyPath(xxx/key)    \"%s\"", key );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "openiccGetShortKeyFromFullKeyPath(xxx/key)    \"%s\"", key );
+  }
+
+  key = openiccGetShortKeyFromFullKeyPath( "key", &temp );
+  if(strcmp(key,"key") == 0 && !temp)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "openiccGetShortKeyFromFullKeyPath(key)        \"%s\"", key );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "openiccGetShortKeyFromFullKeyPath(key)        \"%s\"", key );
+  }
+
+  key = openiccGetShortKeyFromFullKeyPath( "key.attribute", &temp );
+  if(strcmp(key,"key") == 0 && temp)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "openiccGetShortKeyFromFullKeyPath(key.ignore) \"%s\"", key );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "openiccGetShortKeyFromFullKeyPath(key.ignore) \"%s\"", key );
+  }
+  if(temp) free(temp);
+
+  key = openiccGetShortKeyFromFullKeyPath( "path/key.attribute", &temp );
+  if(strcmp(key,"key") == 0 && temp)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "openiccGetShortKeyFromFullKeyPath(path/key.ignore)" );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "openiccGetShortKeyFromFullKeyPath(path/key.ignore)\"%s\"", key );
+  }
+  if(temp) free(temp);
+
+  /* Get key names below some point in the JSON trees. */
+  error = openiccDB_GetKeyNames( db, "org", 0,
+                                 myAllocFunc, myDeAllocFunc,
+                                 &key_names, &key_names_n );
+  if(key_names_n)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccDB_GetKeyNames()                      %d", key_names_n );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccDB_GetKeyNames()                        " );
+  }
+
+  /* Get values for the above key names. */
+  /*error = openiccDB_GetStrings( config, (const char **)key_names,
+                                    myAllocFunc, &values, &values_n );
+  i = 0;
+  while(values && values[i]) ++i;
+  if(key_names_n == values_n && values_n == i)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccConfig_GetStrings()             %d==%d==%d", key_names_n,values_n,i );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccConfig_GetStrings()             %d==%d==%d", key_names_n,values_n,i );
+  }*/
+
+  for(i = 0; i < key_names_n; ++i)
+  {
+    /* Get a single value from the config object by conviniently contructing
+     * the key name.
+     */
+    const char * t = "";
+    //openiccConfig_GetStringf( config, &t, "%s/[%d]", base_key, i );
+    if(!t)
+    { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccConfig_GetString()                      " );
+    }
+    fprintf(zout, "\t%s:\t\"%s\"\n", key_names[i]?key_names[i]:"????", t?t:"????" );
+    myDeAllocFunc( key_names[i] );
+    if(values && values[i]) myDeAllocFunc(values[i]);
+  }
+
+  if( key_names ) myDeAllocFunc(key_names); key_names = NULL;
+  if( values ) myDeAllocFunc(values); values = NULL;
 
   openiccDB_Release( &db );
 
