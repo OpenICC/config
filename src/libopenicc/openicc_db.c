@@ -278,15 +278,20 @@ int                openiccDB_GetKeyNames (
       char ** ks_tmp = NULL;
       int     ks_tmp_n = 0;
       
-      error = openiccConfig_GetKeyNames( db->ks[i], xpath, child_levels, alloc, key_names?&ks_tmp:NULL, &ks_tmp_n );
-      oyjl_string_list_add_list( &ks, &ks_n, (const char **)ks_tmp, ks_tmp_n,
-                                 alloc, dealloc );
-      oyjl_string_list_release( &ks_tmp, ks_tmp_n, dealloc );
-      oyjl_string_list_free_doubles( ks, &ks_n, dealloc );
+      error = openiccConfig_GetKeyNames( db->ks[i], xpath, child_levels, alloc, &ks_tmp, &ks_tmp_n );
+      if(ks_tmp)
+      {
+        oyjl_string_list_add_list( &ks, &ks_n, (const char **)ks_tmp, ks_tmp_n,
+                                   alloc, dealloc );
+        oyjl_string_list_release( &ks_tmp, ks_tmp_n, dealloc );
+        oyjl_string_list_free_doubles( ks, &ks_n, dealloc );
+      }
     }
 
     if(key_names)
       *key_names = ks;
+    else
+      oyjl_string_list_release( &ks, ks_n, dealloc );
     if(n) *n = ks_n;
   }
 
