@@ -1041,12 +1041,12 @@ oiTESTRESULT_e testODB()
      * the key name.
      */
     const char * t = "";
-    //openiccConfig_GetStringf( config, &t, "%s/[%d]", base_key, i );
-    if(!t)
+    error = openiccDB_GetString( db, key_names[i], &t );
+    if(error)
     { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccConfig_GetString()                      " );
     }
-    fprintf(zout, "\t%s:\t\"%s\"\n", key_names[i]?key_names[i]:"????", t?t:"????" );
+    fprintf(zout, "\t%s:\t\"%s\"\n", key_names[i]?key_names[i]:"????", t?t:"" );
     myDeAllocFunc( key_names[i] );
     if(values && values[i]) myDeAllocFunc(values[i]);
   }

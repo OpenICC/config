@@ -528,7 +528,7 @@ int                openiccConfig_GetString (
       case oyjl_t_number:
         string = o->u.number.r; break;
       default:
-        string = "no string or number"; break;
+        string = NULL; break;
     }
   }
 
