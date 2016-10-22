@@ -78,7 +78,7 @@ typedef struct oyjl_val_s * oyjl_val;
 struct oyjl_val_s
 {
     /** @internal
-     *  Type of the value contained. Use the "OYJL_IS_*" macors to check for a
+     *  Type of the value contained. Use the "OYJL_IS_*" macros to check for a
      * specific type. */
     oyjl_type type;
     /** @internal
@@ -90,10 +90,10 @@ struct oyjl_val_s
         struct {
             long long i; /*< integer value, if representable. */
             double  d;   /*< double value, if representable. */
+            char   *r;   /*< unparsed number in string form. */
             /** Signals whether the \em i and \em d members are
              * valid. See \c OYJL_NUMBER_INT_VALID and
              * \c OYJL_NUMBER_DOUBLE_VALID. */
-            char   *r;   /*< unparsed number in string form. */
             unsigned int flags;
         } number;
         struct {
@@ -152,7 +152,7 @@ OYJL_API void oyjl_tree_free (oyjl_val v);
  * \param type the oyjl_type of the object you seek, or oyjl_t_any if any will do.
  *
  * \returns a pointer to the found value, or NULL if we came up empty.
- * 
+ *
  * Future Ideas:  it'd be nice to move path to a string and implement support for
  * a teeny tiny micro language here, so you can extract array elements, do things
  * like .first and .last, even .length.  Inspiration from JSONPath and css selectors?
@@ -218,6 +218,16 @@ oyjl_val       oyjl_value_pos_get    ( oyjl_val            v,
 void       oyjl_string_list_release  ( char            *** l,
                                        int                 size,
                                        void              (*dealloc)(void*ptr));
+void       oyjl_string_list_free_doubles (
+                                       char             ** list,
+                                       int               * list_n,
+                                       void              (*dealloc)(void*ptr) );
+void       oyjl_string_list_add_list ( char            *** list,
+                                       int               * n,
+                                       const char       ** append,
+                                       int                 n_app,
+                                       void*             (*alloc)(size_t size),
+                                       void              (*dealloc)(void*ptr) );
 
 typedef enum {
   oyjl_message_info = 400 + yajl_status_ok,

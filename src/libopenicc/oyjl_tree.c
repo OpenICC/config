@@ -319,6 +319,8 @@ static int handle_number (void *ctx, const char *string, unsigned int string_len
     v->u.number.flags = 0;
 
     errno = 0;
+    /*v->u.number.i = yajl_parse_integer((const unsigned char *) v->u.number.r,
+                                       strlen(v->u.number.r));*/
     v->u.number.i = strtol(v->u.number.r, 0, 10);
     if (errno == 0)
         v->u.number.flags |= OYJL_NUMBER_INT_VALID;
@@ -1030,7 +1032,9 @@ void oyjl_tree_free (oyjl_val v)
 /* rename some symbols */
 #define oyStringListAppend_          oyjlStringListAppend
 #define oyStringListRelease_         oyjl_string_list_release
+#define oyStringListFreeDoubles_     oyjl_string_list_free_doubles
 #define oyStringListAddStaticString_ oyjl_string_list_add_static_string
+#define oyStringListAdd_             oyjl_string_list_add_list
 char**             oyStringListAppend_( const char   ** list,
                                         int             n_alt,
                                         const char   ** append,
@@ -1098,6 +1102,63 @@ void               oyStringListAddStaticString_ ( char *** list,
   int alt_n = *n;
   char ** tmp = oyStringListAppend_((const char**)*list, alt_n,
                                     (const char**)&string, 1,
+                                     n, allocateFunc);
+
+  oyStringListRelease_(list, alt_n, deallocateFunc);
+
+  *list = tmp;
+}
+
+/** @internal
+ *  @brief filter doubles out
+ *
+ *  @version Oyranos: 0.9.6
+ *  @date    2015/08/04
+ *  @since   2015/08/04 (Oyranos: 0.9.6)
+ */
+void oyStringListFreeDoubles_        ( char         ** list,
+                                       int           * list_n,
+                                       oyDeAlloc_f     deallocateFunc )
+{
+  int n = *list_n,
+      i,
+      pos = n ? 1 : 0;
+
+  if(!deallocateFunc) deallocateFunc = oyDeAllocateFunc_;
+
+  for(i = pos; i < n; ++i)
+  {
+    int k, found = 0;
+    for( k = 0; k < i; ++k )
+      if(list[i] && list[k] && strcmp(list[i], list[k]) == 0)
+      {
+        deallocateFunc( list[i] );
+        list[i] = NULL;
+        found = 1;
+        continue;
+      }
+
+    if(found == 0)
+    {
+      list[pos] = list[i];
+      ++pos;
+    }
+  }
+
+  *list_n = pos;
+}
+void               oyStringListAdd_  ( char            *** list,
+                                       int               * n,
+                                       const char       ** append,
+                                       int                 n_app,
+                                       oyAlloc_f           allocateFunc,
+                                       oyDeAlloc_f         deallocateFunc )
+{
+  int alt_n = 0;
+  char ** tmp;
+
+  if(n) alt_n = *n;
+  tmp = oyStringListAppend_((const char**)*list, alt_n, append, n_app,
                                      n, allocateFunc);
 
   oyStringListRelease_(list, alt_n, deallocateFunc);
