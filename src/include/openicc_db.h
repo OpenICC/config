@@ -29,19 +29,26 @@ typedef struct openiccDB_s openiccDB_s;
 openiccDB_s * openiccDB_NewFrom      ( const char        * top_key_name,
                                        openiccSCOPE_e      scope );
 void     openiccDB_Release           ( openiccDB_s      ** db );
-char *   openiccDB_GetString         ( openiccDB_s       * db,
-                                       const char        * key_name );
+int      openiccDB_GetString         ( openiccDB_s       * db,
+                                       const char        * xpath,
+                                       const char       ** value );
 int      openiccDB_GetStrings        ( openiccDB_s       * db,
                                        const char       ** key_names,
                                        char            *** values,
                                        openiccAlloc_f      allocFunc );
-char **  openiccDB_GetKeyNames       ( openiccDB_s       * db,
-                                       const char        * key_name,
-                                       int               * n );
-char **  openiccDB_GetKeyNamesOneLevel(openiccDB_s       * db,
-                                       const char        * key_name,
+int      openiccDB_GetKeyNames       ( openiccDB_s       * db,
+                                       const char        * xpath,
+                                       int                 child_levels,
+                                       openiccAlloc_f      alloc,
+                                       openiccDeAlloc_f    dealloc,
+                                       char            *** key_names,
                                        int               * n );
   
+/* key manipulation */
+const char * openiccGetShortKeyFromFullKeyPath( 
+                                       const char        * key,
+                                       char             ** temp );
+
 /* DB key wrappers */
 int      openiccDBSetString_         ( const char        * keyName,
                                        openiccSCOPE_e      scope,
