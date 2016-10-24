@@ -14,7 +14,7 @@ script:
   - make check
   - if [[ "$CC" == "gcc" ]]; then
       make coverage;
-      bash -v <(curl -s https://codecov.io/bash);
+      bash -v -p ../config <(curl -s https://codecov.io/bash);
     fi
 
 before_install:
