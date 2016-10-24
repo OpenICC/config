@@ -14,12 +14,9 @@ script:
   - make check
   - if [[ "$CC" == "gcc" ]]; then
       make coverage;
+      bash <(curl -s https://codecov.io/bash);
     fi
 
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y locales cmake pkg-config libyajl-dev gettext valgrind icc-profiles-free lcov
-after_success:
-  - if [[ "$CC" == "gcc" ]]; then
-      bash <(curl -s https://codecov.io/bash);
-    fi
