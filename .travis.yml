@@ -14,6 +14,9 @@ script:
   - make check
   - if [[ "$CC" == "gcc" ]]; then
       bash <(curl -s https://codecov.io/bash);
+      bash <(curl -s https://codecov.io/bash) -G "-o src/ src/*.c";
+      bash <(curl -s https://codecov.io/bash) -G "-o ../config/src/ ../config/src/*.c";
+      bash <(curl -s https://codecov.io/bash) -G "-o src/libopenicc/ src/libopenicc/*.c";
     fi
 
 before_install:
