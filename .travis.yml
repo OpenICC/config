@@ -15,6 +15,6 @@ script:
   - make coverage
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y locales cmake pkg-config libyajl-dev gettext valgrind icc-profiles-free
+  - sudo apt-get install -y locales cmake pkg-config libyajl-dev gettext valgrind icc-profiles-free lcov
 after_success:
   - bash <(curl -s https://codecov.io/bash)
