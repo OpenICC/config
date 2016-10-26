@@ -283,3 +283,16 @@ void     oyjl_string_list_add_list   ( char            *** list,
   *list = tmp;
 }
 
+
+/* show better const behaviour and return instant error status */
+int      oyjl_string_to_long         ( const char        * text,
+                                       long              * value )
+{
+  char * end = 0;
+  *value = strtol( text, &end, 0 );
+  if(end && end != text && end[0] == '\000' )
+    return 0;
+  else
+    return 1;
+}
+

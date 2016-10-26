@@ -252,6 +252,8 @@ void       oyjl_string_list_add_static_string (
                                        const char        * string,
                                        void*            (* alloc)(size_t),
                                        void             (* deAlloc)(void*) );
+int        oyjl_string_to_long       ( const char        * text,
+                                       long              * value );
 
 typedef enum {
   oyjl_message_info = 400 + yajl_status_ok,

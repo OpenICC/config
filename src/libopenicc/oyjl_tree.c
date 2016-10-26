@@ -742,6 +742,44 @@ oyjl_val       oyjl_value_pos_get    ( oyjl_val            v,
   return NULL;
 }
 
+int        oyjl_tree_get_index       ( const char        * term,
+                                       int               * index )
+{
+  char * tindex = strrchr(term,'['),
+       * ttmp = NULL;
+  int pos = -1;
+  int error = -1;
+
+  if(tindex != NULL)
+  {
+    ptrdiff_t size;
+    ++tindex;
+    size = strrchr(term,']') - tindex;
+    if(size > 0)
+    {
+      long signed int num = 0;
+      ttmp = malloc(size + 1);
+      memcpy( ttmp, tindex, size );
+      ttmp[size] = '\000';
+
+      error = oyjl_string_to_long( ttmp, &num );
+      if(!error)
+        pos = num;
+
+      size = strrchr(term,'[') - term;
+      memcpy( ttmp, term, size );
+      ttmp[size] = '\000';
+      term = ttmp;
+    }
+  }
+
+  *index = pos;
+
+  if(ttmp)
+    free( ttmp );
+
+  return error;
+}
 
 oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
                                        const char        * xpath )
@@ -752,45 +790,26 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
 
   /* follow the search path term */
   level = v;
-  found = n;
   for(i = 0; i < n; ++i)
   {
-    char * term = list[i],
-         * tindex = strrchr(term,'['),
-         * ttmp = NULL;
+    char * term = list[i];
     int count = oyjl_value_count( level );
     int j;
     int pos = -1;
+    int is_no_pos = 0;
 
-    
-    if(tindex != NULL)
-    {
-      ptrdiff_t size;
-      ++tindex;
-      size = strrchr(term,']') - tindex;
-      if(size > 0)
-      {
-        ttmp = malloc(size + 1);
-        memcpy( ttmp, tindex, size );
-        ttmp[size] = '\000';
-        pos = atoi(ttmp);
-        size = strrchr(term,'[') - term;
-        memcpy( ttmp, term, size );
-        ttmp[size] = '\000';
-        term = ttmp;
-      }
-    }
+    is_no_pos = oyjl_tree_get_index( term, &pos );
 
-    if(found == 0) break;
     found = 0;
 
-    if(!(term && term[0]) && pos != -1)
+    if(is_no_pos == 0 && pos != -1)
     {
       level = oyjl_value_pos_get( level, pos );
       found = 1;
-    } else
-    for(j = 0; j < count; ++j)
-    {
+    }
+    else
+      for(j = 0; j < count; ++j)
+      {
         if(term &&
            strcmp( level->u.object.keys[j], term ) == 0)
         {
@@ -802,10 +821,7 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
             break;
           }
         }
-    }
-
-    if(ttmp)
-      free( ttmp );
+      }
   }
 
   /* clean up temorary memory */
