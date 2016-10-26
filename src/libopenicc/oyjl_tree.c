@@ -526,59 +526,6 @@ oyjl_val oyjl_tree_get(oyjl_val n, const char ** path, oyjl_type type)
     return n;
 }
 
-char *             oyjl_string_copy  ( const char        * string,
-                                       void*            (* alloc)(size_t size))
-{
-  char * text = 0;
-
-  if(!alloc) alloc = malloc;
-
-  text = alloc( strlen(string) + 1 );
-  strcpy( text, string );
-    
-  return text;
-}
-
-int                   oyjl_string_add( char             ** string,
-                                       const char        * format,
-                                                           ... )
-{
-  char * text_copy = NULL;
-  char * text = 0;
-  va_list list;
-  int len;
-  size_t sz = 0;
-
-  va_start( list, format);
-  len = vsnprintf( text, sz, format, list );
-  va_end  ( list );
-
-  {
-    text = malloc( len + 1 );
-    va_start( list, format);
-    len = vsnprintf( text, len+1, format, list );
-    va_end  ( list );
-  }
-
-  if(string && *string)
-  {
-    int l = strlen(*string);
-    text_copy = malloc( len + l + 1 );
-    strcpy( text_copy, *string );
-    strcpy( &text_copy[l], text );
-    
-
-    free(*string);
-    *string = text_copy;
-
-    free(text);
-
-  } else
-    *string = text;
-
-  return 0;
-}
-
 char * oyjl_value_text (oyjl_val v, void*(*alloc)(size_t size))
 {
   char * t = 0, * text = 0;
@@ -590,16 +537,16 @@ char * oyjl_value_text (oyjl_val v, void*(*alloc)(size_t size))
          break;
     case oyjl_t_number:
          if(v->u.number.flags & OYJL_NUMBER_DOUBLE_VALID)
-           oyjl_string_add (&t, "%g", v->u.number.d);
+           oyjl_string_add (&t, 0,0, "%g", v->u.number.d);
          else
-           oyjl_string_add (&t, "%ld", v->u.number.i);
+           oyjl_string_add (&t, 0,0, "%ld", v->u.number.i);
          break;
     case oyjl_t_true:
-         oyjl_string_add (&t, "1"); break;
+         oyjl_string_add (&t, 0,0, "1"); break;
     case oyjl_t_false:
-         oyjl_string_add (&t, "0"); break;
+         oyjl_string_add (&t, 0,0, "0"); break;
     case oyjl_t_string:
-         oyjl_string_add (&t, "%s", v->u.string); break;
+         oyjl_string_add (&t, 0,0, "%s", v->u.string); break;
     case oyjl_t_array:
     case oyjl_t_object:
          break;
@@ -617,13 +564,6 @@ char * oyjl_value_text (oyjl_val v, void*(*alloc)(size_t size))
   return text;
 }
 
-typedef void * (*oyAlloc_f)     ( size_t              size );
-typedef void   (*oyDeAlloc_f)   ( void              * data );
-void               oyjl_string_list_add_static_string (char *** list,
-                                       int               * n,
-                                       const char        * string,
-                                       oyAlloc_f           allocateFunc,
-                                       oyDeAlloc_f         deallocateFunc );
 void       oyjl_tree_to_xpath        ( oyjl_val            v,
                                        int                 levels,
                                        char            *** xpaths )
@@ -655,7 +595,7 @@ void       oyjl_tree_to_xpath        ( oyjl_val            v,
            for(i = 0; i < count; ++i)
            {
              char * xpath = NULL;
-             oyjl_string_add( &xpath, "%s%s[%d]",base,base[0]?"/":"",i );
+             oyjl_string_add( &xpath, 0,0, "%s%s[%d]",base,base[0]?"/":"",i );
              oyjl_string_list_add_static_string( xpaths, &n, xpath, malloc,free );
              free(xpath);
              if(levels != 1)
@@ -675,8 +615,8 @@ void       oyjl_tree_to_xpath        ( oyjl_val            v,
            {
              char * xpath = NULL;
              const char * key = v->u.object.keys[i];
-             
-             oyjl_string_add( &xpath, "%s%s%s", base,base[0]?"/":"", key );
+
+             oyjl_string_add( &xpath, 0,0, "%s%s%s", base,base[0]?"/":"", key );
              oyjl_string_list_add_static_string( xpaths, &n, xpath, malloc,free );
              free(xpath);
              if(levels != 1)
@@ -708,22 +648,22 @@ void oyjl_tree_to_json (oyjl_val v, int * level, char ** json)
          break;
     case oyjl_t_number:
          if(v->u.number.flags & OYJL_NUMBER_DOUBLE_VALID)
-           oyjl_string_add (json, "%g", v->u.number.d);
+           oyjl_string_add (json, 0,0, "%g", v->u.number.d);
          else
-           oyjl_string_add (json, "%ld", v->u.number.i);
+           oyjl_string_add (json, 0,0, "%ld", v->u.number.i);
          break;
     case oyjl_t_true:
-         oyjl_string_add (json, "1"); break;
+         oyjl_string_add (json, 0,0, "1"); break;
     case oyjl_t_false:
-         oyjl_string_add (json, "0"); break;
+         oyjl_string_add (json, 0,0, "0"); break;
     case oyjl_t_string:
-         oyjl_string_add (json, "\"%s\"", v->u.string); break;
+         oyjl_string_add (json, 0,0, "\"%s\"", v->u.string); break;
     case oyjl_t_array:
          {
            int i,
                count = v->u.array.len;
 
-           oyjl_string_add( json, "[" );
+           oyjl_string_add( json, 0,0, "[" );
 
            *level += 2;
            for(i = 0; i < count; ++i)
@@ -732,38 +672,38 @@ void oyjl_tree_to_json (oyjl_val v, int * level, char ** json)
              if(count > 1)
              {
                if(i < count - 1)
-                 oyjl_string_add( json, "," );
+                 oyjl_string_add( json, 0,0, "," );
              }
            }
            *level -= 2;
 
-           oyjl_string_add( json, "]");
+           oyjl_string_add( json, 0,0, "]");
          } break;
     case oyjl_t_object:
          {
            int i,
                count = v->u.object.len;
 
-           oyjl_string_add( json, "{" );
+           oyjl_string_add( json, 0,0, "{" );
 
            *level += 2;
            for(i = 0; i < count; ++i)
            {
-             oyjl_string_add( json, "\n");
-             n = *level; while(n--) oyjl_string_add(json, " ");
-             oyjl_string_add( json, "\"%s\": ", v->u.object.keys[i] );
+             oyjl_string_add( json, 0,0, "\n");
+             n = *level; while(n--) oyjl_string_add(json, 0,0, " ");
+             oyjl_string_add( json, 0,0, "\"%s\": ", v->u.object.keys[i] );
              oyjl_tree_to_json( v->u.object.values[i], level, json );
              if(count > 1)
              {
                if(i < count - 1)
-                 oyjl_string_add( json, "," );
+                 oyjl_string_add( json, 0,0, "," );
              }
            }
            *level -= 2;
 
-           oyjl_string_add( json, "\n");
-           n = *level; while(n--) oyjl_string_add(json, " ");
-           oyjl_string_add( json, "}");
+           oyjl_string_add( json, 0,0, "\n");
+           n = *level; while(n--) oyjl_string_add(json, 0,0, " ");
+           oyjl_string_add( json, 0,0, "}");
          }
          break;
     default:
@@ -802,60 +742,13 @@ oyjl_val       oyjl_value_pos_get    ( oyjl_val            v,
   return NULL;
 }
 
-char **        oyjl_string_split     ( const char        * text,
-                                       int               * count )
-{
-  char ** list = 0;
-  int n = 0, i;
-  char delimiter = '/';
-
-  /* split the path search string by a delimiter */
-  if(text && text[0] && delimiter)
-  {
-    const char * tmp = text;
-
-    if(tmp[0] == delimiter) ++n;
-    do { ++n;
-    } while( (tmp = strchr(tmp + 1, delimiter)) );
-
-    tmp = 0;
-
-    if((list = malloc( (n+1) * sizeof(char*) )) == 0) return NULL;
-
-    {
-      const char * start = text;
-      for(i = 0; i < n; ++i)
-      {
-        intptr_t len = 0;
-        char * end = strchr(start, delimiter);
-
-        if(end > start)
-          len = end - start;
-        else if (end == start)
-          len = 0;
-        else
-          len = strlen(start);
-
-        if((list[i] = malloc( len+1 )) == 0) return NULL;
-
-        memcpy( list[i], start, len );
-        list[i][len] = 0;
-        start += len + 1;
-      }
-    }
-  }
-
-  *count = n;
-
-  return list;
-}
 
 oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
                                        const char        * xpath )
 {
   oyjl_val level = 0;
   int n = 0, i, found = 0;
-  char ** list = oyjl_string_split(xpath, &n);
+  char ** list = oyjl_string_split(xpath, '/', &n, malloc);
 
   /* follow the search path term */
   level = v;
@@ -1006,163 +899,5 @@ void oyjl_tree_free (oyjl_val v)
     {
         free(v);
     }
-}
-
-/* the following code is from Oyranos project by the same author */
-/* replace with oyjl names */
-#define oyStringCopy_                oyjl_string_copy
-/* imitate */
-#define oyDeAllocateFunc_ free
-#define oySnprintf_( str_, len_, patrn_ ) \
-           snprintf( str_, len_, patrn_ )
-/* oyAllocHelper_ (void*, type, size_t, action) */ 
-#define oyAllocHelper_m_(ptr_, type, size_, alloc_func, action) { \
-  if ((size_) <= 0) {                                       \
-      fprintf( stderr, "Nothing to allocate\n"); \
-  } else {                                                  \
-      oyAlloc_f a = alloc_func?alloc_func:malloc;           \
-      ptr_ = (type*) a(sizeof (type) * (size_t)(size_));    \
-      memset( ptr_, 0, sizeof (type) * (size_t)(size_) );   \
-  }                                                         \
-  if (ptr_ == NULL) {                                       \
-      fprintf( stderr, "Out of memory\n"); \
-    action;                                                 \
-  }                                                         \
-}
-/* rename some symbols */
-#define oyStringListAppend_          oyjlStringListAppend
-#define oyStringListRelease_         oyjl_string_list_release
-#define oyStringListFreeDoubles_     oyjl_string_list_free_doubles
-#define oyStringListAddStaticString_ oyjl_string_list_add_static_string
-#define oyStringListAdd_             oyjl_string_list_add_list
-char**             oyStringListAppend_( const char   ** list,
-                                        int             n_alt,
-                                        const char   ** append,
-                                        int             n_app,
-                                        int           * count,
-                                        oyAlloc_f       allocateFunc )
-{
-  char ** nlist = 0;
-
-  {
-    int i = 0;
-    int n = 0;
-
-    if(n_alt || n_app)
-      oyAllocHelper_m_(nlist, char*, n_alt + n_app +1, allocateFunc, return NULL);
-
-    for(i = 0; i < n_alt; ++i)
-    {
-      if(list[i] /*&& oyStrlen_(list[i])*/)
-        nlist[n] = oyStringCopy_( list[i], allocateFunc );
-      n++;
-    }
-
-    for(i = 0; i < n_app; ++i)
-    {
-      if(1/*oyStrlen_( append[i] )*/)
-        nlist[n] = oyStringCopy_( append[i], allocateFunc );
-      n++;
-    }
-
-    if(count)
-      *count = n;
-  }
-
-  return nlist;
-}
-
-void          oyStringListRelease_    ( char          *** l,
-                                        int               size,
-                                        oyDeAlloc_f       deallocFunc )
-{
-  char *** list = l;
-
-  if(!deallocFunc) deallocFunc = oyDeAllocateFunc_;
-
-  if( l )
-  {
-    size_t i;
-
-    for(i = 0; i < size; ++i)
-      if((*list)[i])
-        deallocFunc( (*list)[i] );
-    if(*list)
-      deallocFunc( *list );
-    *list = NULL;
-  }
-}
-
-void               oyStringListAddStaticString_ ( char *** list,
-                                       int               * n,
-                                       const char        * string,
-                                       oyAlloc_f           allocateFunc,
-                                       oyDeAlloc_f         deallocateFunc )
-{
-  int alt_n = *n;
-  char ** tmp = oyStringListAppend_((const char**)*list, alt_n,
-                                    (const char**)&string, 1,
-                                     n, allocateFunc);
-
-  oyStringListRelease_(list, alt_n, deallocateFunc);
-
-  *list = tmp;
-}
-
-/** @internal
- *  @brief filter doubles out
- *
- *  @version Oyranos: 0.9.6
- *  @date    2015/08/04
- *  @since   2015/08/04 (Oyranos: 0.9.6)
- */
-void oyStringListFreeDoubles_        ( char         ** list,
-                                       int           * list_n,
-                                       oyDeAlloc_f     deallocateFunc )
-{
-  int n = *list_n,
-      i,
-      pos = n ? 1 : 0;
-
-  if(!deallocateFunc) deallocateFunc = oyDeAllocateFunc_;
-
-  for(i = pos; i < n; ++i)
-  {
-    int k, found = 0;
-    for( k = 0; k < i; ++k )
-      if(list[i] && list[k] && strcmp(list[i], list[k]) == 0)
-      {
-        deallocateFunc( list[i] );
-        list[i] = NULL;
-        found = 1;
-        continue;
-      }
-
-    if(found == 0)
-    {
-      list[pos] = list[i];
-      ++pos;
-    }
-  }
-
-  *list_n = pos;
-}
-void               oyStringListAdd_  ( char            *** list,
-                                       int               * n,
-                                       const char       ** append,
-                                       int                 n_app,
-                                       oyAlloc_f           allocateFunc,
-                                       oyDeAlloc_f         deallocateFunc )
-{
-  int alt_n = 0;
-  char ** tmp;
-
-  if(n) alt_n = *n;
-  tmp = oyStringListAppend_((const char**)*list, alt_n, append, n_app,
-                                     n, allocateFunc);
-
-  oyStringListRelease_(list, alt_n, deallocateFunc);
-
-  *list = tmp;
 }
 

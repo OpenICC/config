@@ -256,7 +256,7 @@ const char *       openiccConfig_DeviceGet (
                              {
                                int k = 0,
                                    n = device->u.object.values[i]->u.array.len;
-                               openiccStringAdd_( &t, "[" );
+                               STRING_ADD( t, "[" );
                                for(k = 0; k < n; ++k)
                                {
                                  if(device->u.object.values[i]->
@@ -272,14 +272,14 @@ const char *       openiccConfig_DeviceGet (
                                  if(tmp2)
                                  {
                                    if(k != 0)
-                                   openiccStringAdd_( &t, "," );
-                                   openiccStringAdd_( &t, "\"" );
-                                   openiccStringAdd_( &t, tmp2 );
-                                   openiccStringAdd_( &t, "\"" );
+                                   STRING_ADD( t, "," );
+                                   STRING_ADD( t, "\"" );
+                                   STRING_ADD( t, tmp2 );
+                                   STRING_ADD( t, "\"" );
                                    tmp = t;
                                  }
                                }
-                               openiccStringAdd_( &t, "]" );
+                               STRING_ADD( t, "]" );
                                tmp = t;
                              }
                              break;
@@ -725,7 +725,7 @@ char *       openiccGetInstallPath   ( openiccPATH_TYPE_e  type,
         case openiccSCOPE_USER:
         {
           char * t = NULL;
-          openiccStringAddPrintf( &t,
+          openiccStringAddPrintf( &t, 0,0,
                              "~/.local/lib%s/" OPENICC_CMMSUBPATH, strstr(OPENICC_LIBDIR, "lib64") ? "64":"");
           path = C( t );
           if(t) free(t); t = NULL;

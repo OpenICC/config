@@ -23,6 +23,14 @@
 #include <stdarg.h>           /* va_list */
 #include <time.h>
 
+#define oyjl_string_add                openiccStringAddPrintf
+#define oyjl_string_copy               openiccStringCopy
+#define oyjl_string_split              openiccStringSplit
+#define oyjl_string_list_add_list      openiccStringListAdd
+#define oyjl_string_list_cat_list      openiccStringListCat
+#define oyjl_string_list_release       openiccStringListRelease
+#define oyjl_string_list_free_doubles  openiccStringListFreeDoubles
+#define oyjl_string_list_add_static_string openiccStringListAddStaticString
 #include "oyjl_tree.h"
 
 #include "openicc_conf.h"
@@ -93,11 +101,11 @@ struct openiccDB_s {
 };
 
 int          openiccStringAddPrintf  ( char             ** string,
+                                       void*            (* alloc)(size_t size),
+                                       void             (* deAlloc)(void * data ),
                                        const char        * format,
                                                            ... );
-void         openiccStringAdd_       ( char             ** text,
-                                       const char        * append );
-#define STRING_ADD( t, append ) openiccStringAdd_( &t, append )
+#define STRING_ADD( t, append ) openiccStringAddPrintf( &t, 0,0, append )
 char *       openiccStringCopy       ( const char        * text,
                                        openiccAlloc_f      alloc );
 #define openiccNoEmptyString_m_(t) (t?t:"")

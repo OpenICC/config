@@ -613,7 +613,7 @@ oiTESTRESULT_e testStringRun ()
   }
 
 
-  openiccStringAddPrintf( &t, OPENICC_BASE_PATH "%s", "/behaviour");
+  openiccStringAddPrintf( &t, 0,0, OPENICC_BASE_PATH "%s", "/behaviour");
   if( t && strlen(t) > strlen(OPENICC_BASE_PATH) )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
     "openiccStringAddPrintf() %s", t );
@@ -646,7 +646,7 @@ oiTESTRESULT_e testConfig()
   int key_names_n = 0, values_n = 0,i,error = 0;
   char ** key_names, ** values;
   const char * base_key = "org/freedesktop/openicc/device/camera/[1]";
-  oyjl_val v = NULL;
+  oyjl_val v = NULL, root = NULL;
   char * json = NULL;
   int level = 0;
 
@@ -657,10 +657,12 @@ oiTESTRESULT_e testConfig()
   /* read JSON input file */
   text = openiccOpenFile( file_name, &size );
 
-  /* parse json and write back */
-  v = oyjl_tree_parse( text, NULL, 0 );
-  oyjl_tree_to_json( v, &level, &json );
-  oyjl_tree_free( v ); v = NULL;
+  /* parse json ... */
+  root = oyjl_tree_parse( text, NULL, 0 );
+  
+  /* and write back */
+  oyjl_tree_to_json( root, &level, &json );
+  oyjl_tree_free( root ); root = NULL;
   if(text) free(text);
 
   /* parse JSON */
@@ -1065,19 +1067,6 @@ oiTESTRESULT_e testODB()
     "openiccDB_GetKeyNames()                        " );
   }
 
-  /* Get values for the above key names. */
-  /*error = openiccDB_GetStrings( config, (const char **)key_names,
-                                    myAllocFunc, &values, &values_n );
-  i = 0;
-  while(values && values[i]) ++i;
-  if(key_names_n == values_n && values_n == i)
-  { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccConfig_GetStrings()             %d==%d==%d", key_names_n,values_n,i );
-  } else
-  { PRINT_SUB( oiTESTRESULT_FAIL,
-    "openiccConfig_GetStrings()             %d==%d==%d", key_names_n,values_n,i );
-  }*/
-
   for(i = 0; i < key_names_n; ++i)
   {
     /* Get a single value from the config object by conviniently contructing
@@ -1098,6 +1087,17 @@ oiTESTRESULT_e testODB()
   if( values ) myDeAllocFunc(values); values = NULL;
 
   openiccDB_Release( &db );
+
+  key = "org/freedesktop/openicc/device/camera";
+  temp = openiccDBSearchEmptyKeyname( key, openiccSCOPE_USER );
+  if(temp)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccDBSearchEmptyKeyname() %s", temp );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccDBSearchEmptyKeyname() %s", temp );
+  }
+  if(temp) free(temp);
 
   return result;
 }

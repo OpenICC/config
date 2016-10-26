@@ -329,5 +329,46 @@ const char * openiccGetShortKeyFromFullKeyPath( const char * key, char ** temp )
   return key_short;
 }
 
+int      openiccDBSetString          ( const char        * keyName,
+                                       openiccSCOPE_e      scope,
+                                       const char        * value,
+                                       const char        * comment )
+{
+  openiccDB_s * db = openiccDB_NewFrom( keyName, scope );
+  int error = !db || !keyName;
+  return error;
+}
+
+char *   openiccDBSearchEmptyKeyname ( const char        * keyParentName,
+                                       openiccSCOPE_e      scope )
+{
+  char * key = NULL;
+  int end = 0;
+  const char * xpath = keyParentName;
+  openiccDB_s * db = openiccDB_NewFrom( xpath, scope );
+  int error = !db || !xpath,
+      xpath_is_array = 1;
+
+  if(error == 0)
+  {
+    int count = openiccArray_Count( (openiccArray_s*)&db->ks ), i;
+    for(i = 0; i < count; ++i)
+    {
+      oyjl_val o = oyjl_tree_get_value( db->ks[i]->oyjl, xpath );
+      error = !o ? -1:0;
+      if(o && !OYJL_IS_ARRAY(o))
+        xpath_is_array = 0;
+      end = oyjl_value_count( o );
+      if(error == 0) break;
+    }
+  }
+
+  openiccDB_Release( &db );
+
+  if(xpath_is_array)
+    openiccStringAddPrintf( &key, 0,0, "%s/[%d]", keyParentName, end );
+
+  return key;
+}
 
 /*  @} *//* OpenICC_config */

@@ -206,7 +206,7 @@ void       oyjl_tree_to_xpath        ( oyjl_val            v,
                                        int                 child_levels,
                                        char            *** xpaths );
 char *     oyjl_value_text           ( oyjl_val            v,
-                                       void*             (*alloc)(size_t size));
+                                       void*             (*alloc)(size_t));
 oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
                                        const char        * xpath );
 oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
@@ -215,19 +215,43 @@ oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
 int            oyjl_value_count      ( oyjl_val            v );
 oyjl_val       oyjl_value_pos_get    ( oyjl_val            v,
                                        int                 pos );
+
+char **    oyjl_string_split         ( const char        * text,
+                                       const char          delimiter,
+                                       int               * count,
+                                       void*            (* alloc)(size_t));
+char *     oyjl_string_copy          ( const char        * string,
+                                       void*            (* alloc)(size_t));
+int        oyjl_string_add           ( char             ** string,
+                                       void*            (* alloc)(size_t),
+                                       void             (* deAlloc)(void*),
+                                       const char        * format,
+                                                           ... );
 void       oyjl_string_list_release  ( char            *** l,
                                        int                 size,
-                                       void              (*dealloc)(void*ptr));
+                                       void             (* deAlloc)(void*) );
 void       oyjl_string_list_free_doubles (
                                        char             ** list,
                                        int               * list_n,
-                                       void              (*dealloc)(void*ptr) );
+                                       void             (* deAlloc)(void*) );
 void       oyjl_string_list_add_list ( char            *** list,
                                        int               * n,
                                        const char       ** append,
                                        int                 n_app,
-                                       void*             (*alloc)(size_t size),
-                                       void              (*dealloc)(void*ptr) );
+                                       void*            (* alloc)(size_t),
+                                       void             (* deAlloc)(void*) );
+char **    oyjl_string_list_cat_list ( const char       ** list,
+                                       int                 n_alt,
+                                       const char       ** append,
+                                       int                 n_app,
+                                       int               * count,
+                                       void*            (* alloc)(size_t) );
+void       oyjl_string_list_add_static_string (
+                                       char            *** list,
+                                       int               * n,
+                                       const char        * string,
+                                       void*            (* alloc)(size_t),
+                                       void             (* deAlloc)(void*) );
 
 typedef enum {
   oyjl_message_info = 400 + yajl_status_ok,

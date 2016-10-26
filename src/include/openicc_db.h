@@ -32,10 +32,6 @@ void     openiccDB_Release           ( openiccDB_s      ** db );
 int      openiccDB_GetString         ( openiccDB_s       * db,
                                        const char        * xpath,
                                        const char       ** value );
-int      openiccDB_GetStrings        ( openiccDB_s       * db,
-                                       const char       ** key_names,
-                                       char            *** values,
-                                       openiccAlloc_f      allocFunc );
 int      openiccDB_GetKeyNames       ( openiccDB_s       * db,
                                        const char        * xpath,
                                        int                 child_levels,
@@ -50,11 +46,11 @@ const char * openiccGetShortKeyFromFullKeyPath(
                                        char             ** temp );
 
 /* DB key wrappers */
-int      openiccDBSetString_         ( const char        * keyName,
+int      openiccDBSetString          ( const char        * keyName,
                                        openiccSCOPE_e      scope,
                                        const char        * value,
                                        const char        * comment );
-char*    openiccDBSearchEmptyKeyname_( const char        * keyParentName,
+char*    openiccDBSearchEmptyKeyname ( const char        * keyParentName,
                                        openiccSCOPE_e      scope );
 int      openiccDBEraseKey_          ( const char        * key_name,
                                        openiccSCOPE_e      scope );

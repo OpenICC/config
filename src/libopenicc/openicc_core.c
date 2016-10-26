@@ -128,9 +128,9 @@ int                openiccMessageFormat (
   /* reduce output for non core messages */
   if( (openiccMSG_ERROR <= code && code <= 399) )
   {
-    openiccStringAddPrintf( &t,
+    openiccStringAddPrintf( &t, 0,0,
                         " %03f: ", DBG_UHR_);
-    openiccStringAddPrintf( &t,
+    openiccStringAddPrintf( &t, 0,0,
                         "%s%s%s%s ", type_name,
              id_text ? "=\"" : "", id_text ? id_text : "", id_text ? "\"" : "");
   }
@@ -283,8 +283,8 @@ int            openiccInit           ( void )
     if(getenv("OI_LOCALEDIR") && strlen(getenv("OI_LOCALEDIR")))
       openicc_domain_path = strdup(getenv("OI_LOCALEDIR"));
 
-    openiccStringAdd_( &var, "NLSPATH=");
-    openiccStringAdd_( &var, openicc_domain_path);
+    STRING_ADD( var, "NLSPATH=");
+    STRING_ADD( var, openicc_domain_path);
     putenv(var); /* Solaris */
 
     bindtextdomain( "OpenICC", openicc_domain_path );
@@ -298,3 +298,4 @@ int            openiccInit           ( void )
 
 /*  @} *//* misc */
 
+#include "oyjl_tree.c"

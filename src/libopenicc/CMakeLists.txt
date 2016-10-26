@@ -5,7 +5,6 @@ SET( CFILES_OBJECT_CONFIG_PUBLIC
 	openicc_db.c
 	openicc_io.c
 	openicc_string.c
-        oyjl_tree.c
 	xdg_bds.c
    )
 SET( CFILES_OBJECT_CONFIG_PUBLIC ${CFILES_OBJECT_CONFIG_PUBLIC} PARENT_SCOPE )
