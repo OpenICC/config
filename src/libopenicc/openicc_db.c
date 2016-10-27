@@ -74,10 +74,6 @@ int      openiccArray_Push           ( openiccArray_s    * array )
   return openiccArray_Add( array, 1 );
 }
 
-/** \addtogroup OpenICC_config
- *  @{
- */
-
 /**
  *  @internal
  *  @brief    add a openiccConfig_s
@@ -216,7 +212,7 @@ void     openiccDB_Release           ( openiccDB_s      ** db )
 
 /**
  *  @brief    get a value
- *  @memberof openiccConfig_s
+ *  @memberof openiccDB_s
  *
  *  @param[in]     db                  a data base object
  *  @param[in]     xpath               key name to ask for
@@ -298,6 +294,10 @@ int                openiccDB_GetKeyNames (
   return error;
 }
 
+/** \addtogroup OpenICC_config
+ *  @{
+ */
+
 /**
  *  @brief    get a plain key name
  *
@@ -339,6 +339,13 @@ int      openiccDBSetString          ( const char        * keyName,
   return error;
 }
 
+/**
+ *  @brief    get a empty key name to add a new config group to a array
+ *
+ *  @param[in]     keyParentName       a key name string
+ *  @param[in]     scope               specify to intended user or system scope
+ *  @return                            the free key name from the array
+ */
 char *   openiccDBSearchEmptyKeyname ( const char        * keyParentName,
                                        openiccSCOPE_e      scope )
 {
