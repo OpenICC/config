@@ -42,6 +42,8 @@
 # define  OYJL_DBG_ARGS_   strrchr(__FILE__,'/') ? strrchr(__FILE__,'/')+1 : __FILE__,__LINE__
 #endif
 
+extern oyjl_message_f oyjl_message_p;
+
 #define STATUS_CONTINUE 1
 #define STATUS_ABORT    0
 
@@ -798,7 +800,6 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
     int count = oyjl_value_count( parent );
     int j;
     int pos = -1;
-    int is_no_pos = 0;
 
     found = 0;
 

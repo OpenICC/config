@@ -28,10 +28,10 @@ typedef struct {
   int dummy;
 } openiccDummy_s;
 
-typedef struct {
+struct openiccArray_s {
   openiccDummy_s ** array;
   int reserved_n;
-} openiccArray_s;
+};
 
 int      openiccArray_Count          ( openiccArray_s    * array )
 {

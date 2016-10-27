@@ -638,7 +638,6 @@ oiTESTRESULT_e testStringRun ()
 oiTESTRESULT_e testConfig()
 {
   oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
-  const char * top_key_name = OPENICC_DEVICE_PATH;
   openiccConfig_s * config;
   const char * file_name;
   char * text;
@@ -646,7 +645,7 @@ oiTESTRESULT_e testConfig()
   int key_names_n = 0, values_n = 0,i,error = 0;
   char ** key_names, ** values;
   const char * base_key = "org/freedesktop/openicc/device/camera/[1]";
-  oyjl_val v = NULL, root = NULL;
+  oyjl_val root = NULL;
   char * json = NULL;
   int level = 0;
 
@@ -972,7 +971,7 @@ oiTESTRESULT_e testODB()
   const char * key = "org/freedesktop/openicc/device/camera/[0]/key";
   char * temp;
   char ** key_names = NULL, ** values = NULL;
-  int key_names_n = 0, values_n = 0,i,error = 0;
+  int key_names_n = 0, i,error = 0;
 
   fprintf(stdout, "\n" );
 
@@ -999,13 +998,13 @@ oiTESTRESULT_e testODB()
     /* parse JSON */
     if(text)
     {
-      int count = openiccArray_Count( &db->ks );
+      int count = openiccArray_Count( (openiccArray_s*)&db->ks );
       openiccConfig_s * config = openiccConfig_FromMem( text );
       if(text) free(text); text = NULL;
       openiccConfig_SetInfo ( config, db_file );
 
       /* reserve enough memory in list array */
-      if( openiccArray_Push( &db->ks ))
+      if( openiccArray_Push( (openiccArray_s*)&db->ks ))
       {
         ERRc_S("%s", _("Could not alloc memory") );
         return 1;

@@ -100,6 +100,10 @@ struct openiccDB_s {
   int ks_array_reserved_n;
 };
 
+typedef struct openiccArray_s openiccArray_s;
+int      openiccArray_Count          ( openiccArray_s    * array );
+int      openiccArray_Push           ( openiccArray_s    * array );
+
 int          openiccStringAddPrintf  ( char             ** string,
                                        void*            (* alloc)(size_t size),
                                        void             (* deAlloc)(void * data ),
