@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-10-20 08:51+0200\n"
+"POT-Creation-Date: 2016-10-27 15:45+0200\n"
 "PO-Revision-Date: 2006-06-29 19:31+0200\n"
 "Last-Translator: Pascal LACROIX <lacroixpascal at vfemail.net>\n"
 "Language-Team: <fr@li.org>\n"
@@ -20,22 +20,22 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr ""
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:128
+#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:127
 #, fuzzy
 msgid "Could not alloc memory"
 msgstr "Ouvrir Profil"
 
-#: libopenicc/openicc_db.c:100
+#: libopenicc/openicc_db.c:99
 #, fuzzy
 msgid "Could not find config"
 msgstr "Ouvrir Profil"
 
-#: libopenicc/openicc_db.c:180
+#: libopenicc/openicc_db.c:179
 #, fuzzy
 msgid "Could not setup db objetc"
 msgstr "Ouvrir Profil"
 
-#: libopenicc/openicc_db.c:105
+#: libopenicc/openicc_db.c:104
 msgid "Paths:"
 msgstr ""
 

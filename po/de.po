@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-10-20 08:51+0200\n"
+"POT-Creation-Date: 2016-10-27 15:45+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -23,19 +23,19 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr "!!! Fehler"
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:128
+#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:127
 msgid "Could not alloc memory"
 msgstr "Kann keinen Speicher reservieren"
 
-#: libopenicc/openicc_db.c:100
+#: libopenicc/openicc_db.c:99
 msgid "Could not find config"
 msgstr "Konnte Konfiguration nicht finden"
 
-#: libopenicc/openicc_db.c:180
+#: libopenicc/openicc_db.c:179
 msgid "Could not setup db objetc"
 msgstr "Konnte DB Objekt nicht erstellen"
 
-#: libopenicc/openicc_db.c:105
+#: libopenicc/openicc_db.c:104
 msgid "Paths:"
 msgstr "Pfade:"
 

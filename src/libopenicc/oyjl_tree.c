@@ -765,11 +765,6 @@ int        oyjl_tree_paths_get_index ( const char        * term,
       error = oyjl_string_to_long( ttmp, &num );
       if(!error)
         pos = num;
-
-      size = strrchr(term,'[') - term;
-      memcpy( ttmp, term, size );
-      ttmp[size] = '\000';
-      term = ttmp;
     }
   }
 

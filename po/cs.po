@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-10-20 08:51+0200\n"
+"POT-Creation-Date: 2016-10-27 15:45+0200\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -19,22 +19,22 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr "!!! CHYBA"
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:128
+#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:127
 #, fuzzy
 msgid "Could not alloc memory"
 msgstr "Nelze alokovat paměť pro:"
 
-#: libopenicc/openicc_db.c:100
+#: libopenicc/openicc_db.c:99
 #, fuzzy
 msgid "Could not find config"
 msgstr "Nelze otevřít profil"
 
-#: libopenicc/openicc_db.c:180
+#: libopenicc/openicc_db.c:179
 #, fuzzy
 msgid "Could not setup db objetc"
 msgstr "Nelze rozpoznat zařízení"
 
-#: libopenicc/openicc_db.c:105
+#: libopenicc/openicc_db.c:104
 #, fuzzy
 msgid "Paths:"
 msgstr "Cesty"
