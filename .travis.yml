@@ -13,10 +13,12 @@ script:
   - make
   - make check
   - if [[ "$CC" == "gcc" ]]; then
+      ls;
       bash <(curl -s https://codecov.io/bash);
       bash <(curl -s https://codecov.io/bash) -G "-o src/ src/*.c";
       bash <(curl -s https://codecov.io/bash) -G "-o ../config/src/ ../config/src/*.c";
       bash <(curl -s https://codecov.io/bash) -G "-o src/libopenicc/ src/libopenicc/*.c";
+      bash <(curl -s https://codecov.io/bash) -f $TRAVIS_BUILD_DIR/build/coverage.info -R $TRAVIS_BUILD_DIR -X gcov;
     fi
 
 before_install:
