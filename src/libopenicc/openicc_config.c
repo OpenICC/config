@@ -457,7 +457,7 @@ int                openiccConfig_GetKeyNames (
   char ** keys = (char**)  calloc(sizeof(char*),2);
 
   if(!error)
-    list = oyjl_tree_get_value( config->oyjl, xpath );
+    list = oyjl_tree_get_value( config->oyjl, 0, xpath );
 
   if(!error)
     error = !list ? -1:0;
@@ -515,7 +515,7 @@ int                openiccConfig_GetString (
 
   if(error == 0)
   {
-    o = oyjl_tree_get_value( config->oyjl, xpath );
+    o = oyjl_tree_get_value( config->oyjl, 0, xpath );
     error = !o ? -1:0;
   }
 

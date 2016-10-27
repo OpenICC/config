@@ -354,7 +354,7 @@ char *   openiccDBSearchEmptyKeyname ( const char        * keyParentName,
     int count = openiccArray_Count( (openiccArray_s*)&db->ks ), i;
     for(i = 0; i < count; ++i)
     {
-      oyjl_val o = oyjl_tree_get_value( db->ks[i]->oyjl, xpath );
+      oyjl_val o = oyjl_tree_get_value( db->ks[i]->oyjl, 0, xpath );
       error = !o ? -1:0;
       if(o && !OYJL_IS_ARRAY(o))
         xpath_is_array = 0;

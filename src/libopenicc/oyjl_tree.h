@@ -204,17 +204,21 @@ void       oyjl_tree_to_json         ( oyjl_val            v,
                                        char             ** json );
 void       oyjl_tree_to_xpath        ( oyjl_val            v,
                                        int                 child_levels,
-                                       char            *** xpaths );
+                                       char            *** paths );
 char *     oyjl_value_text           ( oyjl_val            v,
                                        void*             (*alloc)(size_t));
+#define    OYJL_CREATE_NEW             0x02
 oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
-                                       const char        * xpath );
+                                       int                 flags,
+                                       const char        * path );
 oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
+                                       int                 flags,
                                        const char        * format,
                                                            ... );
-int            oyjl_value_count      ( oyjl_val            v );
-oyjl_val       oyjl_value_pos_get    ( oyjl_val            v,
+int        oyjl_value_count          ( oyjl_val            v );
+oyjl_val   oyjl_value_pos_get        ( oyjl_val            v,
                                        int                 pos );
+
 
 char **    oyjl_string_split         ( const char        * text,
                                        const char          delimiter,

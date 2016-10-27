@@ -742,7 +742,7 @@ oyjl_val       oyjl_value_pos_get    ( oyjl_val            v,
   return NULL;
 }
 
-int        oyjl_tree_get_index       ( const char        * term,
+int        oyjl_tree_xpath_get_index ( const char        * term,
                                        int               * index )
 {
   char * tindex = strrchr(term,'['),
@@ -782,6 +782,7 @@ int        oyjl_tree_get_index       ( const char        * term,
 }
 
 oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
+                                       int                 flags,
                                        const char        * xpath )
 {
   oyjl_val level = 0;
@@ -793,35 +794,33 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
   for(i = 0; i < n; ++i)
   {
     char * term = list[i];
+    /* is object or array */
     int count = oyjl_value_count( level );
     int j;
     int pos = -1;
     int is_no_pos = 0;
 
-    is_no_pos = oyjl_tree_get_index( term, &pos );
-
     found = 0;
 
-    if(is_no_pos == 0 && pos != -1)
+    /* requests index in object or array */
+    if(oyjl_tree_xpath_get_index( term, &pos ) == 0 && pos != -1)
     {
       level = oyjl_value_pos_get( level, pos );
       found = 1;
-    }
-    else
+    } else
+    {
+      /* search for name in object */
       for(j = 0; j < count; ++j)
       {
         if(term &&
            strcmp( level->u.object.keys[j], term ) == 0)
         {
-          ++found;
-          if(pos == -1 ||
-             (found-1) == pos)
-          {
-            level = level->u.object.values[j];
-            break;
-          }
+          found = 1;
+          level = level->u.object.values[j];
+          break;
         }
       }
+    }
   }
 
   /* clean up temorary memory */
@@ -840,7 +839,23 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
  *  Function oyjl_tree_get_valuef
  *  @brief   get a child node
  *
+ *  A path string is constructed of terms and the slash delimiter '/'.
+ *  Understood terms are object names or the squared brackets index operator [].
+ *  Example: "foo/[3]/bar" will return the "bar" leave with the "found" string.
+ *  @verbatim
+    {
+      "foo": [
+        { "ignore": 0 },
+        { "ignore_too": 0 },
+        { "ignore_it": 0 },
+        { "bar": "found" }
+      ]
+    }
+    @endverbatim
+ *
  *  @param[in]     v                   the oyjl node
+ *  @param[in]     flags               OYJL_CREATE_NEW - returns leaves even
+ *                                     if they did not yet exist
  *  @param[in]     format              the xpath format
  *  @param[in]     ...                 the variable argument list
  *  @return                            the childs text value
@@ -850,6 +865,7 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
  *  @date    2013/02/24
  */
 oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
+                                       int                 flags,
                                        const char        * format,
                                                            ... )
 {
@@ -881,7 +897,7 @@ oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
     va_end  ( list );
   }
 
-  value = oyjl_tree_get_value( v, text );
+  value = oyjl_tree_get_value( v, flags, text );
 
   if(text) free(text);
 
