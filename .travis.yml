@@ -12,8 +12,11 @@ script:
   - ls ..
   - make
   - make check
+  - make coverage
   - if [[ "$CC" == "gcc" ]]; then
-      ls;
+      echo ls && ls;
+      echo ls TRAVIS_BUILD_DIR && ls $TRAVIS_BUILD_DIR;
+      echo ls TRAVIS_BUILD_DIR/build/ && ls $TRAVIS_BUILD_DIR/build/
       bash <(curl -s https://codecov.io/bash);
       bash <(curl -s https://codecov.io/bash) -G "-o src/ src/*.c";
       bash <(curl -s https://codecov.io/bash) -G "-o ../config/src/ ../config/src/*.c";
