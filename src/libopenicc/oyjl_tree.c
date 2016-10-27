@@ -564,7 +564,7 @@ char * oyjl_value_text (oyjl_val v, void*(*alloc)(size_t size))
   return text;
 }
 
-void       oyjl_tree_to_xpath        ( oyjl_val            v,
+void       oyjl_tree_to_paths        ( oyjl_val            v,
                                        int                 levels,
                                        char            *** xpaths )
 {
@@ -600,7 +600,7 @@ void       oyjl_tree_to_xpath        ( oyjl_val            v,
              free(xpath);
              if(levels != 1)
              {
-               oyjl_tree_to_xpath( v->u.array.values[i], levels-1, xpaths );
+               oyjl_tree_to_paths( v->u.array.values[i], levels-1, xpaths );
                while(xpaths && *xpaths && (*xpaths)[n]) ++n;
              }
            }
@@ -621,7 +621,7 @@ void       oyjl_tree_to_xpath        ( oyjl_val            v,
              free(xpath);
              if(levels != 1)
              {
-               oyjl_tree_to_xpath( v->u.object.values[i], levels-1, xpaths );
+               oyjl_tree_to_paths( v->u.object.values[i], levels-1, xpaths );
                while(xpaths && *xpaths && (*xpaths)[n]) ++n;
              }
            }
@@ -742,7 +742,7 @@ oyjl_val       oyjl_value_pos_get    ( oyjl_val            v,
   return NULL;
 }
 
-int        oyjl_tree_xpath_get_index ( const char        * term,
+int        oyjl_tree_paths_get_index ( const char        * term,
                                        int               * index )
 {
   char * tindex = strrchr(term,'['),
@@ -803,7 +803,7 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
     found = 0;
 
     /* requests index in object or array */
-    if(oyjl_tree_xpath_get_index( term, &pos ) == 0 && pos != -1)
+    if(oyjl_tree_paths_get_index( term, &pos ) == 0 && pos != -1)
     {
       level = oyjl_value_pos_get( level, pos );
       found = 1;
@@ -834,6 +834,7 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
   else
     return NULL;
 }
+
 
 /** @internal
  *  Function oyjl_tree_get_valuef

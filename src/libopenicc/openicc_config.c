@@ -463,7 +463,7 @@ int                openiccConfig_GetKeyNames (
     error = !list ? -1:0;
 
   keys[0] = openiccStringCopy( xpath, malloc );
-  oyjl_tree_to_xpath( list, child_levels, &keys );
+  oyjl_tree_to_paths( list, child_levels, &keys );
 
   if(n)
   {

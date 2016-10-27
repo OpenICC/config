@@ -202,7 +202,7 @@ OYJL_API oyjl_val oyjl_tree_get(oyjl_val parent, const char ** path, oyjl_type t
 void       oyjl_tree_to_json         ( oyjl_val            v,
                                        int               * level,
                                        char             ** json );
-void       oyjl_tree_to_xpath        ( oyjl_val            v,
+void       oyjl_tree_to_paths        ( oyjl_val            v,
                                        int                 child_levels,
                                        char            *** paths );
 char *     oyjl_value_text           ( oyjl_val            v,
