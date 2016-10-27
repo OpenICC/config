@@ -34,6 +34,14 @@
 #define snprintf sprintf_s
 #endif
 
+#if defined(__GNUC__)
+# define  OYJL_DBG_FORMAT_ "%s:%d %s() "
+# define  OYJL_DBG_ARGS_   strrchr(__FILE__,'/') ? strrchr(__FILE__,'/')+1 : __FILE__,__LINE__,__func__
+#else
+# define  OYJL_DBG_FORMAT_ "%s:%d "
+# define  OYJL_DBG_ARGS_   strrchr(__FILE__,'/') ? strrchr(__FILE__,'/')+1 : __FILE__,__LINE__
+#endif
+
 #define STATUS_CONTINUE 1
 #define STATUS_ABORT    0
 
@@ -549,7 +557,7 @@ char * oyjl_value_text (oyjl_val v, void*(*alloc)(size_t size))
     case oyjl_t_object:
          break;
     default:
-         fprintf( stderr, "unknown type: %d\n", v->type );
+         oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"unknown type: %d", OYJL_DBG_ARGS_, v->type );
          break;
   }
 
@@ -626,7 +634,7 @@ void       oyjl_tree_to_paths        ( oyjl_val            v,
          }
          break;
     default:
-         fprintf( stderr, "unknown type: %d\n", v->type );
+         oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"unknown type: %d", OYJL_DBG_ARGS_, v->type );
          break;
   }
 
@@ -705,7 +713,7 @@ void oyjl_tree_to_json (oyjl_val v, int * level, char ** json)
          }
          break;
     default:
-         fprintf( stderr, "unknown type: %d\n", v->type );
+         oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"unknown type: %d", OYJL_DBG_ARGS_, v->type );
          break;
   }
   return;
@@ -872,7 +880,7 @@ oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
   text = malloc( sz );
   if(!text)
   {
-    fprintf( stderr, "!!! ERROR: could not allocate memory\n" );
+    oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"could not allocate memory", OYJL_DBG_ARGS_ );
     return 0;
   }
 

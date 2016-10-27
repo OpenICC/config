@@ -26,16 +26,87 @@
 #endif
 #define oyjlAllocHelper_m_(ptr_, type, size_, alloc_func, action) { \
   if ((size_) <= 0) {                                       \
-      fprintf( stderr, "Nothing to allocate\n"); \
+      oyjl_message_p( oyjl_message_insufficient_data, 0, "Nothing to allocate\n"); \
   } else {                                                  \
       void*(*a)(size_t size) = alloc_func?alloc_func:malloc;         \
       ptr_ = (type*) a(sizeof (type) * (size_t)(size_));    \
       memset( ptr_, 0, sizeof (type) * (size_t)(size_) );   \
   }                                                         \
   if (ptr_ == NULL) {                                       \
-      fprintf( stderr, "Out of memory\n"); \
+      oyjl_message_p( oyjl_message_error, 0, "Out of memory\n"); \
     action;                                                 \
   }                                                         \
+}
+
+#if defined(__GNUC__)
+# define  OYJL_DBG_FORMAT_ "%s:%d %s() "
+# define  OYJL_DBG_ARGS_   strrchr(__FILE__,'/') ? strrchr(__FILE__,'/')+1 : __FILE__,__LINE__,__func__
+#else
+# define  OYJL_DBG_FORMAT_ "%s:%d "
+# define  OYJL_DBG_ARGS_   strrchr(__FILE__,'/') ? strrchr(__FILE__,'/')+1 : __FILE__,__LINE__
+#endif
+
+yajl_status  oyjl_message_func       ( oyjl_message_e      error_code,
+                                       const void        * context_object,
+                                       const char        * format,
+                                       ... )
+{
+  char * text = 0, * msg = 0;
+  int error = 0;
+  va_list list;
+  size_t sz = 0;
+  int len = 0;
+  const char * status_text = NULL;
+
+
+  va_start( list, format);
+  len = vsnprintf( text, sz, format, list);
+  va_end  ( list );
+
+  {
+    text = calloc( sizeof(char), len+2 );
+    if(!text)
+    {
+      fprintf(stderr,
+      OYJL_DBG_FORMAT_"Could not allocate 256 byte of memory.\n",OYJL_DBG_ARGS_);
+      return 1;
+    }
+    va_start( list, format);
+    len = vsnprintf( text, len+1, format, list);
+    va_end  ( list );
+  }
+
+  if(error_code == oyjl_message_info) status_text = "Info: ";
+  if(error_code == oyjl_message_client_canceled) status_text = "Client Canceled: ";
+  if(error_code == oyjl_message_insufficient_data) status_text = "Insufficient data: ";
+  if(error_code == oyjl_message_error) status_text = "!!! ERROR: ";
+
+  if(status_text)
+    fprintf( stderr, "%s", status_text );
+  if(msg)
+    fprintf( stderr, "%s\n", msg );
+  fflush( stderr );
+
+  free( text ); text = 0;
+  free( msg ); msg = 0;
+
+  return error;
+}
+
+oyjl_message_f     oyjl_message_p = oyjl_message_func;
+
+/** @fn      openiccMessageFuncSet
+ *  @brief   set a custom message listener
+ *
+ *  @version OpenICC: 0.1.0
+ *  @date    2011/10/21
+ *  @since   2008/04/03 (OpenICC: 0.1.0)
+ */
+yajl_status    oyjl_message_func_set ( oyjl_message_f    message_func )
+{
+  if(message_func)
+    oyjl_message_p = message_func;
+  return 0;
 }
 
 char **        oyjl_string_split     ( const char        * text,
