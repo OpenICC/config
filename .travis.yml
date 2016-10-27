@@ -12,8 +12,8 @@ script:
   - ls ..
   - make
   - make check
-  - make coverage
   - if [[ "$CC" == "gcc" ]]; then
+      make coverage;
       echo ls && ls;
       echo ls TRAVIS_BUILD_DIR && ls $TRAVIS_BUILD_DIR;
       echo ls TRAVIS_BUILD_DIR/build/ && ls $TRAVIS_BUILD_DIR/build/
@@ -21,7 +21,7 @@ script:
       bash <(curl -s https://codecov.io/bash) -G "-o src/ src/*.c";
       bash <(curl -s https://codecov.io/bash) -G "-o ../config/src/ ../config/src/*.c";
       bash <(curl -s https://codecov.io/bash) -G "-o src/libopenicc/ src/libopenicc/*.c";
-      bash <(curl -s https://codecov.io/bash) -f $TRAVIS_BUILD_DIR/build/coverage.info -R $TRAVIS_BUILD_DIR -X gcov;
+      bash <(curl -s https://codecov.io/bash) -f coverage.info -R $TRAVIS_BUILD_DIR -X gcov;
     fi
 
 before_install:
