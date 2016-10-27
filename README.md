@@ -1,5 +1,9 @@
 # OpenICC Configuration README
-<a href="https://travis-ci.org/OpenICC/config"><img src="https://travis-ci.org/OpenICC/config.svg?branch=master"/></a> <a href="https://codedocs.xyz/OpenICC/config/"><img src="https://codedocs.xyz/OpenICC/config.svg"/></a>
+[![Build Status](https://travis-ci.org/OpenICC/config.svg?branch=master)](https://travis-ci.org/OpenICC/config)
+[![Documentation](https://codedocs.xyz/OpenICC/config.svg)](https://codedocs.xyz/OpenICC/config)
+[![codecov](https://codecov.io/gh/OpenICC/config/branch/master/graph/badge.svg)](https://codecov.io/gh/OpenICC/config)
+[![issues](https://img.shields.io/github/issues-raw/OpenICC/config.svg?style=flat-square)](https://github.com/OpenICC/config/issues)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](http://www.opensource.org/licenses/mit-license.php)
 
 The OpenICC configuration data base allows to store, share and manipulate
 colour management informations.
