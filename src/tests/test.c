@@ -651,6 +651,18 @@ oiTESTRESULT_e testConfig()
 
   fprintf(stdout, "\n" );
 
+  /* test JSON generation */
+  root = oyjl_tree_get_value( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/[]/my_key" );
+  oyjl_tree_to_json( root, &level, &json ); level = 0;
+  if(root && json)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS, 
+    "JSON   created                               %s", json );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL, 
+    "JSON   created                                 " );
+  }
+
+  
   file_name = oiGetConfigFileName();
 
   /* read JSON input file */
@@ -663,6 +675,7 @@ oiTESTRESULT_e testConfig()
   oyjl_tree_to_json( root, &level, &json );
   oyjl_tree_free( root ); root = NULL;
   if(text) free(text);
+
 
   /* parse JSON */
   config = openiccConfig_FromMem( json );

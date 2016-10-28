@@ -28,21 +28,9 @@
 #include <yajl/yajl_version.h>
 #endif
 #include "oyjl_tree.h"
+#include "oyjl_tree_internal.h"
 #define YA_FREE(afs, ptr) (afs)->free((afs)->ctx, (ptr))
 
-#if defined(_MSC_VER) 
-#define snprintf sprintf_s
-#endif
-
-#if defined(__GNUC__)
-# define  OYJL_DBG_FORMAT_ "%s:%d %s() "
-# define  OYJL_DBG_ARGS_   strrchr(__FILE__,'/') ? strrchr(__FILE__,'/')+1 : __FILE__,__LINE__,__func__
-#else
-# define  OYJL_DBG_FORMAT_ "%s:%d "
-# define  OYJL_DBG_ARGS_   strrchr(__FILE__,'/') ? strrchr(__FILE__,'/')+1 : __FILE__,__LINE__
-#endif
-
-extern oyjl_message_f oyjl_message_p;
 
 #define STATUS_CONTINUE 1
 #define STATUS_ABORT    0

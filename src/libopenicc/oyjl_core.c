@@ -21,30 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#if defined(_MSC_VER) 
-#define snprintf sprintf_s
-#endif
-#define oyjlAllocHelper_m_(ptr_, type, size_, alloc_func, action) { \
-  if ((size_) <= 0) {                                       \
-      oyjl_message_p( oyjl_message_insufficient_data, 0, "Nothing to allocate\n"); \
-  } else {                                                  \
-      void*(*a)(size_t size) = alloc_func?alloc_func:malloc;         \
-      ptr_ = (type*) a(sizeof (type) * (size_t)(size_));    \
-      memset( ptr_, 0, sizeof (type) * (size_t)(size_) );   \
-  }                                                         \
-  if (ptr_ == NULL) {                                       \
-      oyjl_message_p( oyjl_message_error, 0, "Out of memory\n"); \
-    action;                                                 \
-  }                                                         \
-}
-
-#if defined(__GNUC__)
-# define  OYJL_DBG_FORMAT_ "%s:%d %s() "
-# define  OYJL_DBG_ARGS_   strrchr(__FILE__,'/') ? strrchr(__FILE__,'/')+1 : __FILE__,__LINE__,__func__
-#else
-# define  OYJL_DBG_FORMAT_ "%s:%d "
-# define  OYJL_DBG_ARGS_   strrchr(__FILE__,'/') ? strrchr(__FILE__,'/')+1 : __FILE__,__LINE__
-#endif
+#include "oyjl_tree_internal.h"
 
 yajl_status  oyjl_message_func       ( oyjl_message_e      error_code,
                                        const void        * context_object,
