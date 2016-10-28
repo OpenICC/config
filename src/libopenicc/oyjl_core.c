@@ -28,7 +28,7 @@ yajl_status  oyjl_message_func       ( oyjl_message_e      error_code,
                                        const char        * format,
                                        ... )
 {
-  char * text = 0, * msg = 0;
+  char * text = 0;
   int error = 0;
   va_list list;
   size_t sz = 0;
@@ -60,12 +60,11 @@ yajl_status  oyjl_message_func       ( oyjl_message_e      error_code,
 
   if(status_text)
     fprintf( stderr, "%s", status_text );
-  if(msg)
-    fprintf( stderr, "%s\n", msg );
+  if(text)
+    fprintf( stderr, "%s\n", text );
   fflush( stderr );
 
   free( text ); text = 0;
-  free( msg ); msg = 0;
 
   return error;
 }
