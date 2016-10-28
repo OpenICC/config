@@ -655,7 +655,6 @@ oiTESTRESULT_e testConfig()
   root = (oyjl_val) calloc( sizeof(struct oyjl_val_s), 1 );
   v = oyjl_tree_get_value( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/[]/my_key" );
   oyjl_tree_to_json( root, &level, &json ); level = 0;
-  oyjl_tree_free( root ); root = NULL;
   if(root && json)
   { PRINT_SUB( oiTESTRESULT_SUCCESS, 
     "JSON   created                               %s", json );
@@ -663,7 +662,9 @@ oiTESTRESULT_e testConfig()
   { PRINT_SUB( oiTESTRESULT_FAIL, 
     "JSON   created                                 " );
   }
+  oyjl_tree_free( root ); root = NULL;
   if(json) free(json);
+  json = NULL;
 
   
   file_name = oiGetConfigFileName();
