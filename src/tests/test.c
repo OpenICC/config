@@ -645,15 +645,17 @@ oiTESTRESULT_e testConfig()
   int key_names_n = 0, values_n = 0,i,error = 0;
   char ** key_names, ** values;
   const char * base_key = "org/freedesktop/openicc/device/camera/[1]";
-  oyjl_val root = NULL;
+  oyjl_val root, v;
   char * json = NULL;
   int level = 0;
 
   fprintf(stdout, "\n" );
 
   /* test JSON generation */
-  root = oyjl_tree_get_value( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/[]/my_key" );
+  root = (oyjl_val) calloc( sizeof(struct oyjl_val_s), 1 );
+  v = oyjl_tree_get_value( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/[]/my_key" );
   oyjl_tree_to_json( root, &level, &json ); level = 0;
+  oyjl_tree_free( root ); root = NULL;
   if(root && json)
   { PRINT_SUB( oiTESTRESULT_SUCCESS, 
     "JSON   created                               %s", json );
@@ -661,6 +663,7 @@ oiTESTRESULT_e testConfig()
   { PRINT_SUB( oiTESTRESULT_FAIL, 
     "JSON   created                                 " );
   }
+  if(json) free(json);
 
   
   file_name = oiGetConfigFileName();
