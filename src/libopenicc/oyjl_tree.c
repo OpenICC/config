@@ -165,7 +165,7 @@ static oyjl_val context_pop(context_t *ctx)
 static int object_add_keyval(context_t *ctx,
                              oyjl_val obj, char *key, oyjl_val value)
 {
-    const char **tmpk;
+    char **tmpk;
     oyjl_val *tmpv;
 
     /* We're checking for NULL in "context_add_value" or its callers. */
@@ -811,9 +811,43 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
     found = 0;
 
     /* requests index in object or array */
-    if(oyjl_tree_paths_get_index( term, &pos ) == 0 && pos != -1)
+    if(oyjl_tree_paths_get_index( term, &pos ) == 0 && pos != -1 ||
+       /* request a empty index together with OYJL_CREATE_NEW */
+       strcmp(term,"[]") == 0)
     {
       level = oyjl_value_pos_get( parent, pos );
+
+      /* add new leave */
+      if(!level &&
+         flags & OYJL_CREATE_NEW)
+      {
+        level = value_alloc( oyjl_t_null );
+
+        if(parent)
+        {
+          if(parent->type != oyjl_t_array)
+          {
+            oyjl_tree_free_content( parent );
+            parent->type = oyjl_t_array;
+            oyjlAllocHelper_m_( parent->u.array.values, oyjl_val, 2, malloc, return NULL );
+          } else
+          {
+            oyjl_val *tmp;
+
+            tmp = realloc(parent->u.array.values,
+                    sizeof(*(parent->u.array.values)) * (parent->u.array.len + 1));
+            if (tmp == NULL)
+            {
+              oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"could not allocate memory", OYJL_DBG_ARGS_ );
+              return NULL;
+            }
+            parent->u.array.values = tmp;
+          }
+          parent->u.array.values[parent->u.array.len] = level;
+          parent->u.array.len++;
+        }
+      }
+
       found = 1;
     } else
     {
@@ -828,6 +862,50 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
           break;
         }
       }
+
+      /* add new leave */
+      if(!level &&
+         flags & OYJL_CREATE_NEW)
+      {
+        level = value_alloc( oyjl_t_null );
+
+        if(parent)
+        {
+          if(parent->type != oyjl_t_object)
+          {
+            oyjl_tree_free_content( parent );
+            parent->type = oyjl_t_object;
+            oyjlAllocHelper_m_( parent->u.object.values, oyjl_val, 2, malloc, return NULL );
+            oyjlAllocHelper_m_( parent->u.object.keys, char*, 2, malloc, return NULL );
+          } else
+          {
+            oyjl_val *tmp;
+            char ** keys;
+
+            tmp = realloc(parent->u.object.values,
+                    sizeof(*(parent->u.object.values)) * (parent->u.object.len + 1));
+            if (tmp == NULL)
+            {
+              oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"could not allocate memory", OYJL_DBG_ARGS_ );
+              return NULL;
+            }
+            parent->u.object.values = tmp;
+
+            keys = realloc(parent->u.object.keys,
+                    sizeof(*(parent->u.object.keys)) * (parent->u.object.len + 1));
+            if (keys == NULL)
+            {
+              oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"could not allocate memory", OYJL_DBG_ARGS_ );
+              return NULL;
+            }
+            parent->u.object.keys = keys;
+          }
+          parent->u.object.keys[parent->u.object.len] = oyjl_string_copy( term, malloc );
+          parent->u.object.values[parent->u.object.len] = level;
+          parent->u.object.len++;
+        }
+      }
+
       found = 1;
     }
     parent = level;
@@ -852,7 +930,7 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
  *
  *  A path string is constructed of terms and the slash delimiter '/'.
  *  Understood terms are object names or the squared brackets index operator [].
- *  Example: "foo/[3]/bar" will return the "bar" leave with the "found" string.
+ *  Example: "foo/[3]/bar" will return the "bar" node with the "found" string.
  *  @verbatim
     {
       "foo": [
@@ -864,16 +942,21 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
     }
     @endverbatim
  *
- *  @param[in]     v                   the oyjl node
- *  @param[in]     flags               OYJL_CREATE_NEW - returns leaves even
- *                                     if they did not yet exist
- *  @param[in]     format              the xpath format
- *  @param[in]     ...                 the variable argument list
- *  @return                            the childs text value
+ *  Creating a new node inside a existing tree needs just a root node - v.
+ *  The flags should contain OYJL_CREATE_NEW.
+ *  Example: "foo/[]/bar" will append a node to the foo array and create
+ *  the bar node, which is empty.
  *
- *  @version Oyranos: 0.9.5
+ *  @param[in]     v                   the oyjl node
+ *  @param[in]     flags               OYJL_CREATE_NEW - returns nodes even
+ *                                     if they did not yet exist
+ *  @param[in]     format              the format for the slashed path string
+ *  @param[in]     ...                 the variable argument list; optional
+ *  @return                            the requested node or zero
+ *
+ *  @version Oyranos: 0.9.6
+ *  @date    2016/10/28
  *  @since   2011/09/24 (Oyranos: 0.3.3)
- *  @date    2013/02/24
  */
 oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
                                        int                 flags,
