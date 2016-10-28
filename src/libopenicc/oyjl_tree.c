@@ -79,14 +79,22 @@ static void oyjl_object_free (oyjl_val v)
 
     for (i = 0; i < v->u.object.len; i++)
     {
-        free((char *) v->u.object.keys[i]);
-        v->u.object.keys[i] = NULL;
-        oyjl_tree_free (v->u.object.values[i]);
-        v->u.object.values[i] = NULL;
+        if(v->u.object.keys && v->u.object.keys[i])
+        {
+          free((char *) v->u.object.keys[i]);
+          v->u.object.keys[i] = NULL;
+        }
+        if(v->u.object.values && v->u.object.values[i])
+        {
+          oyjl_tree_free (v->u.object.values[i]);
+          v->u.object.values[i] = NULL;
+        }
     }
 
-    free((void*) v->u.object.keys);
-    free(v->u.object.values);
+    if(v->u.object.keys)
+      free((void*) v->u.object.keys);
+    if(v->u.object.values)
+      free(v->u.object.values);
 }
 
 static void oyjl_array_free (oyjl_val v)
@@ -97,11 +105,15 @@ static void oyjl_array_free (oyjl_val v)
 
     for (i = 0; i < v->u.array.len; i++)
     {
-        oyjl_tree_free (v->u.array.values[i]);
-        v->u.array.values[i] = NULL;
+        if(v->u.array.values && v->u.array.values[i])
+        {
+          oyjl_tree_free (v->u.array.values[i]);
+          v->u.array.values[i] = NULL;
+        }
     }
 
-    free(v->u.array.values);
+    if(v->u.array.values)
+      free(v->u.array.values);
 }
 
 /*
@@ -687,6 +699,13 @@ void oyjl_tree_to_json (oyjl_val v, int * level, char ** json)
            {
              oyjl_string_add( json, 0,0, "\n");
              n = *level; while(n--) oyjl_string_add(json, 0,0, " ");
+             if(!v->u.object.keys || !v->u.object.keys[i])
+             {
+               oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"missing key", OYJL_DBG_ARGS_ );
+               if(json && *json) free(*json);
+               *json = NULL;
+               return;
+             }
              oyjl_string_add( json, 0,0, "\"%s\": ", v->u.object.keys[i] );
              oyjl_tree_to_json( v->u.object.values[i], level, json );
              if(count > 1)
@@ -809,8 +828,10 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
           break;
         }
       }
+      found = 1;
     }
     parent = level;
+    level = NULL;
   }
 
   /* clean up temorary memory */
@@ -819,8 +840,8 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
   if(list)
     free(list);
 
-  if(found && level)
-    return level;
+  if(found && parent)
+    return parent;
   else
     return NULL;
 }
@@ -899,11 +920,11 @@ void oyjl_tree_free_content (oyjl_val v)
 {
     if (v == NULL) return;
 
-    if (OYJL_IS_STRING(v))
-        free(v->u.string);
-    else if (OYJL_IS_NUMBER(v))
-        free(v->u.number.r);
-    else if (OYJL_GET_OBJECT(v))
+    if (OYJL_IS_STRING(v)) {
+        if(v->u.string) free(v->u.string);
+    } else if (OYJL_IS_NUMBER(v)) {
+        if(v->u.number.r) free(v->u.number.r);
+    } else if (OYJL_GET_OBJECT(v))
         oyjl_object_free(v);
     else if (OYJL_GET_ARRAY(v))
         oyjl_array_free(v);
