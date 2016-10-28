@@ -51,5 +51,3 @@ Supported are autotools and cmake style builds.
 ### Known Bugs
 * The source code provides currently no mechanism for a write lock.
 
-### TODO
-* cascading config files or keys in openiccDB\_s
