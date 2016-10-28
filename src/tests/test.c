@@ -644,7 +644,7 @@ oiTESTRESULT_e testConfig()
   size_t size = 0;
   int key_names_n = 0, values_n = 0,i,error = 0;
   char ** key_names, ** values;
-  const char * base_key = "org/freedesktop/openicc/device/camera/[1]";
+  const char * base_key;
   oyjl_val root, v;
   char * json = NULL;
   int level = 0;
@@ -653,20 +653,23 @@ oiTESTRESULT_e testConfig()
 
   /* test JSON generation */
   root = (oyjl_val) calloc( sizeof(struct oyjl_val_s), 1 );
-  v = oyjl_tree_get_value( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/[]/my_key" );
+  base_key = "org/freedesktop/openicc/[]/my_key";
+  v = oyjl_tree_get_value( root, OYJL_CREATE_NEW, base_key );
   oyjl_tree_to_json( root, &level, &json ); level = 0;
   if(root && json)
   { PRINT_SUB( oiTESTRESULT_SUCCESS, 
-    "JSON   created                               %s", json );
+    "oyjl_tree_get_value(root,OYJL_CREATE_NEW,\"%s\")", base_key );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL, 
-    "JSON   created                                 " );
+    "oyjl_tree_get_value(root,OYJL_CREATE_NEW,\"%s\")", base_key );
   }
   oyjl_tree_free( root ); root = NULL;
+  fprintf(zout, "%s\n", json );
   if(json) free(json);
   json = NULL;
 
-  
+
+  base_key = "org/freedesktop/openicc/device/camera/[1]";
   file_name = oiGetConfigFileName();
 
   /* read JSON input file */
