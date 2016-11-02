@@ -24,6 +24,7 @@ according library for easy access.
 
 ### Dependencies
 * [Yajl](http://lloyd.github.com/yajl/) - a JSON parser library
+
 #### Optional
 * [gettext](https://www.gnu.org/software/gettext/) - i18n
 * [LCOV](http://ltp.sourceforge.net/coverage/lcov.php) - coverage docu
