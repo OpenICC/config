@@ -645,7 +645,7 @@ oiTESTRESULT_e testConfig()
   int key_names_n = 0, values_n = 0,i,error = 0;
   char ** key_names, ** values;
   const char * base_key;
-  oyjl_val root, v;
+  oyjl_val root, array, v;
   char * json = NULL;
   int level = 0;
 
@@ -653,8 +653,12 @@ oiTESTRESULT_e testConfig()
 
   /* test JSON generation */
   root = (oyjl_val) calloc( sizeof(struct oyjl_val_s), 1 );
-  base_key = "org/freedesktop/openicc/[]/my_key";
-  v = oyjl_tree_get_value( root, OYJL_CREATE_NEW, base_key );
+  base_key = "org/freedesktop/openicc/[]";
+  array = oyjl_tree_get_value( root, OYJL_CREATE_NEW, base_key );
+  v = oyjl_tree_get_value( array, OYJL_CREATE_NEW, "my_key_A" );
+  oyjl_value_set_string( v, "my_value_A" );
+  v = oyjl_tree_get_value( array, OYJL_CREATE_NEW, "my_key_B" );
+  oyjl_value_set_string( v, "my_value_B" );
   oyjl_tree_to_json( root, &level, &json ); level = 0;
   if(root && json)
   { PRINT_SUB( oiTESTRESULT_SUCCESS, 
