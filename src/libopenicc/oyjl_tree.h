@@ -219,6 +219,8 @@ oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
 int        oyjl_value_count          ( oyjl_val            v );
 oyjl_val   oyjl_value_pos_get        ( oyjl_val            v,
                                        int                 pos );
+int        oyjl_value_set_string     ( oyjl_val            v,
+                                       const char        * string );
 
 
 char **    oyjl_string_split         ( const char        * text,

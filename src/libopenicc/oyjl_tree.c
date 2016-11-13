@@ -998,6 +998,18 @@ oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
   return value;
 }
 
+int        oyjl_value_set_string     ( oyjl_val            v,
+                                       const char        * string )
+{
+  int error = -1;
+  if(v)
+  {
+    oyjl_tree_free_content( v );
+    v->type = oyjl_t_string;
+    oyjl_string_add( &v->u.string, 0,0, "%s", string );
+  }
+  return error;
+}
 
 void oyjl_tree_free_content (oyjl_val v)
 {
