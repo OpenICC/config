@@ -815,7 +815,10 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
        /* request a empty index together with OYJL_CREATE_NEW */
        strcmp(term,"[]") == 0)
     {
-      level = oyjl_value_pos_get( parent, pos );
+      if(count > pos)
+        level = oyjl_value_pos_get( parent, pos );
+      else
+        level = NULL;
 
       /* add new leave */
       if(!level &&
