@@ -182,7 +182,7 @@ int                openiccMessageFormat (
  *  @date    2009/07/20
  *  @since   2008/04/03 (OpenICC: 0.1.0)
  */
-int  openiccMessageFunc              ( openiccMSG_e        code,
+int  openiccMessageFunc              ( int/*openiccMSG_e*/ code,
                                        void              * context_object,
                                        const char        * format,
                                        ... )
