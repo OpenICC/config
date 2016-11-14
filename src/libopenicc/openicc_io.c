@@ -211,7 +211,47 @@ int openiccMakeDir_ (const char* path)
   return rc;
 }
 
+int openiccIsFileFull_ (const char* fullFileName, const char * read_mode)
+{
+  struct stat status;
+  int r = 0;
+  const char* name = fullFileName;
 
+  memset(&status,0,sizeof(struct stat));
+  r = stat (name, &status);
+
+  if(r != 0 && openicc_debug > 1)
+  switch (errno)
+  {
+    case EACCES:       WARNc_S("Permission denied: %s", name); break;
+    case EIO:          WARNc_S("EIO : %s", name); break;
+    case ENAMETOOLONG: WARNc_S("ENAMETOOLONG : %s", name); break;
+    case ENOENT:       WARNc_S("A component of the name/file_name does not exist, or the file_name is an empty string: \"%s\"", name); break;
+    case ENOTDIR:      WARNc_S("ENOTDIR : %s", name); break;
+    case ELOOP:        WARNc_S("Too many symbolic links encountered while traversing the name: %s", name); break;
+    case EOVERFLOW:    WARNc_S("EOVERFLOW : %s", name); break;
+    default:           WARNc_S("%s : %s", strerror(errno), name); break;
+  }
+
+  r = !r &&
+       (   ((status.st_mode & S_IFMT) & S_IFREG)
+        || ((status.st_mode & S_IFMT) & S_IFLNK)
+                                                );
+
+  if (r)
+  {
+    FILE* fp = fopen (name, read_mode);
+    if (!fp) {
+      openiccMessage_p( openiccMSG_DBG, 0, "not existent: %s", name );
+      r = 0;
+    } else {
+      fclose (fp);
+    }
+  }
+
+  return r;
+}
+  
 size_t openiccWriteFile(const char * filename,
                         void       * mem,
                         size_t       size )
