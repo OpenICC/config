@@ -1120,6 +1120,18 @@ oiTESTRESULT_e testODB()
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccDBSearchEmptyKeyname() %s", temp );
   }
+
+  openiccStringAddPrintf( &temp, 0,0, "%s/", "/my_test_key");
+  error = openiccDBSetString( temp, openiccSCOPE_SYSTEM, "my_test_value", "my_test_comment" );
+  if(!error)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccDBSetString(%s)        %d", temp, error );
+  } else
+  { PRINT_SUB( oiTESTRESULT_XFAIL,
+    "openiccDBSetString(%s)        %d", temp, error );
+  }
+
+
   if(temp) free(temp);
 
   return result;

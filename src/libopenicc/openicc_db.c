@@ -74,6 +74,29 @@ int      openiccArray_Push           ( openiccArray_s    * array )
   return openiccArray_Add( array, 1 );
 }
 
+const char * openiccScopeGetString   ( openiccSCOPE_e      scope )
+{
+  static char * txt = NULL;
+
+  if(!txt)
+    txt = malloc(128);
+
+  if(!txt)
+  {
+    openiccMessage_p( openiccMSG_ERROR, 0, "Out of memory" );
+    return "----";
+  }
+
+  sprintf( txt, "%s%s%s%s%s",
+           scope == openiccSCOPE_USER_SYS ? "all" : "",
+           scope & openiccSCOPE_USER ? (((scope & openiccSCOPE_USER) == scope)?"user":"user ") : "",
+           scope & openiccSCOPE_SYSTEM ? (((scope & openiccSCOPE_SYSTEM) == scope)?"system":"system ") : "",
+           scope & openiccSCOPE_OPENICC ? (((scope & openiccSCOPE_OPENICC) == scope)?"openicc":"openicc ") : "",
+           scope & openiccSCOPE_MACHINE ? "machine" : "" );
+
+  return txt;
+}
+
 /**
  *  @internal
  *  @brief    add a openiccConfig_s
@@ -329,13 +352,60 @@ const char * openiccGetShortKeyFromFullKeyPath( const char * key, char ** temp )
   return key_short;
 }
 
+/**
+ *  @brief    set a key name to a value
+ *
+ *  @param[in]     keyName             a key name string
+ *  @param[in]     scope               specify to intended user or system scope
+ *  @param[in]     value               a value string
+ *  @param[in]     comment             a comment string, currently ignored
+ *  @return                            0 - success, >=1 - error, <0 - issue
+ */
 int      openiccDBSetString          ( const char        * keyName,
                                        openiccSCOPE_e      scope,
                                        const char        * value,
                                        const char        * comment )
 {
+  const char * xpath = keyName;
   openiccDB_s * db = openiccDB_NewFrom( keyName, scope );
-  int error = !db || !keyName;
+  int error = keyName ? 0 : -1;
+
+  if(!db)
+  {
+    error = 1;
+    openiccMessage_p( openiccMSG_WARN, 0,
+                      "Could not create a intermediate db object for [%s]%s",
+                      openiccScopeGetString(scope), keyName?keyName:"" );
+  }
+
+  if(!error)
+  {
+    if(openiccArray_Count( (openiccArray_s*)&db->ks ))
+    {
+      oyjl_val o = oyjl_tree_get_value( db->ks[0]->oyjl, 0, xpath );
+      if(o)
+      { 
+        error = oyjl_value_set_string( o, value );
+        openiccMessage_p( openiccMSG_WARN, db,
+                          "Could not set JSON string for [%s]%s",
+                          openiccScopeGetString(scope), keyName?keyName:"" );
+      }
+      else
+      {
+        error = 1;
+        openiccMessage_p( openiccMSG_WARN, db,
+                          "Could not obtain JSON node for [%s]%s",
+                          openiccScopeGetString(scope), keyName?keyName:"" );
+      }
+    } else
+    {
+      error = 1;
+      openiccMessage_p( openiccMSG_WARN, db,
+                        "Could not find db::config object for [%s]%s",
+                        openiccScopeGetString(scope), keyName?keyName:"" );
+    }
+  }
+
   return error;
 }
 
