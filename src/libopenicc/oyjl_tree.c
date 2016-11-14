@@ -1020,8 +1020,10 @@ void oyjl_tree_free_content (oyjl_val v)
 
     if (OYJL_IS_STRING(v)) {
         if(v->u.string) free(v->u.string);
+        v->u.string = NULL;
     } else if (OYJL_IS_NUMBER(v)) {
         if(v->u.number.r) free(v->u.number.r);
+        v->u.number.r = NULL;
     } else if (OYJL_GET_OBJECT(v))
         oyjl_object_free(v);
     else if (OYJL_GET_ARRAY(v))
