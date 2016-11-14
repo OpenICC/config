@@ -28,14 +28,14 @@ extern "C" {
 #endif
 #define oyjlAllocHelper_m_(ptr_, type, size_, alloc_func, action) { \
   if ((size_) <= 0) {                                       \
-      oyjl_message_p( oyjl_message_insufficient_data, 0, "Nothing to allocate\n"); \
+      oyjl_message_p( oyjl_message_insufficient_data, 0, "Nothing to allocate"); \
   } else {                                                  \
       void*(*a)(size_t size) = alloc_func?alloc_func:malloc;         \
       ptr_ = (type*) a(sizeof (type) * (size_t)(size_));    \
       memset( ptr_, 0, sizeof (type) * (size_t)(size_) );   \
   }                                                         \
   if (ptr_ == NULL) {                                       \
-      oyjl_message_p( oyjl_message_error, 0, "Out of memory\n"); \
+      oyjl_message_p( oyjl_message_error, 0, "Out of memory"); \
     action;                                                 \
   }                                                         \
 }
