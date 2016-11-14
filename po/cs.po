@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-11-14 10:47+0100\n"
+"POT-Creation-Date: 2016-11-14 14:06+0100\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -19,12 +19,12 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr "!!! CHYBA"
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:151
+#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:154
 #, fuzzy
 msgid "Could not alloc memory"
 msgstr "Nelze alokovat paměť pro:"
 
-#: libopenicc/openicc_db.c:378
+#: libopenicc/openicc_db.c:383
 #, fuzzy
 msgid "Could not create a intermediate db object for"
 msgstr "Nelze rozpoznat zařízení"
@@ -34,30 +34,30 @@ msgstr "Nelze rozpoznat zařízení"
 msgid "Could not find config"
 msgstr "Nelze otevřít profil"
 
-#: libopenicc/openicc_db.c:442
+#: libopenicc/openicc_db.c:451
 #, fuzzy
 msgid "Could not find db::config object for"
 msgstr "Nelze otevřít profil"
 
-#: libopenicc/openicc_db.c:436
+#: libopenicc/openicc_db.c:445
 #, fuzzy
 msgid "Could not obtain JSON node for"
 msgstr "Nelze otevřít meta modul API"
 
-#: libopenicc/openicc_db.c:393
+#: libopenicc/openicc_db.c:402
 msgid "Could not set JSON string for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:203
+#: libopenicc/openicc_db.c:206
 #, fuzzy
 msgid "Could not setup db objetc"
 msgstr "Nelze rozpoznat zařízení"
 
-#: libopenicc/openicc_db.c:419
+#: libopenicc/openicc_db.c:428
 msgid "No JSON content obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:428
+#: libopenicc/openicc_db.c:437
 msgid "No JSON obtained for"
 msgstr ""
 
@@ -70,7 +70,7 @@ msgstr "Cesty"
 msgid "WARNING"
 msgstr "VAROVÁNÍ"
 
-#: libopenicc/openicc_db.c:412
+#: libopenicc/openicc_db.c:421
 msgid "Writing failed for"
 msgstr ""
 

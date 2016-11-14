@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenICC 0.1\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-11-14 10:47+0100\n"
+"POT-Creation-Date: 2016-11-14 14:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,7 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr ""
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:151
+#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:154
 msgid "Could not alloc memory"
 msgstr ""
 
@@ -37,34 +37,34 @@ msgstr ""
 msgid "Paths:"
 msgstr ""
 
-#: libopenicc/openicc_db.c:203
+#: libopenicc/openicc_db.c:206
 msgid "Could not setup db objetc"
 msgstr ""
 
-#: libopenicc/openicc_db.c:378
+#: libopenicc/openicc_db.c:383
 msgid "Could not create a intermediate db object for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:393
+#: libopenicc/openicc_db.c:402
 msgid "Could not set JSON string for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:412
+#: libopenicc/openicc_db.c:421
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:419
+#: libopenicc/openicc_db.c:428
 msgid "No JSON content obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:428
+#: libopenicc/openicc_db.c:437
 msgid "No JSON obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:436
+#: libopenicc/openicc_db.c:445
 msgid "Could not obtain JSON node for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:442
+#: libopenicc/openicc_db.c:451
 msgid "Could not find db::config object for"
 msgstr ""

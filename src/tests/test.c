@@ -993,7 +993,7 @@ oiTESTRESULT_e testODB()
   const char * top_key_name = OPENICC_DEVICE_PATH;
   openiccDB_s * db;
   const char * key = "org/freedesktop/openicc/device/camera/[0]/key";
-  char * temp;
+  char * gkey, * temp, * temp2;
   char ** key_names = NULL, ** values = NULL;
   int key_names_n = 0, i,error = 0;
 
@@ -1121,27 +1121,40 @@ oiTESTRESULT_e testODB()
     "openiccDBSearchEmptyKeyname() %s", temp );
   }
 
-  openiccStringAddPrintf( &temp, 0,0, "%s", "/my_test_key");
-  error = openiccDBSetString( temp, openiccSCOPE_SYSTEM, "my_test_value", "my_test_comment" );
+  gkey = NULL;
+  openiccStringAddPrintf( &gkey, 0,0, "%s%s", temp, "/my_test_key");
+  error = openiccDBSetString( gkey, openiccSCOPE_SYSTEM, "my_test_value", "my_test_comment" );
   if(!error)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccDBSetString(%s)        %d", temp, error );
+    "openiccDBSetString(%s)        %d", gkey, error );
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
-    "openiccDBSetString(%s)        %d", temp, error );
+    "openiccDBSetString(%s)        %d", gkey, error );
   }
 
-  error = openiccDBSetString( temp, openiccSCOPE_USER, "my_test_value", "my_test_comment" );
+  error = openiccDBSetString( gkey, openiccSCOPE_USER, "my_test_value", "my_test_comment" );
   if(!error)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccDBSetString(%s)        %d", temp, error );
+    "openiccDBSetString(%s)        %d", gkey, error );
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
-    "openiccDBSetString(%s)        %d", temp, error );
+    "openiccDBSetString(%s)        %d", gkey, error );
+  }
+
+  error = openiccDBSetString( gkey, openiccSCOPE_USER, NULL, "delete" );
+  temp2 = openiccDBSearchEmptyKeyname( key, openiccSCOPE_USER );
+  if(!error && strcmp(temp, temp2) == 0)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccDBSetString(%s,\"delete\") %d", gkey, error );
+  } else
+  { PRINT_SUB( oiTESTRESULT_XFAIL,
+    "openiccDBSetString(%s,\"delete\") %d", gkey, error );
   }
 
 
+  if(gkey) free(gkey);
   if(temp) free(temp);
+  if(temp2) free(temp2);
 
   return result;
 }
