@@ -1026,6 +1026,98 @@ void oyjl_tree_free_content (oyjl_val v)
         oyjl_object_free(v);
     else if (OYJL_GET_ARRAY(v))
         oyjl_array_free(v);
+
+    v->type = oyjl_t_null;
+}
+
+void oyjl_tree_free_node             ( oyjl_val            root,
+                                       const char        * xpath )
+{
+  int n = 0, i, pos, count;
+  char ** list = oyjl_string_split(xpath, '/', &n, malloc);
+  char * path = oyjl_string_copy( xpath, malloc );
+
+  for(pos = 0; pos < (n-1); ++pos)
+  {
+    oyjl_val p; /* parent */
+    oyjl_val o = oyjl_tree_get_value( root, 0, path );
+    int delete_parent = 0;
+
+    char * parent_path = oyjl_string_copy( path, malloc ),
+         * t = strrchr(parent_path, '/');
+    if(t)
+      t[0] = '\000';
+
+    p = oyjl_tree_get_value( root, 0, parent_path );
+    if(p)
+    {
+      switch(p->type)
+      {
+      case oyjl_t_array:
+         {
+           count = p->u.array.len;
+
+           for(i = 0; i < count; ++i)
+           {
+             if( p->u.array.values[i] == o )
+             {
+               oyjl_tree_free( o );
+               p->u.array.values[i] = NULL;
+
+               if(count > 1)
+                 memmove( &p->u.array.values[i], &p->u.array.values[i+1],
+                          sizeof(oyjl_val *) * (count - i - 1) );
+               else
+                 delete_parent = 1;
+
+               --p->u.array.len;
+               break;
+             }
+           }
+         }
+         break;
+      case oyjl_t_object:
+         {
+           count = p->u.object.len;
+
+           for(i = 0; i < count; ++i)
+           {
+             if( p->u.object.values[i] == o )
+             {
+               oyjl_tree_free( o );
+               p->u.object.keys[i] = NULL;
+               p->u.object.values[i] = NULL;
+
+               if(count > 1)
+               {
+                 memmove( &p->u.object.keys[i], &p->u.object.keys[i+1],
+                          sizeof(char *) * (count - i - 1) );
+                 memmove( &p->u.object.values[i], &p->u.object.values[i+1],
+                          sizeof(oyjl_val *) * (count - i - 1) );
+               }
+               else
+                 delete_parent = 1;
+
+               --p->u.object.len;
+               break;
+             }
+           }
+         }
+         break;
+      }
+    }
+
+    if(path) free(path);
+    path = parent_path;
+    parent_path = NULL;
+
+    if(delete_parent == 0)
+      break;
+  }
+
+  for(i = 0; i < n; ++i) free(list[i]);
+  if(list) free(list);
+  if(path) free(path);
 }
 
 void oyjl_tree_free (oyjl_val v)
