@@ -134,7 +134,10 @@ int           openiccDB_AddScope     ( openiccDB_s       * db,
     const char * db_file = paths[i];
     /* read JSON input file */
     size_t size = 0;
-    char * text = openiccOpenFile( db_file, &size );
+    char * text = NULL;
+
+    if(openiccIsFileFull_( db_file, "r" ))
+      text = openiccOpenFile( db_file, &size );
 
     /* parse JSON */
     if(text)
@@ -359,7 +362,9 @@ const char * openiccGetShortKeyFromFullKeyPath( const char * key, char ** temp )
  *  @param[in]     keyName             a key name string
  *  @param[in]     scope               specify to intended user or system scope
  *  @param[in]     value               a value string
- *  @param[in]     comment             a comment string, currently ignored
+ *  @param[in]     comment             a comment string;
+ *                                     The keyName will be deleted with
+ *                                     value=NULL and comment="delete".
  *  @return                            0 - success, >=1 - error, <0 - issue
  */
 int      openiccDBSetString          ( const char        * keyName,
@@ -386,7 +391,11 @@ int      openiccDBSetString          ( const char        * keyName,
       oyjl_val o = oyjl_tree_get_value( db->ks[0]->oyjl, OYJL_CREATE_NEW, xpath );
       if(o)
       { 
-        error = oyjl_value_set_string( o, value );
+        if(value == NULL && comment && strcmp(comment,"delete") == 0)
+        {
+          oyjl_tree_free_node( db->ks[0]->oyjl, keyName );
+        } else
+          error = oyjl_value_set_string( o, value );
         if(error)
         {
           openiccMessage_p( openiccMSG_ERROR, db, "%s [%s]/%s",
