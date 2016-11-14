@@ -53,6 +53,12 @@ typedef void   (*openiccDeAlloc_f)   ( void              * data );
   "}\n"
 
 
+typedef enum {
+  openiccOBJECT_NONE,
+  openiccOBJECT_CONFIG = 312,
+  openiccOBJECT_DB
+} openiccOBJECT_e;
+
 typedef struct openiccConfig_s openiccConfig_s;
 
 openiccConfig_s  * openiccConfig_FromMem (
@@ -174,7 +180,7 @@ typedef enum {
   openiccMSG_DBG,                      /**< @brief developer messages */
 } openiccMSG_e;
 
-typedef int  (*openiccMessage_f)     ( openiccMSG_e        error_code,
+typedef int  (*openiccMessage_f)     ( int/*openiccMSG_e*/ error_code,
                                        void              * context_object,
                                        const char        * format,
                                        ... );
