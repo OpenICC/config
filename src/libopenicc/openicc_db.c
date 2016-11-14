@@ -97,6 +97,31 @@ const char * openiccScopeGetString   ( openiccSCOPE_e      scope )
   return txt;
 }
 
+char *        openiccDBGetJSONFile   ( openiccSCOPE_e      scope )
+{
+  const char * config_file = OPENICC_DB_PREFIX OPENICC_SLASH OPENICC_DB;
+  /* Locate the directories where the config file is, */
+  /* and where we should copy the profile to. */
+  int npaths;
+  xdg_error er;
+  char **paths;
+  char * db_file;
+  
+
+  if ((npaths = xdg_bds(&er, &paths, xdg_conf, xdg_write, 
+                        (scope == openiccSCOPE_SYSTEM) ? xdg_local : xdg_user,
+                        config_file)) == 0)
+  {
+    ERRc_S("%s %d", _("Could not find config"), scope );
+    return NULL;
+  }
+  
+  db_file = openiccStringCopy( paths[0], malloc );
+  xdg_free(paths, npaths);
+
+  return db_file;
+}
+
 /**
  *  @internal
  *  @brief    add a openiccConfig_s
@@ -386,14 +411,29 @@ int      openiccDBSetString          ( const char        * keyName,
 
   if(!error)
   {
+    oyjl_val root;
+    char * file_name;
+
     if(openiccArray_Count( (openiccArray_s*)&db->ks ))
     {
-      oyjl_val o = oyjl_tree_get_value( db->ks[0]->oyjl, OYJL_CREATE_NEW, xpath );
+      root = db->ks[0]->oyjl;
+      file_name = openiccStringCopy( db->ks[0]->info, malloc );
+    }
+    else
+    {
+      openiccDB_Release( &db );
+      root = (oyjl_val) calloc( sizeof(struct oyjl_val_s), 1 );
+      file_name = openiccDBGetJSONFile( scope );
+    }
+
+    if(root)
+    {
+      oyjl_val o = oyjl_tree_get_value( root, OYJL_CREATE_NEW, xpath );
       if(o)
       { 
         if(value == NULL && comment && strcmp(comment,"delete") == 0)
         {
-          oyjl_tree_free_node( db->ks[0]->oyjl, keyName );
+          oyjl_tree_free_node( root, keyName );
         } else
           error = oyjl_value_set_string( o, value );
         if(error)
@@ -403,12 +443,11 @@ int      openiccDBSetString          ( const char        * keyName,
                    openiccScopeGetString(scope), keyName?keyName:"" );
         } else
         {
-          const char * file_name = db->ks[0]->info;
           char * json = NULL;
           size_t size = 0, result = 0;
           int level = 0;
 
-          oyjl_tree_to_json( db->ks[0]->oyjl, &level, &json );
+          oyjl_tree_to_json( root, &level, &json );
           if(json)
           {
             size = strlen(json);
@@ -445,13 +484,18 @@ int      openiccDBSetString          ( const char        * keyName,
                  _("Could not obtain JSON node for"),
                  openiccScopeGetString(scope), keyName?keyName:"" );
       }
+
+      if(root && !db)
+        oyjl_tree_free(root);
+
     } else
     { error = 1;
       ERRcc_S( db, "%s [%s]/%s",
-               _("Could not find db::config object for"),
+               _("Could not create root JSON node for"),
                openiccScopeGetString(scope), keyName?keyName:"" );
     }
     openiccDB_Release( &db );
+    if(file_name) free(file_name);
   }
 
   return error;
