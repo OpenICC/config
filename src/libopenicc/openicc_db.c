@@ -142,6 +142,7 @@ int           openiccDB_AddScope     ( openiccDB_s       * db,
       int count = openiccArray_Count( (openiccArray_s*)&db->ks );
       openiccConfig_s * config = openiccConfig_FromMem( text );
       if(text) free(text); text = NULL;
+      /* The file name is expected later on write. */
       openiccConfig_SetInfo ( config, db_file );
 
       /* reserve enough memory in list array */
@@ -374,7 +375,7 @@ int      openiccDBSetString          ( const char        * keyName,
   {
     error = 1;
     openiccMessage_p( openiccMSG_WARN, 0,
-                      "Could not create a intermediate db object for [%s]%s",
+                      "Could not create a intermediate db object for [%s]/%s",
                       openiccScopeGetString(scope), keyName?keyName:"" );
   }
 
@@ -382,28 +383,66 @@ int      openiccDBSetString          ( const char        * keyName,
   {
     if(openiccArray_Count( (openiccArray_s*)&db->ks ))
     {
-      oyjl_val o = oyjl_tree_get_value( db->ks[0]->oyjl, 0, xpath );
+      oyjl_val o = oyjl_tree_get_value( db->ks[0]->oyjl, OYJL_CREATE_NEW, xpath );
       if(o)
       { 
         error = oyjl_value_set_string( o, value );
-        openiccMessage_p( openiccMSG_WARN, db,
-                          "Could not set JSON string for [%s]%s",
-                          openiccScopeGetString(scope), keyName?keyName:"" );
+        if(error)
+        {
+          openiccMessage_p( openiccMSG_WARN, db,
+                            "Could not set JSON string for [%s]/%s",
+                            openiccScopeGetString(scope), keyName?keyName:"" );
+        } else
+        {
+          const char * file_name = db->ks[0]->info;
+          char * json = NULL;
+          size_t size = 0, result = 0;
+          int level = 0;
+
+          oyjl_tree_to_json( db->ks[0]->oyjl, &level, &json );
+          if(json)
+          {
+            size = strlen(json);
+            if(size)
+            {
+              result = openiccWriteFile( file_name, json, size );
+              if(result != size)
+              { error = 1;
+                openiccMessage_p( openiccMSG_WARN, db,
+                                  "Writing %s failed for [%s]/%s", file_name,
+                                  openiccScopeGetString(scope), keyName?keyName:"" );
+              }
+            }
+            else
+            { error = 1;
+              openiccMessage_p( openiccMSG_WARN, db,
+                                "No JSON content obtained for [%s]/%s",
+                                openiccScopeGetString(scope), keyName?keyName:"" );
+            }
+
+            free( json ); json = NULL;
+          }
+          else
+          { error = 1;
+            openiccMessage_p( openiccMSG_WARN, db,
+                              "No JSON obtained for [%s]/%s",
+                              openiccScopeGetString(scope), keyName?keyName:"" );
+          }
+        }
       }
       else
-      {
-        error = 1;
+      { error = 1;
         openiccMessage_p( openiccMSG_WARN, db,
                           "Could not obtain JSON node for [%s]%s",
                           openiccScopeGetString(scope), keyName?keyName:"" );
       }
     } else
-    {
-      error = 1;
+    { error = 1;
       openiccMessage_p( openiccMSG_WARN, db,
                         "Could not find db::config object for [%s]%s",
                         openiccScopeGetString(scope), keyName?keyName:"" );
     }
+    openiccDB_Release( &db );
   }
 
   return error;

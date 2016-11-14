@@ -1009,7 +1009,7 @@ int        oyjl_value_set_string     ( oyjl_val            v,
   {
     oyjl_tree_free_content( v );
     v->type = oyjl_t_string;
-    oyjl_string_add( &v->u.string, 0,0, "%s", string );
+    error = oyjl_string_add( &v->u.string, 0,0, "%s", string );
   }
   return error;
 }

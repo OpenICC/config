@@ -44,7 +44,7 @@ openiccConfig_s *  openiccConfig_FromMem( const char       * data )
 
     config->type = openiccOBJECT_CONFIG;
     config->json_text = strdup( (char*)data );
-    config->dbg_text = openiccStringCopy( "openiccConfig_FromMem()", malloc );
+    config->info = openiccStringCopy( "openiccConfig_FromMem()", malloc );
     config->oyjl = oyjl_tree_parse( data, NULL, 0 );
     if(!config->oyjl)
     {
@@ -80,10 +80,10 @@ void               openiccConfig_Release (
         oyjl_tree_free(c->oyjl);
       else
         WARNcc_S( c, "expected openiccConfig_s::oyjl",0 );
-      if(c->dbg_text)
-        free(c->dbg_text);
+      if(c->info)
+        free(c->info);
       else
-        WARNcc_S( c, "expected openiccConfig_s::dbg_text",0 );
+        WARNcc_S( c, "expected openiccConfig_s::info",0 );
       free(c);
     }
     *config = NULL;
@@ -100,9 +100,9 @@ void               openiccConfig_SetInfo (
 {
   if(config && debug_info)
   {
-    if(config->dbg_text)
-      free(config->dbg_text);
-    config->dbg_text = strdup( (char*)debug_info );
+    if(config->info)
+      free(config->info);
+    config->info = strdup( (char*)debug_info );
   }
 }
 
@@ -170,7 +170,7 @@ int                openiccConfig_DevicesCount (
       }
     } else
       WARNcc_S( config, "could not find " OPENICC_DEVICE_PATH " %s",
-                config->dbg_text ? config->dbg_text : "" );
+                config->info ? config->info : "" );
   }
 
   return n;
@@ -303,7 +303,7 @@ const char *       openiccConfig_DeviceGet (
       }
     } else
       WARNcc_S( config, "could not find " OPENICC_DEVICE_PATH " %s",
-                config->dbg_text ? config->dbg_text : "" );
+                config->info ? config->info : "" );
   }
 
   return actual_device_class;
@@ -423,7 +423,7 @@ char *             openiccConfig_DeviceClassGet (
 
     } else
       WARNcc_S( config, "could not find " OPENICC_DEVICE_PATH " %s",
-                config->dbg_text ? config->dbg_text : "" );
+                config->info ? config->info : "" );
   }
 
   return device_class;

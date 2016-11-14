@@ -95,7 +95,7 @@ int                openiccMessageFormat (
 
   if(c)
   {
-    id_text = c->dbg_text;
+    id_text = c->info;
     if(id_text)
       id_text_tmp = strdup(id_text);
     id_text = id_text_tmp;

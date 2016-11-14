@@ -89,7 +89,7 @@ struct openiccConfig_s {
   openiccOBJECT_e type;
   char     * json_text;
   oyjl_val   oyjl;
-  char     * dbg_text;
+  char     * info;
 };
 
 struct openiccDB_s {
