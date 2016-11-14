@@ -31,6 +31,24 @@
 #define oyjl_string_list_release       openiccStringListRelease
 #define oyjl_string_list_free_doubles  openiccStringListFreeDoubles
 #define oyjl_string_list_add_static_string openiccStringListAddStaticString
+#define oyjl_string_to_long            openiccStringToLong
+#define oyjl_array_free                openiccJArrayFree
+#define oyjl_object_free               openiccJObjectFree
+#define oyjl_tree_callbacks            openicc_jtree_callbacks
+#define oyjl_tree_free                 openiccJTreeFree
+#define oyjl_tree_free_content         openiccJTreeFreeContent
+#define oyjl_tree_free_node            openiccJTreeFreeNode
+#define oyjl_tree_get                  openiccJTreeGet
+#define oyjl_tree_get_value            openiccJTreeGetValue
+#define oyjl_tree_get_valuef           openiccJTreeGetValuef
+#define oyjl_tree_parse                openiccJTreeParse
+#define oyjl_tree_paths_get_index      openiccJTreePathsGetIndex
+#define oyjl_tree_to_json              openiccJTreeToJson
+#define oyjl_tree_to_paths             openiccJTreeToPaths
+#define oyjl_value_count               openiccJValueCount
+#define oyjl_value_pos_get             openiccJValuePosGet
+#define oyjl_value_set_string          openiccJValueSetString
+#define oyjl_value_text                openiccJValueText
 #include "oyjl_tree.h"
 
 #include "openicc_conf.h"
@@ -79,12 +97,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum {
-  openiccOBJECT_NONE,
-  openiccOBJECT_CONFIG = 312,
-  openiccOBJECT_DB
-} openiccOBJECT_e;
-
 struct openiccConfig_s {
   openiccOBJECT_e type;
   char     * json_text;
@@ -116,7 +128,7 @@ char *       openiccStringCopy       ( const char        * text,
 
 
 extern openiccMessage_f     openiccMessage_p;
-int  openiccMessageFunc              ( openiccMSG_e        code,
+int  openiccMessageFunc              ( int/*openiccMSG_e*/ code,
                                        void              * context_object,
                                        const char        * format,
                                        ... );
