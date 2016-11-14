@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-10-27 15:45+0200\n"
+"POT-Creation-Date: 2016-11-14 10:47+0100\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -23,25 +23,53 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr "!!! Fehler"
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:127
+#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:151
 msgid "Could not alloc memory"
 msgstr "Kann keinen Speicher reservieren"
 
-#: libopenicc/openicc_db.c:99
+#: libopenicc/openicc_db.c:378
+msgid "Could not create a intermediate db object for"
+msgstr "Konnte temporäres DB Objekt nicht erstellen für"
+
+#: libopenicc/openicc_db.c:122
 msgid "Could not find config"
 msgstr "Konnte Konfiguration nicht finden"
 
-#: libopenicc/openicc_db.c:179
+#: libopenicc/openicc_db.c:442
+msgid "Could not find db::config object for"
+msgstr "Konnte db::config nicht finden für"
+
+#: libopenicc/openicc_db.c:436
+msgid "Could not obtain JSON node for"
+msgstr "Konnte kein JSON Knoten erhalten für"
+
+#: libopenicc/openicc_db.c:393
+msgid "Could not set JSON string for"
+msgstr "Konnte keinen JSON Text setzen für"
+
+#: libopenicc/openicc_db.c:203
 msgid "Could not setup db objetc"
 msgstr "Konnte DB Objekt nicht erstellen"
 
-#: libopenicc/openicc_db.c:104
+#: libopenicc/openicc_db.c:419
+msgid "No JSON content obtained for"
+msgstr "Kein JSON Inhalt erhalten für"
+
+#: libopenicc/openicc_db.c:428
+msgid "No JSON obtained for"
+msgstr "Kein JSON erhalten für"
+
+#: libopenicc/openicc_db.c:127
 msgid "Paths:"
 msgstr "Pfade:"
 
 #: libopenicc/openicc_core.c:121
 msgid "WARNING"
 msgstr "WARNUNG"
+
+#: libopenicc/openicc_db.c:412
+msgid "Writing failed for"
+msgstr "Schreiben mislungen für"
 
 #~ msgid ""
 #~ "    ICC Examin is licensed under the GPL version 2.    Especially all "
@@ -877,9 +905,6 @@ msgstr "WARNUNG"
 
 #~ msgid "Could not open instrument"
 #~ msgstr "Konnte Instrument nicht öffnen"
-
-#~ msgid "Could not open meta module API"
-#~ msgstr "Konnte Meta Schnittstelle nicht öffnen"
 
 #~ msgid "Could not open or invalid data: "
 #~ msgstr "Konnte nicht öffnen oder ungültige Daten: "

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-10-27 15:45+0200\n"
+"POT-Creation-Date: 2016-11-14 10:47+0100\n"
 "PO-Revision-Date: 2007-11-07 11:11+0100\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
 "Language-Team: Basque <itzulpena@euskalgnu.org>\n"
@@ -23,28 +23,59 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr ""
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:127
+#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:151
 #, fuzzy
 msgid "Could not alloc memory"
 msgstr "Ezin izan da letra-tipoa ireki:"
 
-#: libopenicc/openicc_db.c:99
+#: libopenicc/openicc_db.c:378
+#, fuzzy
+msgid "Could not create a intermediate db object for"
+msgstr "Ezin izan da letra-tipoa ireki:"
+
+#: libopenicc/openicc_db.c:122
 #, fuzzy
 msgid "Could not find config"
 msgstr "Ezin izan da letra-tipoa ireki:"
 
-#: libopenicc/openicc_db.c:179
+#: libopenicc/openicc_db.c:442
+#, fuzzy
+msgid "Could not find db::config object for"
+msgstr "Ezin izan da letra-tipoa ireki:"
+
+#: libopenicc/openicc_db.c:436
+#, fuzzy
+msgid "Could not obtain JSON node for"
+msgstr "Ezin izan da letra-tipoa ireki:"
+
+#: libopenicc/openicc_db.c:393
+msgid "Could not set JSON string for"
+msgstr ""
+
+#: libopenicc/openicc_db.c:203
 #, fuzzy
 msgid "Could not setup db objetc"
 msgstr "Ezin izan da letra-tipoa ireki:"
 
-#: libopenicc/openicc_db.c:104
+#: libopenicc/openicc_db.c:419
+msgid "No JSON content obtained for"
+msgstr ""
+
+#: libopenicc/openicc_db.c:428
+msgid "No JSON obtained for"
+msgstr ""
+
+#: libopenicc/openicc_db.c:127
 #, fuzzy
 msgid "Paths:"
 msgstr "Pausarazi"
 
 #: libopenicc/openicc_core.c:121
 msgid "WARNING"
+msgstr ""
+
+#: libopenicc/openicc_db.c:412
+msgid "Writing failed for"
 msgstr ""
 
 #~ msgid ""
@@ -614,10 +645,6 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "Could not open instrument"
-#~ msgstr "Ezin izan da letra-tipoa ireki:"
-
-#, fuzzy
-#~ msgid "Could not open meta module API"
 #~ msgstr "Ezin izan da letra-tipoa ireki:"
 
 #, fuzzy
