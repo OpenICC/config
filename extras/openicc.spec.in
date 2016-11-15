@@ -1,7 +1,7 @@
 #
 # spec file for package openicc
 #
-# Copyright (c) 2015 Kai-Uwe Behrmann <ku.b@gmx.de>
+# Copyright (c) 2015-2016 Kai-Uwe Behrmann <ku.b@gmx.de>
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -121,7 +121,9 @@ Header files, libraries and documentation for development.
 
 %install
 %make_install -C build
-rm -fr %{buildroot}/%{_datadir}/doc/%{name}
+mkdir -p %{buildroot}/%{_datadir}/doc/packages/lib%{name}
+mv %{buildroot}/%{_datadir}/doc/%{name}/html/* %{buildroot}/%{_datadir}/doc/packages/lib%{name}
+rm -rf %{buildroot}/%{_datadir}/doc/%{name}
 %find_lang OpenICC       # generate a special file list
 
 %post -n lib%{name}0 -p /sbin/ldconfig
@@ -150,7 +152,8 @@ rm -fr %{buildroot}/%{_datadir}/doc/%{name}
 %dir %{_libdir}/cmake/%{name}
 %{_libdir}/cmake/%{name}/*.cmake
 %{_libdir}/lib%{name}-static.a
-
+%dir %{_datadir}/doc/packages/lib%{name}
+%{_datadir}/doc/packages/lib%{name}
 
 %changelog
 * Fri Aug 28 2015 Kai-Uwe Behrmann
