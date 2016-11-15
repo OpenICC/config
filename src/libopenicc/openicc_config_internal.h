@@ -142,6 +142,7 @@ char * openiccReadFileSToMem(
 size_t openiccWriteFile(const char * file_name,
                         void       * ptr,
                         size_t       size );
+int openiccIsFileFull_ (const char* fullFileName, const char * read_mode);
 char * openiccExtractPathFromFileName_(const char        * file_name );
 int    openiccIsDirFull_             ( const char        * name );
 char * openiccPathGetParent_         ( const char        * name );
