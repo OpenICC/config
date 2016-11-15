@@ -811,7 +811,7 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
     found = 0;
 
     /* requests index in object or array */
-    if(oyjl_tree_paths_get_index( term, &pos ) == 0 && pos != -1 ||
+    if((oyjl_tree_paths_get_index( term, &pos ) == 0 && pos != -1) ||
        /* request a empty index together with OYJL_CREATE_NEW */
        strcmp(term,"[]") == 0)
     {
@@ -1106,6 +1106,7 @@ void oyjl_tree_free_node             ( oyjl_val            root,
            }
          }
          break;
+      default: break; /* ok */
       }
     }
 

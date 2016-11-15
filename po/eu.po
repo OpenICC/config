@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-11-14 14:06+0100\n"
+"POT-Creation-Date: 2016-11-14 21:09+0100\n"
 "PO-Revision-Date: 2007-11-07 11:11+0100\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
 "Language-Team: Basque <itzulpena@euskalgnu.org>\n"
@@ -23,49 +23,49 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr ""
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:154
+#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:179
 #, fuzzy
 msgid "Could not alloc memory"
 msgstr "Ezin izan da letra-tipoa ireki:"
 
-#: libopenicc/openicc_db.c:383
+#: libopenicc/openicc_db.c:408
 #, fuzzy
 msgid "Could not create a intermediate db object for"
 msgstr "Ezin izan da letra-tipoa ireki:"
 
-#: libopenicc/openicc_db.c:122
+#: libopenicc/openicc_db.c:494
+#, fuzzy
+msgid "Could not create root JSON node for"
+msgstr "Ezin izan da letra-tipoa ireki:"
+
+#: libopenicc/openicc_db.c:115 libopenicc/openicc_db.c:147
 #, fuzzy
 msgid "Could not find config"
 msgstr "Ezin izan da letra-tipoa ireki:"
 
-#: libopenicc/openicc_db.c:451
-#, fuzzy
-msgid "Could not find db::config object for"
-msgstr "Ezin izan da letra-tipoa ireki:"
-
-#: libopenicc/openicc_db.c:445
+#: libopenicc/openicc_db.c:484
 #, fuzzy
 msgid "Could not obtain JSON node for"
 msgstr "Ezin izan da letra-tipoa ireki:"
 
-#: libopenicc/openicc_db.c:402
+#: libopenicc/openicc_db.c:442
 msgid "Could not set JSON string for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:206
+#: libopenicc/openicc_db.c:231
 #, fuzzy
 msgid "Could not setup db objetc"
 msgstr "Ezin izan da letra-tipoa ireki:"
 
-#: libopenicc/openicc_db.c:428
+#: libopenicc/openicc_db.c:467
 msgid "No JSON content obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:437
+#: libopenicc/openicc_db.c:476
 msgid "No JSON obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:127
+#: libopenicc/openicc_db.c:152
 #, fuzzy
 msgid "Paths:"
 msgstr "Pausarazi"
@@ -74,7 +74,7 @@ msgstr "Pausarazi"
 msgid "WARNING"
 msgstr ""
 
-#: libopenicc/openicc_db.c:421
+#: libopenicc/openicc_db.c:460
 msgid "Writing failed for"
 msgstr ""
 
@@ -630,6 +630,10 @@ msgstr ""
 #, fuzzy
 #~ msgid "Copyright:       "
 #~ msgstr "Copyright-a"
+
+#, fuzzy
+#~ msgid "Could not find db::config object for"
+#~ msgstr "Ezin izan da letra-tipoa ireki:"
 
 #, fuzzy
 #~ msgid "Could not open ICC profile"

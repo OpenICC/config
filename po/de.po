@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2016-11-14 14:06+0100\n"
+"POT-Creation-Date: 2016-11-14 21:09+0100\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -23,43 +23,43 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr "!!! Fehler"
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:154
+#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:179
 msgid "Could not alloc memory"
 msgstr "Kann keinen Speicher reservieren"
 
-#: libopenicc/openicc_db.c:383
+#: libopenicc/openicc_db.c:408
 msgid "Could not create a intermediate db object for"
 msgstr "Konnte temporäres DB Objekt nicht erstellen für"
 
-#: libopenicc/openicc_db.c:122
+#: libopenicc/openicc_db.c:494
+msgid "Could not create root JSON node for"
+msgstr "Konnte kein JSON Wurzelknoten erzeugen für"
+
+#: libopenicc/openicc_db.c:115 libopenicc/openicc_db.c:147
 msgid "Could not find config"
 msgstr "Konnte Konfiguration nicht finden"
 
-#: libopenicc/openicc_db.c:451
-msgid "Could not find db::config object for"
-msgstr "Konnte db::config nicht finden für"
-
-#: libopenicc/openicc_db.c:445
+#: libopenicc/openicc_db.c:484
 msgid "Could not obtain JSON node for"
 msgstr "Konnte kein JSON Knoten erhalten für"
 
-#: libopenicc/openicc_db.c:402
+#: libopenicc/openicc_db.c:442
 msgid "Could not set JSON string for"
 msgstr "Konnte keinen JSON Text setzen für"
 
-#: libopenicc/openicc_db.c:206
+#: libopenicc/openicc_db.c:231
 msgid "Could not setup db objetc"
 msgstr "Konnte DB Objekt nicht erstellen"
 
-#: libopenicc/openicc_db.c:428
+#: libopenicc/openicc_db.c:467
 msgid "No JSON content obtained for"
 msgstr "Kein JSON Inhalt erhalten für"
 
-#: libopenicc/openicc_db.c:437
+#: libopenicc/openicc_db.c:476
 msgid "No JSON obtained for"
 msgstr "Kein JSON erhalten für"
 
-#: libopenicc/openicc_db.c:127
+#: libopenicc/openicc_db.c:152
 msgid "Paths:"
 msgstr "Pfade:"
 
@@ -67,7 +67,7 @@ msgstr "Pfade:"
 msgid "WARNING"
 msgstr "WARNUNG"
 
-#: libopenicc/openicc_db.c:421
+#: libopenicc/openicc_db.c:460
 msgid "Writing failed for"
 msgstr "Schreiben mislungen für"
 
@@ -885,6 +885,9 @@ msgstr "Schreiben mislungen für"
 #~ msgstr ""
 #~ "Konnte keine Metamodul finden. Ist die OY_MODULE_PATH Variable gesetzt? "
 #~ "Sie zeigt auf Verzeichnisse in welchen die Moduleladebibliothek liegt."
+
+#~ msgid "Could not find db::config object for"
+#~ msgstr "Konnte db::config nicht finden für"
 
 #~ msgid "Could not get Xatom \"%s\""
 #~ msgstr "Nicht gefunden: Xatom \"%s\""

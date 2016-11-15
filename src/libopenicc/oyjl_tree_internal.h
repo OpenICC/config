@@ -30,7 +30,8 @@ extern "C" {
   if ((size_) <= 0) {                                       \
       oyjl_message_p( oyjl_message_insufficient_data, 0, "Nothing to allocate"); \
   } else {                                                  \
-      void*(*a)(size_t size) = alloc_func?alloc_func:malloc;         \
+      void*(*a)(size_t size) = alloc_func;                  \
+      if(!a) a = malloc;                                    \
       ptr_ = (type*) a(sizeof (type) * (size_t)(size_));    \
       memset( ptr_, 0, sizeof (type) * (size_t)(size_) );   \
   }                                                         \
