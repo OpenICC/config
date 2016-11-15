@@ -150,9 +150,6 @@ rm -fr %{buildroot}/%{_datadir}/doc/%{name}
 %dir %{_libdir}/cmake/%{name}
 %{_libdir}/cmake/%{name}/*.cmake
 %{_libdir}/lib%{name}-static.a
-#%{_mandir}/man3/%{name}.*
-%{_sharedir}
-%doc doc/html
 
 
 %changelog
