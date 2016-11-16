@@ -3,8 +3,8 @@
 
 #define OPENICC_VERSION_A 0
 #define OPENICC_VERSION_B 1
-#define OPENICC_VERSION_C 0
-#define OPENICC_VERSION_NAME "0.1.0"
+#define OPENICC_VERSION_C 1
+#define OPENICC_VERSION_NAME "0.1.1"
 #define OPENICC_VERSION (OPENICC_VERSION_A * 10000 + OPENICC_VERSION_B * 100 + OPENICC_VERSION_C)	/**< version variable */
 
 #define OPENICC_PREFIX         "/home/kuwe/.local"	/**< install variable */
