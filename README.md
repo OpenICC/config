@@ -34,7 +34,7 @@ according library for easy access.
   * [Doxygen v1.5.8 or higher is recommended](http://www.doxygen.org)
 
 ### Building
-Supported are a cmake build and a very simple makefile.
+Supported are cmake builds and a very simple makefile.
 
     $ mkdir build && cd build
     $ cmake ..
