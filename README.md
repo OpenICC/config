@@ -5,7 +5,7 @@
 [![issues](https://img.shields.io/github/issues-raw/OpenICC/config.svg?style=flat-square)](https://github.com/OpenICC/config/issues)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](http://www.opensource.org/licenses/mit-license.php)
 
-![](extras/OpenICC.svg)
+![](http://www.openicc.info/images/OpenICC.svg)
 
 The OpenICC configuration data base allows to store, share and manipulate
 colour management informations.
