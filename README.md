@@ -15,9 +15,9 @@ according library for easy access.
 * access to OpenICC device JSON DB
 
 ### Links
-* [Copyright](docs/COPYING) - MIT
-* [ChangeLog](docs/ChangeLog)
-* [Authors](docs/AUTHORS)
+* [Copyright](docs/COPYING.md) - MIT
+* [ChangeLog](docs/ChangeLog.md)
+* [Authors](docs/AUTHORS.md)
 * [Code](https://github.com/OpenICC/config)
 * [OpenICC](http://www.openicc.info) - open source color management discussion group
  
