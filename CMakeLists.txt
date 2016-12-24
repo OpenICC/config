@@ -37,8 +37,13 @@ SET( ${PROJECT_NAME}_VERSION_MAJORMINOR "${${PROJECT_NAME}_MAJOR_VERSION}.${${PR
 
 include(GNUInstallDirs)
 
+option(ENABLE_TESTS "Build tests (requires static libs)" ON)
 option(ENABLE_TOOLS "Build tools (currently openicc-device)" ON)
 option(ENABLE_STATIC_LIBS "Build static libs" ON)
+
+IF( ENABLE_TESTS )
+  SET(ENABLE_STATIC_LIBS ON)
+ENDIF()
 
 IF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   SET(PLATFORM "OSX")
