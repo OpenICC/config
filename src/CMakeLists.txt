@@ -108,7 +108,9 @@ ADD_SUBDIRECTORY( libopenicc )
 
 ADD_SUBDIRECTORY( tests )
 
-ADD_SUBDIRECTORY( tools )
+IF( ENABLE_TOOLS )
+    ADD_SUBDIRECTORY( tools )
+ENDIF()
 
 ADD_SUBDIRECTORY( examples )
 
