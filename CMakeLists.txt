@@ -38,6 +38,7 @@ SET( ${PROJECT_NAME}_VERSION_MAJORMINOR "${${PROJECT_NAME}_MAJOR_VERSION}.${${PR
 include(GNUInstallDirs)
 
 option(ENABLE_TOOLS "Build tools (currently openicc-device)" ON)
+option(ENABLE_STATIC_LIBS "Build static libs" ON)
 
 IF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   SET(PLATFORM "OSX")
