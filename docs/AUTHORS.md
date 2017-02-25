@@ -1,3 +1,4 @@
 # Authors
-                Kai-Uwe Behrmann <www.behrmann.name>
+
+                Kai-Uwe Behrmann <http://www.behrmann.name>
 
