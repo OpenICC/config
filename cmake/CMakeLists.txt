@@ -9,7 +9,7 @@ SET (TARGET_INCLUDE_FOLDER
     )
 
 SET (TARGET_CMAKE_FOLDER
-		"share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules"
+		"cmake/${PACKAGE_NAME}"
 		CACHE STRING
 		"The folder below system prefix where to install cmake files."
     )
@@ -45,6 +45,6 @@ CONFIGURE_FILE (
 
 INSTALL ( FILES
 		"${CMAKE_CURRENT_BINARY_DIR}/OpenIccConfig.cmake"
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/openicc COMPONENT dev
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/${TARGET_CMAKE_FOLDER} COMPONENT dev
 	)
 
