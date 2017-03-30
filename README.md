@@ -41,7 +41,7 @@ Supported are cmake builds and a very simple makefile.
     $ make
     $ make install
 
-####Build Flags
+#### Build Flags
 ... are typical cmake flags like CMAKE\_C\_FLAGS to tune compilation.
 
 * CMAKE\_INSTALL\_PREFIX to install into paths and so on. Use on the command 
