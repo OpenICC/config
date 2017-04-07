@@ -159,7 +159,7 @@ int                openiccMessageFormat (
   }
 
   free( text ); text = 0;
-  if(id_text_tmp) free(id_text_tmp); id_text_tmp = 0;
+  if(id_text_tmp) {free(id_text_tmp); id_text_tmp = 0;}
 
   *message_text = t;
 
