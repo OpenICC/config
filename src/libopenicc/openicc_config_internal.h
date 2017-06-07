@@ -132,7 +132,7 @@ char *       openiccStringCopy       ( const char        * text,
 
 extern openiccMessage_f     openiccMessage_p;
 int  openiccMessageFunc              ( int/*openiccMSG_e*/ code,
-                                       void              * context_object,
+                                       const void        * context_object,
                                        const char        * format,
                                        ... );
 
