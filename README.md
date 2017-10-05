@@ -1,5 +1,6 @@
 # OpenICC Configuration README
 [![Build Status](https://travis-ci.org/OpenICC/config.svg?branch=master)](https://travis-ci.org/OpenICC/config)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/10868/badge.svg)](https://scan.coverity.com/projects/10868)
 [![Documentation](https://codedocs.xyz/OpenICC/config.svg)](https://codedocs.xyz/OpenICC/config)
 [![Codecov](https://codecov.io/gh/OpenICC/config/branch/master/graph/badge.svg)](https://codecov.io/gh/OpenICC/config)
 [![Issues](https://img.shields.io/github/issues-raw/OpenICC/config.svg?style=flat-square)](https://github.com/OpenICC/config/issues)
