@@ -422,7 +422,8 @@ oiTESTRESULT_e testConfig()
   const char * file_name;
   char * text;
   size_t size = 0;
-  int key_names_n = 0, values_n = 0,i,error = 0;
+  int key_names_n = 0, values_n = 0,i,
+      error OI_UNUSED = 0;
   char ** key_names, ** values;
   const char * base_key;
   oyjl_val root, array, v;
@@ -521,8 +522,8 @@ oiTESTRESULT_e testConfig()
     if(values && values[i]) myDeAllocFunc(values[i]);
   }
 
-  if( key_names ) myDeAllocFunc(key_names); key_names = NULL;
-  if( values ) myDeAllocFunc(values); values = NULL;
+  if( key_names ) { myDeAllocFunc(key_names); key_names = NULL; }
+  if( values ) { myDeAllocFunc(values); values = NULL; }
 
 
   /* get all key names */
@@ -537,7 +538,7 @@ oiTESTRESULT_e testConfig()
   }
   i = 0;
   while(key_names && key_names[i]) myDeAllocFunc( key_names[i++] );
-  if( key_names ) myDeAllocFunc(key_names); key_names = NULL;
+  if( key_names ) { myDeAllocFunc(key_names); key_names = NULL; }
 
 
   /* get one key name */
@@ -553,7 +554,7 @@ oiTESTRESULT_e testConfig()
   i = 0;
   fprintf(zout, "\t%s\n", key_names[i]?key_names[i]:"????" );
   while(key_names && key_names[i]) myDeAllocFunc( key_names[i++] );
-  if( key_names ) myDeAllocFunc(key_names); key_names = NULL;
+  if( key_names ) { myDeAllocFunc(key_names); key_names = NULL; }
 
 
 
@@ -804,7 +805,7 @@ oiTESTRESULT_e testODB()
     {
       int count = openiccArray_Count( (openiccArray_s*)&db->ks );
       openiccConfig_s * config = openiccConfig_FromMem( text );
-      if(text) free(text); text = NULL;
+      if(text) { free(text); text = NULL; }
       openiccConfig_SetInfo ( config, db_file );
 
       /* reserve enough memory in list array */
@@ -886,8 +887,8 @@ oiTESTRESULT_e testODB()
     if(values && values[i]) myDeAllocFunc(values[i]);
   }
 
-  if( key_names ) myDeAllocFunc(key_names); key_names = NULL;
-  if( values ) myDeAllocFunc(values); values = NULL;
+  if( key_names ) { myDeAllocFunc(key_names); key_names = NULL; }
+  if( values ) { myDeAllocFunc(values); values = NULL; }
 
   openiccDB_Release( &db );
 
@@ -962,7 +963,7 @@ char * tests_xfailed[64];
 
 oiTESTRESULT_e oiTestRun             ( oiTESTRESULT_e    (*test)(void),
                                        const char        * test_name,
-                                       int                 number )
+                                       int                 number OI_UNUSED )
 {
   oiTESTRESULT_e error = oiTESTRESULT_UNKNOWN;
 

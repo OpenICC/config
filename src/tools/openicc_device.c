@@ -48,7 +48,7 @@ typedef enum {
 } ucmm_scope;
 
 
-void printfHelp(int argc, char ** argv)
+void printfHelp(int argc OI_UNUSED, char ** argv)
 {
   fprintf( stderr, "\n");
   fprintf( stderr, "%s %s\n",   argv[0],
@@ -133,7 +133,8 @@ int main(int argc, char ** argv)
 
   if(argc >= 2)
   {
-    int pos = 1, i;
+    int pos = 1;
+    unsigned i;
     char *wrong_arg = 0;
     while(pos < argc)
     {
@@ -169,7 +170,7 @@ int main(int argc, char ** argv)
                         { show_path = 1; i=100; break; }
                         else if(OY_IS_ARG("db-file"))
                         { OY_PARSE_STRING_ARG2( db_file, "db-file"); break; }
-                        }
+                        } OI_FALLTHROUGH
               default:
                         printfHelp(argc, argv);
                         exit (0);
@@ -249,7 +250,7 @@ int main(int argc, char ** argv)
 
     /* parse JSON */
     config = openiccConfig_FromMem( text );
-    if(text) free(text); text = NULL;
+    if(text) { free(text); text = NULL; }
     openiccConfig_SetInfo ( config, db_file );
 
     if(device_class)
@@ -274,7 +275,7 @@ int main(int argc, char ** argv)
 
     /* parse JSON */
     config_new = openiccConfig_FromMem( text );
-    if(text) free(text); text = NULL;
+    if(text) { free(text); text = NULL; }
     openiccConfig_SetInfo ( config_new, file_name );
     devices_new_n = openiccConfig_DevicesCount(config_new, NULL);
     DBG( config_new, "Found %d devices.", devices_new_n );
@@ -331,7 +332,7 @@ int main(int argc, char ** argv)
             STRING_ADD( json_new, json );
             old_d = d;
           }
-          if(json) free(json); json = NULL;
+          if(json) { free(json); json = NULL; }
         }
 
         count = openiccConfig_DevicesCount(config_new, devices_filter);
@@ -350,7 +351,7 @@ int main(int argc, char ** argv)
             old_d = d;
           }
 
-          if(json) free(json); json = NULL;
+          if(json) { free(json); json = NULL; }
           if(json_new)
             list_devices = 1;
         }
