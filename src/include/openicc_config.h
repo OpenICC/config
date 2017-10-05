@@ -93,7 +93,7 @@ const char *       openiccConfig_DeviceGetJSON (
 char *             openiccConfig_DeviceClassGet (
                                        openiccConfig_s   * config,
                                        openiccAlloc_f      alloc );
-const char** const openiccConfigGetDeviceClasses (
+const char**       openiccConfigGetDeviceClasses (
                                        const char       ** device_classes,
                                        int               * count );
 

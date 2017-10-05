@@ -114,7 +114,7 @@ static const char * dev_cl[] = {
 /**
  *  @brief   get default device class
  */
-const char** const openiccConfigGetDeviceClasses (
+const char** openiccConfigGetDeviceClasses (
                                        const char       ** device_classes,
                                        int               * count )
 {
@@ -574,7 +574,7 @@ int                openiccConfig_GetStringf (
   len = vsnprintf( text, sz, format, list );
   va_end  ( list );
 
-  if (len >= sz)
+  if (len >= (int)sz)
   {
     text = realloc( text, (len+1)*sizeof(char) );
     va_start( list, format);
