@@ -18,13 +18,14 @@ script:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y locales cmake pkg-config libyajl-dev gettext valgrind icc-profiles-free lcov
-  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+    #- echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
-   - secure: "nQH5wZmBXI/66hObgHN0/Nn2R8cI0rWvqkILNJH/ZpH0b0zVrbtsJ8DHp+EJKVvLonnEpWk729V+pCC2znqZKiyUnYnty6zy6AwZEHsOU5XY4f8O8wKgDqNf10if+oj/dcgjhthoX8tFmcW6axOtDwSFBpf9eP0GDUir2fhhns/dhagtKAAuaE9ojHWd9Rn04I1SLPfyql6WIgkO3Xxgp140jXkTfimKsnKxpmHYgoHT4MrFhpRaedCcRQVT7pO7qSZkyfqRYyCmplNCFu5/LCLqaWHhSDb2GFMWJfaCUX7+8mtbu77sLnR57UplPWhEyDhLHKd+m3MrE2Jg0c5VV4GzISdZgXvFaO4HVBF8VFBDrfe+vtzi8zbkFiC3H7TEeO5ezmI4RmE73Lsgx32JFfUybBo1vdX+pB1Lojjsv3QSwVowIr4Q6VjrYJk1kzIAdDG1OQivGk/GvJ8RRAHMEZlfCdXtQbnUOerzIucT8HtGdoT4i8nczw6tjrA2zbtdm4YjpR9T/x0XXweWmyBzvKSa4onsQDSOPamUVkJKGJAycqQC85wl/eTJoDJollGHvpo1oQR+yAc1l2Wpw9KrUFwS4QfoHgsBAjPVPMqNVy0b6H2xNliDGy9GgbKGEqJYnLTE84bOWUyDS0kaaNxZ5RYHpb0uIL/Ewo6li+x+b9s="
+   - secure: "uDDjATxPwZY+C+CnDw5/MUtkXIK3aLCo3WzednvF0RsVPCNVFfh2t305EyAABv9Evz2T6i4dQC7BHj0NkDbWw/5KnyF/zuVLVZId6gwcRIWDht75B3hJt5QwfdY93JLLmcbAPPNE/fFw9aEcze+RSQGrZGuqzU/mgRSyChzQeXKIv2CKvUrXgzBJPhDeSwsIcqDtLOOqdGd5NDuKFVcWz85m/jc6xMnXutf5/Nj6PireSKxDG5nKpB99jbrqEAi8C/TyWCXFcHhUNCGt+jVYGQVarD8cDxBaKOBagEHYveXwwuQ/sVI8ebtfFm+wkUnBLGraV9WdFPJ8WlXSyW/gL/7WeSOE71I46kY7x8fIVkh4sq8cNtev0P1MuT+pPSruhokIu2YdwHgQwrivj9GXeFdNb4oH3Dq1TU5QyMx/sS8KMOgBmC3PE14QNsBxDL9pePTbSyGBbv3SIIGdNwRWNzgjxkcQm3cQgVk/89cWSF2L0b0HBIWB5lNEF9bGJO4zODbGk4MAtWOod82ZztV8GKdBOUOGmZISiiAlz2zkZ6Xloq3BfC1Y1h3Ee6KLEiw52fW/P2x+5rMXoPCz6IKVnYGB1nAGx4TnoJdqvFDfkLqFGXFg/gDlrV8ZtjElgKVdLdisCqBc8TwnbUoAflnoSYDDGpHibxcLbScSDAtuAyU="
+
 
 addons:
   coverity_scan:
