@@ -1,11 +1,8 @@
 INCLUDE_DIRECTORIES(
-                    "${CMAKE_SOURCE_DIR}"
-                    "${CMAKE_SOURCE_DIR}/src"
-                    "${CMAKE_SOURCE_DIR}/src/include"
+                    "${CMAKE_CURRENT_SOURCE_DIR}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/include"
                     "${CMAKE_BINARY_DIR}/src/include"
-                    "${CMAKE_SOURCE_DIR}/src/include_private"
-                    "${CMAKE_BINARY_DIR}/src/include_private"
-                    "${CMAKE_SOURCE_DIR}/src/libopenicc"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/libopenicc"
 )
 
 # if our static code lands inside a shared lib, we need -fPIC
@@ -27,6 +24,16 @@ ENDIF(UNIX)
 INCLUDE(CheckLibraryExists)
 INCLUDE(CheckIncludeFile)
 CHECK_INCLUDE_FILE(dirent.h HAVE_DIRENT_H)
+FIND_PATH( DIRENT_INCLUDE_DIR dirent.h
+           HINTS /mingw ${INCLUDE_DIRECTORIES}
+           PATH_SUFFIXES include
+	  )
+   IF(DIRENT_INCLUDE_DIR)
+   SET( HAVE_DIRENT_H TRUE )
+   MESSAGE( "-- dirent.h: " ${DIRENT_INCLUDE_DIR} )
+ELSE(DIRENT_INCLUDE_DIR)
+  MESSAGE( "-- dirent.h not found" )
+ENDIF(DIRENT_INCLUDE_DIR)
 CHECK_INCLUDE_FILE(glob.h HAVE_GLOB_H)
 CHECK_LIBRARY_EXISTS( c glob "glob.h" HAVE_GLOB )
 CHECK_LIBRARY_EXISTS( c issetugid "unistd.h" HAVE_ISSETUGID )
@@ -79,7 +86,7 @@ ENDIF(HAVE_C)
 FIND_PATH( STDINT_INCLUDE_DIR stdint.h
            HINTS /mingw ${INCLUDE_DIRECTORIES}
            PATH_SUFFIXES include
-	 )
+         )
 IF(STDINT_INCLUDE_DIR)
   SET( HAVE_STDINT_H 1 )
   MESSAGE( "-- stdint.h: " ${STDINT_INCLUDE_DIR} )
@@ -90,7 +97,7 @@ ENDIF(STDINT_INCLUDE_DIR)
 FIND_PATH( INTTYPES_INCLUDE_DIR inttypes.h
            HINTS /mingw ${INCLUDE_DIRECTORIES}
            PATH_SUFFIXES include
-	 )
+         )
 IF(INTTYPES_INCLUDE_DIR)
   SET( HAVE_INTTYPES_H 1 )
   MESSAGE( "-- inttypes.h: " ${INTTYPES_INCLUDE_DIR} )

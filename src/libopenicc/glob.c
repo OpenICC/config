@@ -92,6 +92,10 @@ __FBSDID("$FreeBSD: release/10.0.0/lib/libc/gen/glob.c 249381 2013-04-11 20:15:3
 #include <unistd.h>
 #include <wchar.h>
 
+#ifndef HAVE_LOCALE_H
+/* a current MB length makes only sense with locale info */
+#undef  MB_CUR_MAX
+#endif
 #ifndef MB_CUR_MAX
 #define MB_CUR_MAX 4
 #endif
@@ -225,7 +229,7 @@ glob(const char * __restrict pattern, int flags,
 	bufend = bufnext + MAXPATHLEN - 1;
 	if (flags & GLOB_NOESCAPE) {
 		memset(&mbs, 0, sizeof(mbs));
-		while (bufend - bufnext >= MB_CUR_MAX) {
+		while (bufend - bufnext >= (int)MB_CUR_MAX) {
 			clen = mbrtowc(&wc, patnext, MB_LEN_MAX, &mbs);
 			if (clen == (size_t)-1 || clen == (size_t)-2)
 				return (GLOB_NOMATCH);
@@ -237,7 +241,7 @@ glob(const char * __restrict pattern, int flags,
 	} else {
 		/* Protect the quoted characters. */
 		memset(&mbs, 0, sizeof(mbs));
-		while (bufend - bufnext >= MB_CUR_MAX) {
+		while (bufend - bufnext >= (int)MB_CUR_MAX) {
 			if (*patnext == QUOTE) {
 				if (*++patnext == EOS) {
 					*bufnext++ = QUOTE | M_PROTECT;
