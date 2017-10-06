@@ -1,7 +1,7 @@
 # Doxyfile 1.3.8
 
 PROJECT_NUMBER         = 0.1.1
-INPUT                  = docs build/docs src/include src/libopenicc
+INPUT                  = ../../docs ../../build/docs ../../src/include ../../src/libopenicc
 
 #---------------------------------------------------------------------------
 # Project related configuration options
@@ -81,7 +81,7 @@ RECURSIVE              = NO
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = YES
 EXCLUDE_PATTERNS       = 
-EXAMPLE_PATH           = src/examples/ src/tests
+EXAMPLE_PATH           = ../../src/examples/ ../../src/tests
 EXAMPLE_PATTERNS       = *.c
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = 
@@ -109,9 +109,9 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            = docs/doxygen.header.dox
-HTML_FOOTER            = docs/doxygen.footer.dox
-#HTML_STYLESHEET        = docs/doxygen.css
+HTML_HEADER            = ../../docs/doxygen.header.dox
+HTML_FOOTER            = ../../docs/doxygen.footer.dox
+#HTML_STYLESHEET        = ../../docs/doxygen.css
 GENERATE_HTMLHELP      = NO
 CHM_FILE               = 
 HHC_LOCATION           = 
