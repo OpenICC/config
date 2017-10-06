@@ -10,6 +10,7 @@
 
 <table class="title">
 <tr>
+<td class='logo' rowspan="2"><a href='http://www.openicc.org'><img src='openicc_logo.png' alt="OpenICC Icon" border="0"/></a></td>
 <td>$projectname - Version $projectnumber</td>
 </tr>
 </table>
