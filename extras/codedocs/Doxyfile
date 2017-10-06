@@ -1,7 +1,7 @@
 # Doxyfile 1.3.8
 
-PROJECT_NUMBER         = 0.1.1
-INPUT                  = ../../docs ../../build/docs ../../src/include ../../src/libopenicc
+PROJECT_NUMBER         = 0-devel
+INPUT                  = docs ../../build/docs src/include src/libopenicc
 
 #---------------------------------------------------------------------------
 # Project related configuration options
@@ -81,7 +81,7 @@ RECURSIVE              = NO
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = YES
 EXCLUDE_PATTERNS       = 
-EXAMPLE_PATH           = ../../src/examples/ ../../src/tests
+EXAMPLE_PATH           = src/examples/ src/tests
 EXAMPLE_PATTERNS       = *.c
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = 
