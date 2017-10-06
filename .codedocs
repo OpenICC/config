@@ -8,7 +8,7 @@
 # paths will be considered relative to the root of the repository, not the
 # location of the DOXYFILE.
 
-DOXYFILE =
+DOXYFILE = extras/codedocs/Doxyfile
 
 # Specify external repository to link documentation with.
 # This is similar to Doxygen's TAGFILES option, but will automatically link to
@@ -61,8 +61,8 @@ TAGLINKS =
 # ENABLED_SECTIONS =
 # ENABLE_PREPROCESSING =
 # ENUM_VALUES_PER_LINE =
-EXAMPLE_PATH = src/examples
-EXAMPLE_PATTERNS = *.c
+#EXAMPLE_PATH = src/examples
+#EXAMPLE_PATTERNS = *.c
 # EXAMPLE_RECURSIVE =
 # EXCLUDE =
 # EXCLUDE_PATTERNS =
@@ -145,8 +145,8 @@ HTML_FOOTER = doc/doxygen.footer.dox
 # PREDEFINED =
 # PROJECT_BRIEF =
 # PROJECT_LOGO =
-PROJECT_NAME = OpenICC-Configuration-API
-PROJECT_NUMBER = 0-devel
+#PROJECT_NAME = OpenICC-Configuration-API
+#PROJECT_NUMBER = 0-devel
 # QT_AUTOBRIEF =
 # RECURSIVE =
 # REFERENCED_BY_RELATION =
