@@ -1,7 +1,7 @@
 # Doxyfile 1.3.8
 
 PROJECT_NUMBER         = 0-devel
-INPUT                  = docs build/docs src/include src/libopenicc
+INPUT                  = . docs src/include src/libopenicc
 
 #---------------------------------------------------------------------------
 # Project related configuration options
