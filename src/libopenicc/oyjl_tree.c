@@ -430,6 +430,24 @@ static int handle_null (void *ctx)
 /*
  * Public functions
  */
+
+/** \addtogroup misc
+ *  @{ *//* misc */
+/** \addtogroup oyjl Oyjl JSON Parsing
+ *  @brief   Easy to use JSON API
+ *
+ *  The API is designed to be easily useable without much boilerplate.
+ *  It includes a xpath alike syntax to obtain or create nodes inside
+ *  a tree.
+ *
+ *  @subsection tutorial Programming Tutorial
+ *  The following code examples come from @ref tutorial_json_options.c  . 
+ *  @dontinclude tutorial_json_options.c
+ *  @skip testOyjl(void)
+ *  @until oyjl_tree_free
+ *  @{ *//* oyjl */
+
+/** @brief read a json text string into a C data structure */
 oyjl_val oyjl_tree_parse (const char *input,
                           char *error_buffer, size_t error_buffer_size)
 {
@@ -546,6 +564,7 @@ oyjl_val oyjl_tree_get(oyjl_val n, const char ** path, oyjl_type type)
     return n;
 }
 
+/** @brief get the value as text string with user allocator */
 char * oyjl_value_text (oyjl_val v, void*(*alloc)(size_t size))
 {
   char * t = 0, * text = 0;
@@ -595,6 +614,7 @@ char * oyjl_value_text (oyjl_val v, void*(*alloc)(size_t size))
   return text;
 }
 
+/** @brief obtain a list of paths from a node */
 void       oyjl_tree_to_paths        ( oyjl_val            v,
                                        int                 levels,
                                        char            *** xpaths )
@@ -668,6 +688,7 @@ void       oyjl_tree_to_paths        ( oyjl_val            v,
   return;
 }
 
+/** @brief convert a C tree into a JSON string */
 void oyjl_tree_to_json (oyjl_val v, int * level, char ** json)
 {
   int n = *level;
@@ -736,8 +757,11 @@ void oyjl_tree_to_json (oyjl_val v, int * level, char ** json)
              if(!v->u.object.keys || !v->u.object.keys[i])
              {
                oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"missing key", OYJL_DBG_ARGS_ );
-               if(json && *json) free(*json);
-               *json = NULL;
+               if(json && *json)
+               {
+                 free(*json);
+                 *json = NULL;
+               }
                return;
              }
              oyjl_string_add( json, 0,0, "\"%s\": ", v->u.object.keys[i] );
@@ -762,6 +786,10 @@ void oyjl_tree_to_json (oyjl_val v, int * level, char ** json)
   return;
 }
 
+/** @brief return the number of members if any at the node level
+ *
+ *  This function is useful to traverse through objects and arrays of a
+ *  unknown JSON tree. */
 int            oyjl_value_count      ( oyjl_val            v )
 {
   int count = 0;
@@ -777,6 +805,7 @@ int            oyjl_value_count      ( oyjl_val            v )
   return count;
 }
 
+/** @brief obtain a child node at the nth position from a object or array node */
 oyjl_val       oyjl_value_pos_get    ( oyjl_val            v,
                                        int                 pos )
 {
@@ -825,11 +854,14 @@ int        oyjl_tree_paths_get_index ( const char        * term,
   return error;
 }
 
+/** @brief obtain a node by a xpath expression
+ *
+ *  @see oyjl_tree_get_valuef() */
 oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
                                        int                 flags,
                                        const char        * xpath )
 {
-  oyjl_val level = 0, parent = v;
+  oyjl_val level = 0, parent = v, root = NULL;
   int n = 0, i, found = 0;
   char ** list = oyjl_string_split(xpath, '/', &n, malloc);
 
@@ -864,9 +896,9 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
         {
           if(parent->type != oyjl_t_array)
           {
-            oyjl_tree_free_content( parent );
+            oyjl_value_clear( parent );
             parent->type = oyjl_t_array;
-            oyjlAllocHelper_m_( parent->u.array.values, oyjl_val, 2, malloc, return NULL );
+            oyjlAllocHelper_m_( parent->u.array.values, oyjl_val, 2, malloc, oyjl_tree_free( level ); goto clean );
           } else
           {
             oyjl_val *tmp;
@@ -876,7 +908,8 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
             if (tmp == NULL)
             {
               oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"could not allocate memory", OYJL_DBG_ARGS_ );
-              return NULL;
+              oyjl_tree_free( level );
+              goto  clean;
             }
             parent->u.array.values = tmp;
           }
@@ -891,8 +924,7 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
       /* search for name in object */
       for(j = 0; j < count; ++j)
       {
-        if(term &&
-           strcmp( parent->u.object.keys[j], term ) == 0)
+        if(strcmp( parent->u.object.keys[j], term ) == 0)
         {
           found = 1;
           level = parent->u.object.values[j];
@@ -910,10 +942,10 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
         {
           if(parent->type != oyjl_t_object)
           {
-            oyjl_tree_free_content( parent );
+            oyjl_value_clear( parent );
             parent->type = oyjl_t_object;
-            oyjlAllocHelper_m_( parent->u.object.values, oyjl_val, 2, malloc, return NULL );
-            oyjlAllocHelper_m_( parent->u.object.keys, char*, 2, malloc, return NULL );
+            oyjlAllocHelper_m_( parent->u.object.values, oyjl_val, 2, malloc, oyjl_tree_free( level ); goto clean );
+            oyjlAllocHelper_m_( parent->u.object.keys, char*, 2, malloc, oyjl_tree_free( level ); goto clean );
           } else
           {
             oyjl_val *tmp;
@@ -924,7 +956,8 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
             if (tmp == NULL)
             {
               oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"could not allocate memory", OYJL_DBG_ARGS_ );
-              return NULL;
+              oyjl_tree_free( level );
+              goto clean;
             }
             parent->u.object.values = tmp;
 
@@ -933,7 +966,8 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
             if (keys == NULL)
             {
               oyjl_message_p( oyjl_message_error, 0, OYJL_DBG_FORMAT_"could not allocate memory", OYJL_DBG_ARGS_ );
-              return NULL;
+              oyjl_tree_free( level );
+              goto clean;
             }
             parent->u.object.keys = keys;
           }
@@ -941,29 +975,32 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
           parent->u.object.values[parent->u.object.len] = level;
           parent->u.object.len++;
         }
-      }
+      } 
 
       found = 1;
-    }
+    } if(!v && !root)
+        root = level;
     parent = level;
     level = NULL;
   }
 
   /* clean up temorary memory */
+clean:
   for(i = 0; i < n; ++i)
     free(list[i]);
   if(list)
     free(list);
 
+  if(found && root)
+    return root;
   if(found && parent)
     return parent;
   else
     return NULL;
 }
 
-/** @internal
- *  Function oyjl_tree_get_valuef
- *  @brief   get a child node
+/** Function oyjl_tree_get_valuef
+ *  @brief   get a child node by a xpath expression
  *
  *  A path string is constructed of terms and the slash delimiter '/'.
  *  Understood terms are object names or the squared brackets index operator [].
@@ -981,18 +1018,30 @@ oyjl_val   oyjl_tree_get_value       ( oyjl_val            v,
  *
  *  Creating a new node inside a existing tree needs just a root node - v.
  *  The flags should contain OYJL_CREATE_NEW.
+ *  @code
+    oyjl_val root = oyjl_tree_get_valuef( NULL, OYJL_CREATE_NEW, "my/new/node" );
+    @endcode
+ *
  *  Example: "foo/[]/bar" will append a node to the foo array and create
  *  the bar node, which is empty.
+ *  @code
+    oyjl_val new_node = oyjl_tree_get_valuef( root, OYJL_CREATE_NEW, "foo/[]/bar" );
+    @endcode
+ *
  *
  *  @param[in]     v                   the oyjl node
+ *                                     - the root node
+ *                                     - NULL and flags == OYJL_CREATE_NEW
+ *                                       will create a new tree along the path,
+ *                                       which is returned
  *  @param[in]     flags               OYJL_CREATE_NEW - returns nodes even
  *                                     if they did not yet exist
  *  @param[in]     format              the format for the slashed path string
  *  @param[in]     ...                 the variable argument list; optional
- *  @return                            the requested node or zero
+ *  @return                            the requested node or a new tree or zero
  *
- *  @version Oyranos: 0.9.6
- *  @date    2016/10/28
+ *  @version Oyranos: 0.9.7
+ *  @date    2017/10/12
  *  @since   2011/09/24 (Oyranos: 0.3.3)
  */
 oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
@@ -1035,20 +1084,22 @@ oyjl_val   oyjl_tree_get_valuef      ( oyjl_val            v,
   return value;
 }
 
+/** @brief set the node value to a string */
 int        oyjl_value_set_string     ( oyjl_val            v,
                                        const char        * string )
 {
   int error = -1;
   if(v)
   {
-    oyjl_tree_free_content( v );
+    oyjl_value_clear( v );
     v->type = oyjl_t_string;
     error = oyjl_string_add( &v->u.string, 0,0, "%s", string );
   }
   return error;
 }
 
-void oyjl_tree_free_content (oyjl_val v)
+/** @brief release all childs recursively */
+void oyjl_value_clear        (oyjl_val v)
 {
     if (v == NULL) return;
 
@@ -1066,12 +1117,18 @@ void oyjl_tree_free_content (oyjl_val v)
     v->type = oyjl_t_null;
 }
 
-void oyjl_tree_free_node             ( oyjl_val            root,
+/** @brief release a specific node and all its childs */
+void oyjl_tree_clear_value           ( oyjl_val            root,
                                        const char        * xpath )
 {
   int n = 0, i, pos, count;
-  char ** list = oyjl_string_split(xpath, '/', &n, malloc);
-  char * path = oyjl_string_copy( xpath, malloc );
+  char ** list;
+  char * path;
+
+  if(!root) return;
+
+  list = oyjl_string_split(xpath, '/', &n, malloc);
+  path = oyjl_string_copy( xpath, malloc );
 
   for(pos = 0; pos < (n-1); ++pos)
   {
@@ -1098,6 +1155,7 @@ void oyjl_tree_free_node             ( oyjl_val            root,
              if( p->u.array.values[i] == o )
              {
                oyjl_tree_free( o );
+               o = NULL;
                p->u.array.values[i] = NULL;
 
                if(count > 1)
@@ -1121,6 +1179,7 @@ void oyjl_tree_free_node             ( oyjl_val            root,
              if( p->u.object.values[i] == o )
              {
                oyjl_tree_free( o );
+               o = NULL;
                p->u.object.keys[i] = NULL;
                p->u.object.values[i] = NULL;
 
@@ -1147,6 +1206,8 @@ void oyjl_tree_free_node             ( oyjl_val            root,
     if(path) free(path);
     path = parent_path;
     parent_path = NULL;
+    oyjl_tree_free( o );
+    o = NULL;
 
     if(delete_parent == 0)
       break;
@@ -1157,11 +1218,14 @@ void oyjl_tree_free_node             ( oyjl_val            root,
   if(path) free(path);
 }
 
+/** @brief release a node and all its childs recursively */
 void oyjl_tree_free (oyjl_val v)
 {
     if (v == NULL) return;
 
-    oyjl_tree_free_content (v);
+    oyjl_value_clear (v);
     free(v);
 }
 
+/** @} *//* oyjl */
+/** @} *//* misc */
