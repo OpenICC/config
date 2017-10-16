@@ -21,6 +21,7 @@
 #include <string.h>  /* strdup() */
 #include <stdarg.h>  /* vsnprintf() */
 #include <stdio.h>   /* vsnprintf() */
+#include <errno.h>
 
 
 
@@ -31,26 +32,45 @@ char * openiccOpenFile( const char * file_name,
   size_t size = 0, s = 0;
   char * text = NULL;
 
-    if(file_name)
+  if(file_name)
+  {
+    fp = fopen(file_name,"rb");
+    if(fp)
     {
-      fp = fopen(file_name,"rb");
-      if(fp)
+      fseek(fp,0L,SEEK_END); 
+      size = ftell (fp);
+      if(size == (size_t)-1)
       {
-        fseek(fp,0L,SEEK_END); 
-        size = ftell (fp);
-        rewind(fp);
-        text = malloc(size+1);
-        s = fread(text, sizeof(char), size, fp);
-        text[size] = '\000';
-        if(s != size)
-          WARNc_S( "Error: fread %lu but should read %lu",
-                  (long unsigned int) s, (long unsigned int)size);
+        switch(errno)
+        {
+          case EBADF:        WARNc_S("Not a seekable stream %d", errno); break;
+          case EINVAL:       WARNc_S("Wrong argument %d", errno); break;
+          default:           WARNc_S("%s", strerror(errno)); break;
+        }
+        if(size_ptr)
+          *size_ptr = size;
         fclose( fp );
-      } else
-      {
-        WARNc_S( "Error: Could not open file - \"%s\"", file_name);
+        return NULL;
       }
+      rewind(fp);
+      text = malloc(size+1);
+      if(text == NULL)
+      {
+        WARNc_S( "Error: Could allocate memory: %lu", (long unsigned int)size);
+        fclose( fp );
+        return NULL;
+      }
+      s = fread(text, sizeof(char), size, fp);
+      text[size] = '\000';
+      if(s != size)
+        WARNc_S( "Error: fread %lu but should read %lu",
+                (long unsigned int) s, (long unsigned int)size);
+      fclose( fp );
+    } else
+    {
+      WARNc_S( "Error: Could not open file - \"%s\"", file_name);
     }
+  }
 
   if(size_ptr)
     *size_ptr = size;
@@ -62,8 +82,8 @@ char *       openiccReadFileSToMem   ( FILE              * fp,
                                        size_t            * size)
 {
   size_t mem_size = 256;
-  char* mem = malloc(mem_size),
-        c;
+  char* mem = malloc(mem_size);
+  int c;
 
   if (fp && size)
   {
