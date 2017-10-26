@@ -82,8 +82,10 @@ char *       openiccReadFileSToMem   ( FILE              * fp,
                                        size_t            * size)
 {
   size_t mem_size = 256;
-  char* mem = malloc(mem_size);
+  char* mem = (char*) malloc(mem_size);
   int c;
+
+  if(!mem) return NULL;
 
   if (fp && size)
   {
@@ -95,6 +97,7 @@ char *       openiccReadFileSToMem   ( FILE              * fp,
       {
         mem_size *= 2;
         mem = realloc( mem, mem_size );
+        if(!mem) { *size = 0; return NULL; }
       }
       mem[(*size)++] = c;
     } while(!feof(fp));
@@ -103,11 +106,6 @@ char *       openiccReadFileSToMem   ( FILE              * fp,
 
     if(mem)
       mem[*size] = 0;
-    else
-    {
-      free (mem);
-      *size = 0;
-    }
   }
 
   return mem;
