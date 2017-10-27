@@ -218,7 +218,7 @@ int  openiccMessageFunc              ( int/*openiccMSG_e*/ code,
 
   if(msg)
     fprintf( stderr, "%s\n", msg );
-  else
+  else if(error)
     fprintf( stderr, "%s\n", format );
 
   free( text ); text = 0;

@@ -82,10 +82,12 @@ char *       openiccReadFileSToMem   ( FILE              * fp,
                                        size_t            * size)
 {
   size_t mem_size = 256;
-  char* mem = (char*) malloc(mem_size);
+  char* mem;
   int c;
 
   if(!fp) return NULL;
+
+  mem = (char*) malloc(mem_size);
   if(!mem) return NULL;
 
   if(size)
