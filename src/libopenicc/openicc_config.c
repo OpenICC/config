@@ -49,7 +49,8 @@ openiccConfig_s *  openiccConfig_FromMem( const char       * data )
     config->oyjl = oyjl_tree_parse( data, NULL, 0 );
     if(!config->oyjl)
     {
-      char * msg = malloc(1024);
+      char * msg = NULL;
+      oyjlAllocHelper_m_(msg, char, 1024, malloc, );
       config->oyjl = oyjl_tree_parse( data, msg, 1024 );
       WARNcc_S( config, "%s\n", msg?msg:"" );
       if( msg ) free(msg);
@@ -434,11 +435,21 @@ char *             openiccConfig_DeviceClassGet (
       oyjl_val v = base;
 
       if(v->u.object.keys[0] && v->u.object.keys[0][0])
-        device_class = openiccStringCopy((v->u.object.keys[0]), alloc);
-
+      {
+        device_class = openiccStringCopy((v->u.object.keys[0]), malloc);
+        if(!device_class)
+          ERRcc_S( config, "could not allocate string%s", "" );
+      }
     } else
       WARNcc_S( config, "could not find " OPENICC_DEVICE_PATH " %s",
                 config->info ? config->info : "" );
+  }
+
+  if(alloc != malloc && device_class)
+  {
+    char * custom = openiccStringCopy( device_class, alloc );
+    free(device_class);
+    device_class = custom; custom = NULL;
   }
 
   return device_class;
@@ -471,22 +482,30 @@ int                openiccConfig_GetKeyNames (
   int count = 0, i;
   char ** keys = (char**)  calloc(sizeof(char*),2);
 
+  if(!keys) return 1;
+
   if(!error)
     list = oyjl_tree_get_value( config->oyjl, 0, xpath );
 
   if(!error)
     error = !list ? -1:0;
 
-  keys[0] = openiccStringCopy( xpath, malloc );
-  oyjl_tree_to_paths( list, child_levels, &keys );
+  if(!error)
+  {
+    keys[0] = openiccStringCopy( xpath, malloc );
+    error = !keys[0];
+  }
 
-  if(n)
+  if(!error)
+    oyjl_tree_to_paths( list, child_levels, &keys );
+
+  if(!error && n)
   {
     while(keys && keys[count]) ++count;
     *n = count?count-1:0;
   }
 
-  if(key_names && keys)
+  if(!error && key_names && keys)
   {
     /* the first key comes from this function is is artifical: remove it */
     free(keys[0]);
@@ -646,6 +665,8 @@ int                openiccConfig_GetStrings (
     error = !vals;
     if(!error)
       memset( vals, 0, size );
+    else
+      ERRcc_S( config, "could not allocate : %lu", (unsigned long)size );
   }
 
   if(error <= 0)
@@ -656,7 +677,14 @@ int                openiccConfig_GetStrings (
     if(t)
     {
       if(values)
+      {
         vals[pos] = openiccStringCopy( t, alloc );
+        if(!vals[pos])
+        {
+          ERRcc_S( config, "could not allocate string : %s", t );
+          break;
+        }
+      }
       pos++;
     }
   }
