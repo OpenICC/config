@@ -30,7 +30,7 @@ int main(int argc, char ** argv)
   const char * file_name = argc > 1 ? argv[1] : "../test.json";
   FILE * fp = NULL;
   char * text = 0;
-  size_t size = 0;
+  unsigned long size = 0;
   char            ** keys = 0;
   char            ** values = 0;
   int i,j, n = 0, devices_n, flags;
@@ -50,12 +50,14 @@ int main(int argc, char ** argv)
     fseek(fp,0L,SEEK_END);
     size = ftell (fp);
     rewind(fp);
-    if(size)
+    if(size > 0)
     {
       text = malloc(size+1);
       if(text)
+      {
         fread(text, sizeof(char), size, fp);
-      text[size] = '\000';
+        text[size] = '\000';
+      }
     }
   } else
   {

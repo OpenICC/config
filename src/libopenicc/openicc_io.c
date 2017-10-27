@@ -85,9 +85,10 @@ char *       openiccReadFileSToMem   ( FILE              * fp,
   char* mem = (char*) malloc(mem_size);
   int c;
 
+  if(!fp) return NULL;
   if(!mem) return NULL;
 
-  if (fp && size)
+  if(size)
   {
     *size = 0;
     do
@@ -118,6 +119,8 @@ char* openiccExtractPathFromFileName_ (const char* file_name)
   char *path_name = 0;
   char *ptr;
 
+  if(!file_name) return NULL;
+
   path_name = strdup( file_name );
   ptr = strrchr (path_name, '/');
   if(ptr)
@@ -130,6 +133,8 @@ int openiccIsDirFull_ (const char* name)
 {
   struct stat status;
   int r = 0;
+
+  if(!name) return 0;
 
   memset(&status,0,sizeof(struct stat));
   r = stat (name, &status);
@@ -203,7 +208,8 @@ int openiccMakeDir_ (const char* path)
         free( path_parent );
       }
 
-      rc = mkdir (path_name
+      if(!rc)
+        rc = mkdir (path_name
 #ifdef HAVE_POSIX
                             , mode
 #endif

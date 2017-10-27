@@ -356,6 +356,7 @@ oiTESTRESULT_e testIO ()
   }
 
   fp = fopen( file_name, "r" );
+  size = 0;
   t1 = openiccReadFileSToMem( fp, &size );
   if(t1)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
@@ -365,7 +366,7 @@ oiTESTRESULT_e testIO ()
     "openiccReadFileSToMem() %s    ", file_name );
   }
   if(t1) free(t1);
-  fclose(fp);
+  if(fp) fclose(fp);
 
   return result;
 }
@@ -506,6 +507,7 @@ oiTESTRESULT_e testConfig()
     "openiccConfig_GetStrings()             %d==%d==%d", key_names_n,values_n,i );
   }
 
+  if(key_names)
   for(i = 0; i < key_names_n; ++i)
   {
     /* Get a single value from the config object by conviniently contructing
@@ -642,7 +644,7 @@ oiTESTRESULT_e testDeviceJSON ()
   config2 = openiccConfig_FromMem( json );
   openiccConfig_SetInfo ( config2, file_name );
   device_class = openiccConfig_DeviceClassGet( config2, malloc );
-  if( strcmp(device_class,"camera") == 0 )
+  if( device_class && strcmp(device_class,"camera") == 0 )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
     "openiccConfig_DeviceClassGet([%d]) %s      ", i, device_class );
   } else
@@ -775,7 +777,7 @@ oiTESTRESULT_e testODB()
   openiccDB_s * db;
   const char * key = "org/freedesktop/openicc/device/camera/[0]/key";
   char * gkey, * temp, * temp2;
-  char ** key_names = NULL, ** values = NULL;
+  char ** key_names = NULL;
   int key_names_n = 0, i,error = 0;
 
   fprintf(stdout, "\n" );
@@ -884,11 +886,9 @@ oiTESTRESULT_e testODB()
     }
     fprintf(zout, "\t%s:\t\"%s\"\n", key_names[i]?key_names[i]:"????", t?t:"" );
     myDeAllocFunc( key_names[i] );
-    if(values && values[i]) myDeAllocFunc(values[i]);
   }
 
   if( key_names ) { myDeAllocFunc(key_names); key_names = NULL; }
-  if( values ) { myDeAllocFunc(values); values = NULL; }
 
   openiccDB_Release( &db );
 
@@ -924,7 +924,7 @@ oiTESTRESULT_e testODB()
 
   error = openiccDBSetString( gkey, openiccSCOPE_USER, NULL, "delete" );
   temp2 = openiccDBSearchEmptyKeyname( key, openiccSCOPE_USER );
-  if(!error && strcmp(temp, temp2) == 0)
+  if(!error && temp && temp2 && strcmp(temp, temp2) == 0)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
     "openiccDBSetString(%s,\"delete\") %d", gkey, error );
   } else
