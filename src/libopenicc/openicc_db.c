@@ -494,9 +494,6 @@ int      openiccDBSetString          ( const char        * keyName,
                  openiccScopeGetString(scope), keyName?keyName:"" );
       }
 
-      if(root && !db)
-        oyjl_tree_free(root);
-
     } else
     { error = 1;
       ERRcc_S( db, "%s [%s]/%s",
@@ -505,6 +502,7 @@ int      openiccDBSetString          ( const char        * keyName,
     }
     openiccDB_Release( &db );
     if(file_name) free(file_name);
+    if(root && !db) oyjl_tree_free(root);
   }
 
   return error;

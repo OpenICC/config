@@ -103,7 +103,7 @@ int                openiccMessageFormat (
     id_text = id_text_tmp;
   }
 
-  oyjlAllocHelper_m_(text, char, 256, malloc, return 1);
+  oyjlAllocHelper_m_(text, char, 256, malloc, if(id_text_tmp) free(id_text_tmp); return 1);
 
 # define MAX_LEVEL 20
   if(level_PROG < 0)
