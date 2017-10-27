@@ -3,7 +3,7 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2011-2015 (C) Kai-Uwe Behrmann
+ *            2011-2017 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
  *  @internal
@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
   for(i = 0; i < devices_n; ++i)
   {
     const char * d = openiccConfig_DeviceGet( db, NULL, i,
-                                              &keys, &values, malloc );
+                                              &keys, &values, malloc,free );
 
     if(i)
       fprintf( stderr,"\n");
@@ -94,7 +94,7 @@ int main(int argc, char ** argv)
   /* get a single JSON device */
   i = 1; /* select the second one, we start counting from zero */
   d = openiccConfig_DeviceGetJSON ( db, NULL, i, 0,
-                                    old_device_class, &json, malloc );
+                                    old_device_class, &json, malloc,free );
   config = openiccConfig_FromMem( json );
   device_class = openiccConfig_DeviceClassGet( config, malloc );
   openiccConfig_Release( &config );
@@ -116,7 +116,7 @@ int main(int argc, char ** argv)
       flags |= OPENICC_CONFIGS_SKIP_FOOTER;
 
     d = openiccConfig_DeviceGetJSON( db, devices_filter, i, flags,
-                                     old_device_class, &json, malloc );
+                                     old_device_class, &json, malloc,free );
     old_device_class = d;
     printf( "%s\n", json );
     free(json);

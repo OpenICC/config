@@ -3,7 +3,7 @@
  *  libOpenICC - OpenICC Colour Management Configuration
  *
  *  @par Copyright:
- *            2011-2015 (C) Kai-Uwe Behrmann
+ *            2011-2017 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC Colour Management configuration helpers
  *  @internal
@@ -323,7 +323,7 @@ int main(int argc, char ** argv)
             continue;
 
           d = openiccConfig_DeviceGetJSON( config, devices_filter, i,
-                                            flags, old_d, &json, malloc );
+                                           flags, old_d, &json, malloc,free );
 
           if(d)
           {
@@ -341,7 +341,7 @@ int main(int argc, char ** argv)
           ++pos;
 
           d = openiccConfig_DeviceGetJSON( config_new, devices_filter, i,
-                                            flags, old_d, &json, malloc );
+                                           flags, old_d, &json, malloc,free );
 
           if(d)
           {
@@ -396,7 +396,7 @@ int main(int argc, char ** argv)
           continue;
 
         d = openiccConfig_DeviceGet( config, device_classes, i,
-                                      &keys, &values, malloc );
+                                     &keys, &values, malloc,free );
 
         if(i && list_long)
           fprintf( stderr,"\n");
