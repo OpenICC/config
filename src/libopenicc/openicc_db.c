@@ -500,9 +500,9 @@ int      openiccDBSetString          ( const char        * keyName,
                _("Could not create root JSON node for"),
                openiccScopeGetString(scope), keyName?keyName:"" );
     }
+    if(root && !db) oyjl_tree_free(root);
     openiccDB_Release( &db );
     if(file_name) free(file_name);
-    if(root && !db) oyjl_tree_free(root);
   }
 
   return error;
