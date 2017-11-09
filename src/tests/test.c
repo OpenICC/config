@@ -260,7 +260,7 @@ oiTESTRESULT_e testIO ()
 
   char * t1, *t2, *t3;
   const char * file_name = "/usr/share/color/icc/OpenICC/sRGB.icc";
-  size_t size = 0;
+  int size = 0;
   FILE * fp;
 
   t1 = openiccExtractPathFromFileName_( file_name );
@@ -335,7 +335,7 @@ oiTESTRESULT_e testIO ()
   t1 = openiccOpenFile( file_name, &size );
   if(t1)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccOpenFile() &size %u                       ", (unsigned)size );
+    "openiccOpenFile() &size %d                       ", size );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccOpenFile() %s    ", file_name );
@@ -349,7 +349,7 @@ oiTESTRESULT_e testIO ()
                            strlen(OPENICC_DEVICE_PATH) + 1 );
   if(size)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccWriteFile() size %u                         ", (unsigned)size );
+    "openiccWriteFile() size %d                         ", size );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccWriteFile() %s                ", file_name );
@@ -422,7 +422,7 @@ oiTESTRESULT_e testConfig()
   openiccConfig_s * config;
   const char * file_name;
   char * text;
-  size_t size = 0;
+  int size = 0;
   int key_names_n = 0, values_n = 0,i,
       error OI_UNUSED = 0;
   char ** key_names, ** values;
@@ -579,7 +579,7 @@ oiTESTRESULT_e testDeviceJSON ()
   const char * devices_filter[] = {OPENICC_DEVICE_CAMERA,NULL},
              * old_device_class = NULL,
              * d = NULL;
-  size_t size = 0;
+  int size = 0;
 
   const char * non_json = "{\"org\":{\"free{\"openicc\")))";
 
@@ -799,7 +799,7 @@ oiTESTRESULT_e testODB()
     const char * db_file = oiGetConfigFileName();
 
     /* read JSON input file */
-    size_t size = 0;
+    int size = 0;
     char * text = openiccOpenFile( db_file, &size );
 
     /* parse JSON */

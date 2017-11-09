@@ -97,7 +97,7 @@ int main(int argc, char ** argv)
   int list_devices = 0,
       list_long = 0;
   int error = 0;
-  size_t size = 0;
+  int size = 0;
   char * text = NULL;
   const char * db_file = NULL,
              * file_name = NULL,
@@ -374,8 +374,8 @@ int main(int argc, char ** argv)
 
         if(json_new)
         {
-          size_t len = strlen(json_new) + 1;
-          size_t s = openiccWriteFile( db_file, json_new, len );
+          int len = strlen(json_new) + 1;
+          int s = openiccWriteFile( db_file, json_new, len );
           if(s != len)
             WARNc_S("Could not write file %s  %u!=%u", db_file, s, len );
         } else
