@@ -425,7 +425,7 @@ oiTESTRESULT_e testConfig()
   int size = 0;
   int key_names_n = 0, values_n = 0,i,
       error OI_UNUSED = 0;
-  char ** key_names, ** values;
+  char ** key_names = NULL, ** values = NULL;
   const char * base_key;
   oyjl_val root, array, v;
   char * json = NULL;
@@ -519,7 +519,7 @@ oiTESTRESULT_e testConfig()
     { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccConfig_GetString()                      " );
     }
-    fprintf(zout, "\t%s:\t\"%s\"\n", key_names[i]?key_names[i]:"????", t?t:"????" );
+    fprintf(zout, "\t%s:\t\"%s\"\n", (key_names && key_names[i])?key_names[i]:"????", t?t:"????" );
     myDeAllocFunc( key_names[i] );
     if(values && values[i]) myDeAllocFunc(values[i]);
   }
@@ -554,7 +554,7 @@ oiTESTRESULT_e testConfig()
     "openiccConfig_GetKeyNames(\"org\",one level) 1 == %d", i );
   }
   i = 0;
-  fprintf(zout, "\t%s\n", key_names[i]?key_names[i]:"????" );
+  fprintf(zout, "\t%s\n", (key_names && key_names[i])?key_names[i]:"????" );
   while(key_names && key_names[i]) myDeAllocFunc( key_names[i++] );
   if( key_names ) { myDeAllocFunc(key_names); key_names = NULL; }
 
