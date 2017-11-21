@@ -50,6 +50,5 @@ INSTALL ( FILES
           "${CMAKE_CURRENT_BINARY_DIR}/OpenIccConfig.cmake"
           DESTINATION ${CMAKE_MODULES_INSTALL_DIR}
           COMPONENT dev
-          RENAME FindOpenIcc.cmake
         )
 
