@@ -8,11 +8,14 @@ SET (TARGET_INCLUDE_FOLDER
 		"Optional folder below system include folder to install include files."
     )
 
-SET (TARGET_CMAKE_FOLDER
-		"cmake/${PACKAGE_NAME}"
+IF(NOT CMAKE_MODULES_INSTALL_DIR)
+  SET (CMAKE_MODULES_INSTALL_DIR
+		"${CMAKE_INSTALL_LIBDIR}/cmake/${PACKAGE_NAME}"
 		CACHE STRING
-		"The folder below system prefix where to install cmake files."
+		"The folder where to install cmake files."
     )
+ENDIF(NOT CMAKE_MODULES_INSTALL_DIR)
+
 
 SET (TARGET_PLUGIN_FOLDER "openicc"
 		CACHE STRING
@@ -45,7 +48,7 @@ CONFIGURE_FILE (
 
 INSTALL ( FILES
           "${CMAKE_CURRENT_BINARY_DIR}/OpenIccConfig.cmake"
-          DESTINATION ${CMAKE_INSTALL_LIBDIR}/${TARGET_CMAKE_FOLDER}
+          DESTINATION ${CMAKE_MODULES_INSTALL_DIR}
           COMPONENT dev
           RENAME FindOpenIcc.cmake
         )
