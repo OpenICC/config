@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2017-03-29 11:28+0200\n"
+"POT-Creation-Date: 2017-10-27 12:57+0200\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -15,62 +15,63 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libopenicc/openicc_core.c:125
+#: libopenicc/openicc_core.c:126
 msgid "!!! ERROR"
 msgstr "!!! CHYBA"
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:179
+#: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:180
+#: libopenicc/openicc_db.c:434
 #, fuzzy
 msgid "Could not alloc memory"
 msgstr "Nelze alokovat paměť pro:"
 
-#: libopenicc/openicc_db.c:408
+#: libopenicc/openicc_db.c:412
 #, fuzzy
 msgid "Could not create a intermediate db object for"
 msgstr "Nelze rozpoznat zařízení"
 
-#: libopenicc/openicc_db.c:494
+#: libopenicc/openicc_db.c:500
 #, fuzzy
 msgid "Could not create root JSON node for"
 msgstr "Nelze otevřít meta modul API"
 
-#: libopenicc/openicc_db.c:115 libopenicc/openicc_db.c:147
+#: libopenicc/openicc_db.c:116 libopenicc/openicc_db.c:148
 #, fuzzy
 msgid "Could not find config"
 msgstr "Nelze otevřít profil"
 
-#: libopenicc/openicc_db.c:484
+#: libopenicc/openicc_db.c:493
 #, fuzzy
 msgid "Could not obtain JSON node for"
 msgstr "Nelze otevřít meta modul API"
 
-#: libopenicc/openicc_db.c:442
+#: libopenicc/openicc_db.c:451
 msgid "Could not set JSON string for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:231
+#: libopenicc/openicc_db.c:229
 #, fuzzy
 msgid "Could not setup db objetc"
 msgstr "Nelze rozpoznat zařízení"
 
-#: libopenicc/openicc_db.c:467
+#: libopenicc/openicc_db.c:476
 msgid "No JSON content obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:476
+#: libopenicc/openicc_db.c:485
 msgid "No JSON obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:152
+#: libopenicc/openicc_db.c:153
 #, fuzzy
 msgid "Paths:"
 msgstr "Cesty"
 
-#: libopenicc/openicc_core.c:122
+#: libopenicc/openicc_core.c:123
 msgid "WARNING"
 msgstr "VAROVÁNÍ"
 
-#: libopenicc/openicc_db.c:460
+#: libopenicc/openicc_db.c:469
 msgid "Writing failed for"
 msgstr ""
 

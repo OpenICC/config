@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2017-03-29 11:28+0200\n"
+"POT-Creation-Date: 2017-10-27 12:57+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -19,55 +19,56 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: vim 6.0\n"
 
-#: libopenicc/openicc_core.c:125
+#: libopenicc/openicc_core.c:126
 msgid "!!! ERROR"
 msgstr "!!! Fehler"
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:179
+#: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:180
+#: libopenicc/openicc_db.c:434
 msgid "Could not alloc memory"
 msgstr "Kann keinen Speicher reservieren"
 
-#: libopenicc/openicc_db.c:408
+#: libopenicc/openicc_db.c:412
 msgid "Could not create a intermediate db object for"
 msgstr "Konnte temporäres DB Objekt nicht erstellen für"
 
-#: libopenicc/openicc_db.c:494
+#: libopenicc/openicc_db.c:500
 msgid "Could not create root JSON node for"
 msgstr "Konnte kein JSON Wurzelknoten erzeugen für"
 
-#: libopenicc/openicc_db.c:115 libopenicc/openicc_db.c:147
+#: libopenicc/openicc_db.c:116 libopenicc/openicc_db.c:148
 msgid "Could not find config"
 msgstr "Konnte Konfiguration nicht finden"
 
-#: libopenicc/openicc_db.c:484
+#: libopenicc/openicc_db.c:493
 msgid "Could not obtain JSON node for"
 msgstr "Konnte kein JSON Knoten erhalten für"
 
-#: libopenicc/openicc_db.c:442
+#: libopenicc/openicc_db.c:451
 msgid "Could not set JSON string for"
 msgstr "Konnte keinen JSON Text setzen für"
 
-#: libopenicc/openicc_db.c:231
+#: libopenicc/openicc_db.c:229
 msgid "Could not setup db objetc"
 msgstr "Konnte DB Objekt nicht erstellen"
 
-#: libopenicc/openicc_db.c:467
+#: libopenicc/openicc_db.c:476
 msgid "No JSON content obtained for"
 msgstr "Kein JSON Inhalt erhalten für"
 
-#: libopenicc/openicc_db.c:476
+#: libopenicc/openicc_db.c:485
 msgid "No JSON obtained for"
 msgstr "Kein JSON erhalten für"
 
-#: libopenicc/openicc_db.c:152
+#: libopenicc/openicc_db.c:153
 msgid "Paths:"
 msgstr "Pfade:"
 
-#: libopenicc/openicc_core.c:122
+#: libopenicc/openicc_core.c:123
 msgid "WARNING"
 msgstr "WARNUNG"
 
-#: libopenicc/openicc_db.c:460
+#: libopenicc/openicc_db.c:469
 msgid "Writing failed for"
 msgstr "Schreiben mislungen für"
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenICC 0.1\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2017-10-13 21:57+0200\n"
+"POT-Creation-Date: 2017-11-15 19:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,54 +17,55 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libopenicc/openicc_core.c:122
+#: libopenicc/openicc_core.c:123
 msgid "WARNING"
 msgstr ""
 
-#: libopenicc/openicc_core.c:125
+#: libopenicc/openicc_core.c:126
 msgid "!!! ERROR"
 msgstr ""
 
-#: libopenicc/openicc_db.c:59 libopenicc/openicc_db.c:179
+#: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:180
+#: libopenicc/openicc_db.c:434
 msgid "Could not alloc memory"
 msgstr ""
 
-#: libopenicc/openicc_db.c:115 libopenicc/openicc_db.c:147
+#: libopenicc/openicc_db.c:116 libopenicc/openicc_db.c:148
 msgid "Could not find config"
 msgstr ""
 
-#: libopenicc/openicc_db.c:152
+#: libopenicc/openicc_db.c:153
 msgid "Paths:"
 msgstr ""
 
-#: libopenicc/openicc_db.c:231
+#: libopenicc/openicc_db.c:229
 msgid "Could not setup db objetc"
 msgstr ""
 
-#: libopenicc/openicc_db.c:408
+#: libopenicc/openicc_db.c:412
 msgid "Could not create a intermediate db object for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:442
+#: libopenicc/openicc_db.c:451
 msgid "Could not set JSON string for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:460
+#: libopenicc/openicc_db.c:469
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:467
+#: libopenicc/openicc_db.c:476
 msgid "No JSON content obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:476
+#: libopenicc/openicc_db.c:485
 msgid "No JSON obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:484
+#: libopenicc/openicc_db.c:493
 msgid "Could not obtain JSON node for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:494
+#: libopenicc/openicc_db.c:500
 msgid "Could not create root JSON node for"
 msgstr ""
