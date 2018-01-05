@@ -59,31 +59,8 @@
 #define oyjl_value_clear               openiccJValueClear
 #include "oyjl_tree.h"
 
-#if   defined(__clang__)
-#define OI_FALLTHROUGH
-#elif __GNUC__ >= 7 
-#define OI_FALLTHROUGH                 __attribute__ ((fallthrough));
-#else
-#define OI_FALLTHROUGH
-#endif
-
-#if   __GNUC__ >= 7
-#define OI_DEPRECATED                  __attribute__ ((deprecated))
-#elif defined(_MSC_VER)
-#define OI_DEPRECATED                  __declspec(deprecated)
-#else
-#define OI_DEPRECATED
-#endif
-
-#if   (__GNUC__*100 + __GNUC_MINOR__) >= 406
-#define OI_UNUSED                      __attribute__ ((unused))
-#elif defined(_MSC_VER)
-#define OI_UNUSED                      __declspec(unused)
-#else
-#define OI_UNUSED
-#endif
-
 #include "openicc_conf.h"
+#include "openicc_core.h"
 #include "openicc_config.h"
 #include "openicc_version.h"
 

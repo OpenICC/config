@@ -6,6 +6,7 @@ CONFIGURE_FILE (
 
 SET( CHEADERS_OBJECT_CONFIG_PUBLIC
 	openicc_config.h
+	openicc_core.h
 	openicc_db.h
    )
 SET( CHEADERS_OBJECT_CONFIG_PUBLIC
