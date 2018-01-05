@@ -3,7 +3,7 @@
  *  @par License: 
  *             MIT <http://www.opensource.org/licenses/mit-license.php>
  *  @par Copyright:
- *             (c) 2011 - Kai-Uwe Behrmann <ku.b@gmx.de>
+ *             (c) 2011-2017 - Kai-Uwe Behrmann <ku.b@gmx.de>
  *
  *  @brief    helper macros
  */
