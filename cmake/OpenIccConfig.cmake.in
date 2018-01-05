@@ -2,7 +2,7 @@
 # Find the native OpenICC headers and libraries.
 #
 #  OPENICC_FOUND        - True if OpenICC found.
-#  OPENICC_INCLUDE_DIRS - where to find kdb.h, etc.
+#  OPENICC_INCLUDE_DIRS - where to find openicc.h, etc.
 #  OPENICC_LIBRARIES    - List of libraries when using OpenICC.
 #
 #  OPENICC_VERSION       - The version of openicc (x.y.z)
