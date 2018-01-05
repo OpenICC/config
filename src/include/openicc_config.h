@@ -20,6 +20,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stdio.h>
+
 typedef void * (*openiccAlloc_f)     ( size_t              size );
 typedef void   (*openiccDeAlloc_f)   ( void              * data );
 
