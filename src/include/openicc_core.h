@@ -19,9 +19,6 @@
 
 #include <stdio.h>
 
-typedef void * (*openiccAlloc_f)     ( size_t              size );
-typedef void   (*openiccDeAlloc_f)   ( void              * data );
-
 
 #if   defined(__clang__)
 #define OI_FALLTHROUGH
@@ -46,5 +43,46 @@ typedef void   (*openiccDeAlloc_f)   ( void              * data );
 #else
 #define OI_UNUSED
 #endif
+
+/** \addtogroup misc
+
+ *  @{ */
+
+typedef void * (*openiccAlloc_f)     ( size_t              size );
+typedef void   (*openiccDeAlloc_f)   ( void              * data );
+
+#define OPENICC_SLASH "/"
+
+/** @brief customisable messages */
+#define OI_DEBUG                       "OI_DEBUG"
+extern int * openicc_debug;
+extern int openicc_backtrace;
+
+typedef enum {
+  openiccMSG_ERROR = 300,              /**< @brief fatal user messages */
+  openiccMSG_WARN,                     /**< @brief log messages */
+  openiccMSG_DBG,                      /**< @brief developer messages */
+} openiccMSG_e;
+
+typedef int  (*openiccMessage_f)     ( int/*openiccMSG_e*/ error_code,
+                                       const void        * context_object,
+                                       const char        * format,
+                                       ... );
+int            openiccMessageFuncSet ( openiccMessage_f    message_func );
+int            openiccVersion        ( void );
+void           openiccSetDebugVariable(int               * cmm_debug );
+
+char * openiccReadFileSToMem(
+                        FILE       * fp,
+                        int        * size);
+
+int            openiccStringAddPrintf( char             ** string,
+                                       void*            (* alloc)(size_t size),
+                                       void             (* deAlloc)(void * data ),
+                                       const char        * format,
+                                                           ... );
+/** 
+ *  @} *//* misc
+ */
 
 #endif /* __OPENICC_CORE_H__ */
