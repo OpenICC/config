@@ -125,15 +125,12 @@ typedef struct openiccArray_s openiccArray_s;
 int      openiccArray_Count          ( openiccArray_s    * array );
 int      openiccArray_Push           ( openiccArray_s    * array );
 
-int          openiccStringAddPrintf  ( char             ** string,
-                                       void*            (* alloc)(size_t size),
-                                       void             (* deAlloc)(void * data ),
-                                       const char        * format,
-                                                           ... );
 #define STRING_ADD( t, append ) openiccStringAddPrintf( &t, 0,0, append )
 char *       openiccStringCopy       ( const char        * text,
                                        openiccAlloc_f      alloc );
 #define openiccNoEmptyString_m_(t) (t?t:"")
+
+int            openiccInit           ( void );
 
 
 extern openiccMessage_f     openiccMessage_p;
@@ -145,9 +142,6 @@ int  openiccMessageFunc              ( int/*openiccMSG_e*/ code,
 
 char * openiccOpenFile( const char * file_name,
                         int        * size_ptr );
-char * openiccReadFileSToMem(
-                        FILE       * fp,
-                        int        * size);
 int    openiccWriteFile(const char * file_name,
                         void       * ptr,
                         int          size );
