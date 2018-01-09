@@ -621,14 +621,14 @@ oiTESTRESULT_e testDeviceJSON ()
     const char * d = openiccConfig_DeviceGet( config, NULL, i,
                                                &keys, &values, malloc,free );
 
-    if(i && openicc_debug)
+    if(i && *openicc_debug)
       fprintf( zout,"\n");
 
     n = 0; if(keys) while(keys[n]) ++n;
     fprintf( zout, "[%d] device class:\"%s\" with %d key/value pairs\n", i, d, n);
     for( j = 0; j < n; ++j )
     {
-      if(openicc_debug)
+      if(*openicc_debug)
       fprintf(zout, "%s:\"%s\"\n", keys[j], values[j]);
       free(keys[j]);
       free(values[j]);
@@ -724,10 +724,10 @@ oiTESTRESULT_e testXDG()
     return 1;
   }
 
-  if(openicc_debug)
+  if(*openicc_debug)
     fprintf( zout, "%s\n", _("Paths:") );
   for(i=0; i < npaths; ++i)
-    if(openicc_debug)
+    if(*openicc_debug)
       fprintf( zout, "%s\n", paths[i]);
 
   xdg_free(paths, npaths);
@@ -748,10 +748,10 @@ oiTESTRESULT_e testXDG()
     ERRc_S("%s %d", _("Could not find config"), scope );
   }
 
-  if(openicc_debug)
+  if(*openicc_debug)
     fprintf( zout, "%s\n", _("Paths:") );
   for(i=0; i < npaths; ++i)
-    if(openicc_debug)
+    if(*openicc_debug)
       fprintf( zout, "%s\n", paths[i]);
 
   xdg_free(paths, npaths);
@@ -1001,7 +1001,7 @@ int main(int argc, char** argv)
   {
     int value = atoi(getenv("OY_DEBUG"));
     if(value > 0)
-      openicc_debug += value;
+      *openicc_debug += value;
   }
 
   /* init */

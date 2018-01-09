@@ -152,14 +152,14 @@ int main(int argc, char ** argv)
               case 'j': dump_json = 1; break;
               case 'l': list_devices = 1; break;
               case 's': scope = ucmm_local_system; break;
-              case 'v': ++verbose; ++openicc_debug; break;
+              case 'v': ++verbose; ++*openicc_debug; break;
               case 'w': write_db_file = 1; break;
               case 'h':
               case '-':
                         if(i == 1)
                         {
                              if(OY_IS_ARG("verbose"))
-                        { ++openicc_debug; ++verbose; i=100; break; }
+                        { ++*openicc_debug; ++verbose; i=100; break; }
                         else if(OY_IS_ARG("json"))
                         { dump_json = 1; i=100; break; }
                         else if(OY_IS_ARG("long"))

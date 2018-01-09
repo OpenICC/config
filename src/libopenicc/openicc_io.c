@@ -141,7 +141,7 @@ int openiccIsDirFull_ (const char* name)
   memset(&status,0,sizeof(struct stat));
   r = stat (name, &status);
 
-  if(r != 0 && openicc_debug > 1)
+  if(r != 0 && *openicc_debug > 1)
   switch (errno)
   {
     case EACCES:       WARNc_S("Permission denied: %s", name); break;
@@ -216,7 +216,7 @@ int openiccMakeDir_ (const char* path)
                             , mode
 #endif
                                   );
-      if(rc && openicc_debug > 1)
+      if(rc && *openicc_debug > 1)
       switch (errno)
       {
         case EACCES:       WARNc_S("Permission denied: %s", path); break;
@@ -246,7 +246,7 @@ int openiccIsFileFull_ (const char* fullFileName, const char * read_mode)
   memset(&status,0,sizeof(struct stat));
   r = stat (name, &status);
 
-  if(r != 0 && openicc_debug > 1)
+  if(r != 0 && *openicc_debug > 1)
   switch (errno)
   {
     case EACCES:       WARNc_S("Permission denied: %s", name); break;
@@ -316,7 +316,7 @@ int  openiccWriteFile ( const char * filename,
       else
         WARNc_S("no data to write into: \"%s\"", filename );
 
-    if(r && openicc_debug > 1)
+    if(r && *openicc_debug > 1)
     {
       switch (errno)
       {
