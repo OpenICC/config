@@ -357,7 +357,7 @@ oiTESTRESULT_e testIO ()
 
   fp = fopen( file_name, "r" );
   size = 0;
-  t1 = openiccReadFileSToMem( fp, &size );
+  error = openiccReadFileSToMem( fp, &t1, &size );
   if(t1)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
     "openiccReadFileSToMem() &size %u                 ", (unsigned)size );

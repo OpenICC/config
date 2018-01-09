@@ -271,7 +271,7 @@ int main(int argc, char ** argv)
     if(file_name)
       text = openiccOpenFile( file_name, &size );
     else
-      text = openiccReadFileSToMem( stdin, &size );
+      error = openiccReadFileSToMem( stdin, &text, &size );
 
     /* parse JSON */
     config_new = openiccConfig_FromMem( text );

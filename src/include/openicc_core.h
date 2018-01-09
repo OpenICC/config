@@ -72,9 +72,9 @@ int            openiccMessageFuncSet ( openiccMessage_f    message_func );
 int            openiccVersion        ( void );
 void           openiccSetDebugVariable(int               * cmm_debug );
 
-char * openiccReadFileSToMem(
-                        FILE       * fp,
-                        int        * size);
+int            openiccReadFileSToMem ( FILE              * fp,
+                                       char             ** ptr,
+                                       int               * size);
 
 int            openiccStringAddPrintf( char             ** string,
                                        void*            (* alloc)(size_t size),

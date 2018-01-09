@@ -78,40 +78,48 @@ char * openiccOpenFile( const char * file_name,
   return text;
 }
 
-char *       openiccReadFileSToMem   ( FILE              * fp,
+int          openiccReadFileSToMem   ( FILE              * fp,
+                                       char             ** ptr,
                                        int               * size)
 {
-  int mem_size = 256;
+  int mem_size = 256,
+      request = 0;
   char* mem;
   int c;
 
-  if(!fp) return NULL;
+  if(!fp || !size) return 10;
 
   mem = (char*) malloc(mem_size);
   if(!mem) return NULL;
 
-  if(size)
+  request = *size;
+  *size = 0;
+  do
   {
-    *size = 0;
-    do
+    c = getc(fp);
+
+    if(*size >= mem_size)
     {
-      c = getc(fp);
-      if(*size >= mem_size)
-      {
-        mem_size *= 2;
-        mem = realloc( mem, mem_size );
-        if(!mem) { *size = 0; return NULL; }
-      }
-      mem[(*size)++] = c;
-    } while(!feof(fp));
+      mem_size *= 2;
+      mem = realloc( mem, mem_size );
+      if(!mem) { *size = 0; return 14; }
+    }
 
-    --*size;
+    mem[(*size)++] = c;
 
-    if(mem)
-      mem[*size] = 0;
-  }
+    if(request && *size >= request)
+      break;
 
-  return mem;
+  } while(!feof(fp));
+
+  --*size;
+
+  if(mem)
+    mem[*size] = 0;
+
+  *ptr = mem;
+
+  return 0;
 }
 
 #include <errno.h>
