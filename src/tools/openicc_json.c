@@ -37,7 +37,7 @@ void printfHelp(int argc OI_UNUSED, char ** argv)
   fprintf( stderr, "        -f              %s\n", _("output format string"));
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Add gettext translated keys to JSON:"));
-  fprintf( stderr, "      %s -a [-v] -i FILE_NAME -o FILE_NAME -k name,description,help -d TEXTDOMAIN -p LOCALEDIR -l de,es -r root-key\n",        argv[0]);
+  fprintf( stderr, "      %s -a [-v] -i FILE_NAME -o FILE_NAME -k name,description,help -d TEXTDOMAIN -p LOCALEDIR -l de,es\n",        argv[0]);
   fprintf( stderr, "        -d TEXTDOMAIN   %s\n", _("text domain of your project"));
   fprintf( stderr, "        -l locales      %s\n", _("locales in a comma separated list"));
   fprintf( stderr, "        -p LOCALEDIR    %s\n", _("locale directory containing the your-locale/LC_MESSAGES/your-textdomain.mo gettext translations"));
