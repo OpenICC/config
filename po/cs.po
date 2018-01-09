@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2017-10-27 12:57+0200\n"
+"POT-Creation-Date: 2018-01-08 12:09+0100\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -15,9 +15,17 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libopenicc/openicc_core.c:126
+#: libopenicc/openicc_core.c:129
 msgid "!!! ERROR"
 msgstr "!!! CHYBA"
+
+#: tools/openicc_json.c:39
+msgid "Add gettext translated keys to JSON:"
+msgstr ""
+
+#: tools/openicc_json.c:35
+msgid "Convert JSON to gettext ready C strings:"
+msgstr ""
 
 #: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:180
 #: libopenicc/openicc_db.c:434
@@ -54,6 +62,10 @@ msgstr ""
 msgid "Could not setup db objetc"
 msgstr "Nelze rozpoznat zařízení"
 
+#: tools/openicc_json.c:48
+msgid "General options:"
+msgstr "Obecné volby:"
+
 #: libopenicc/openicc_db.c:476
 msgid "No JSON content obtained for"
 msgstr ""
@@ -67,13 +79,64 @@ msgstr ""
 msgid "Paths:"
 msgstr "Cesty"
 
-#: libopenicc/openicc_core.c:123
+#: tools/openicc_json.c:45
+msgid "Print a help text:"
+msgstr "Vytisknout nápovědu:"
+
+#: tools/openicc_json.c:210
+msgid "Rendering Intent"
+msgstr "Záměr transformace"
+
+#: tools/openicc_json.c:34 tools/openicc_json.c:137
+msgid "Usage"
+msgstr "Použití"
+
+#: libopenicc/openicc_core.c:126
 msgid "WARNING"
 msgstr "VAROVÁNÍ"
 
 #: libopenicc/openicc_db.c:469
 msgid "Writing failed for"
 msgstr ""
+
+#: tools/openicc_json.c:30
+msgid "is a JSON helper tool"
+msgstr ""
+
+#: tools/openicc_json.c:43
+msgid ""
+"locale directory containing the your-locale/LC_MESSAGES/your-textdomain.mo "
+"gettext translations"
+msgstr ""
+
+#: tools/openicc_json.c:42
+msgid "locales in a comma separated list"
+msgstr ""
+
+#: tools/openicc_json.c:50
+#, fuzzy
+msgid "output"
+msgstr "Výstupní"
+
+#: tools/openicc_json.c:37
+msgid "output format string"
+msgstr ""
+
+#: tools/openicc_json.c:49
+msgid "specify JSON file"
+msgstr ""
+
+#: tools/openicc_json.c:41
+msgid "text domain of your project"
+msgstr ""
+
+#: tools/openicc_json.c:51
+msgid "to be used key names in a comma separated list"
+msgstr ""
+
+#: tools/openicc_json.c:52
+msgid "verbose"
+msgstr "upovídaný výstup"
 
 #~ msgid ""
 #~ "    ICC Examin is licensed under the GPL version 2.    Especially all "
@@ -1280,9 +1343,6 @@ msgstr ""
 #~ msgid "Gamut selector"
 #~ msgstr "Volba gamutu"
 
-#~ msgid "General options:"
-#~ msgstr "Obecné volby:"
-
 #~ msgid "Generate CLUT Image:"
 #~ msgstr "Generovat obrázek CLUT:"
 
@@ -2141,9 +2201,6 @@ msgstr ""
 #~ msgid "Options"
 #~ msgstr "Volba"
 
-#~ msgid "Output"
-#~ msgstr "Výstupní"
-
 #~ msgid "Output Color Space"
 #~ msgstr "Výstupní barvový prostor"
 
@@ -2393,9 +2450,6 @@ msgstr ""
 #~ msgid "Preview, saturated"
 #~ msgstr "Náhled, saturace"
 
-#~ msgid "Print a help text:"
-#~ msgstr "Vytisknout nápovědu:"
-
 #~ msgid "Printer"
 #~ msgstr "Tiskárna"
 
@@ -2588,9 +2642,6 @@ msgstr ""
 
 #~ msgid "Rendering"
 #~ msgstr "Transformace"
-
-#~ msgid "Rendering Intent"
-#~ msgstr "Záměr transformace"
 
 #, fuzzy
 #~ msgid "Rendering Intent:"
@@ -3467,9 +3518,6 @@ msgstr ""
 #~ msgid "Unset device:"
 #~ msgstr "Vypsat zařízení:"
 
-#~ msgid "Usage"
-#~ msgstr "Použití"
-
 #~ msgid "Use Black Point Compensation"
 #~ msgstr "Použít kompenzaci černého bodu (BPC)"
 
@@ -4300,9 +4348,6 @@ msgstr ""
 
 #~ msgid "user path"
 #~ msgstr "uživatelská cesta"
-
-#~ msgid "verbose"
-#~ msgstr "upovídaný výstup"
 
 #~ msgid "will overwrite policy file"
 #~ msgstr "přepíše soubor politiky"
