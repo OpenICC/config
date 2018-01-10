@@ -33,7 +33,7 @@ void printfHelp(int argc OI_UNUSED, char ** argv)
   fprintf( stderr, "\n");
   fprintf( stderr, "%s\n",                 _("Usage"));
   fprintf( stderr, "  %s\n",               _("Convert JSON to gettext ready C strings:"));
-  fprintf( stderr, "      %s -e [-v] -i FILE_NAME -o FILE_NAME -f '_(%%s)\\n' -k name,description,help\n",        argv[0]);
+  fprintf( stderr, "      %s -e [-v] -i FILE_NAME -o FILE_NAME -f '_(\\\"%%s\\\"); ' -k name,description,help\n",        argv[0]);
   fprintf( stderr, "        -f              %s\n", _("output format string"));
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Add gettext translated keys to JSON:"));
@@ -239,9 +239,9 @@ int main(int argc, char ** argv)
         char * lang = langs[i];
         int j;
 
-        setlocale( LC_MESSAGES, lang );
+        const char * checklocale = setlocale( LC_MESSAGES, lang );
         if(*openicc_debug)
-          fprintf(stdout, "setlocale() %s\n", setlocale( LC_MESSAGES, NULL ));
+          fprintf(stdout, "setlocale(%s) == %s\n", lang, checklocale );
 
         for(j = 0; j < count; ++j)
         {
@@ -262,7 +262,7 @@ int main(int argc, char ** argv)
               if(t)
                 tr = dgettext( ctextdomain, t );
               if(verbose)
-                fprintf(stderr, "found:\t key: %s value: \"%s\"\n", path, tr?tr:"----" );
+                fprintf(stderr, "found:\t key: %s value[%s]: \"%s\"\n", path, ctextdomain, tr?tr:"----" );
               if(t != tr)
               {
                 char * new_path = NULL;
