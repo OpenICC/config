@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-01-08 12:09+0100\n"
+"POT-Creation-Date: 2018-01-10 12:30+0100\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -80,11 +80,11 @@ msgstr "Pfade:"
 msgid "Print a help text:"
 msgstr "Zeige einen Hilfetext an:"
 
-#: tools/openicc_json.c:210
+#: tools/openicc_json.c:213
 msgid "Rendering Intent"
 msgstr "Übertragungsart"
 
-#: tools/openicc_json.c:34 tools/openicc_json.c:137
+#: tools/openicc_json.c:34 tools/openicc_json.c:140
 msgid "Usage"
 msgstr "Benutzung"
 
@@ -99,6 +99,10 @@ msgstr "Schreiben mislungen für"
 #: tools/openicc_json.c:30
 msgid "is a JSON helper tool"
 msgstr "ist ein JSON Hilfswerkzeug"
+
+#: tools/openicc_json.c:52
+msgid "language specific wrap; -w C for C static char"
+msgstr ""
 
 #: tools/openicc_json.c:43
 msgid ""
@@ -132,7 +136,7 @@ msgstr "Text ID für das Projekt"
 msgid "to be used key names in a comma separated list"
 msgstr "zu benutzende Schlüsselwörter in einer kommagetrennten Liste"
 
-#: tools/openicc_json.c:52
+#: tools/openicc_json.c:53
 msgid "verbose"
 msgstr "plaudernd"
 

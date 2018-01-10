@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-01-08 12:09+0100\n"
+"POT-Creation-Date: 2018-01-10 12:30+0100\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -83,11 +83,11 @@ msgstr "Cesty"
 msgid "Print a help text:"
 msgstr "Vytisknout nápovědu:"
 
-#: tools/openicc_json.c:210
+#: tools/openicc_json.c:213
 msgid "Rendering Intent"
 msgstr "Záměr transformace"
 
-#: tools/openicc_json.c:34 tools/openicc_json.c:137
+#: tools/openicc_json.c:34 tools/openicc_json.c:140
 msgid "Usage"
 msgstr "Použití"
 
@@ -101,6 +101,10 @@ msgstr ""
 
 #: tools/openicc_json.c:30
 msgid "is a JSON helper tool"
+msgstr ""
+
+#: tools/openicc_json.c:52
+msgid "language specific wrap; -w C for C static char"
 msgstr ""
 
 #: tools/openicc_json.c:43
@@ -134,7 +138,7 @@ msgstr ""
 msgid "to be used key names in a comma separated list"
 msgstr ""
 
-#: tools/openicc_json.c:52
+#: tools/openicc_json.c:53
 msgid "verbose"
 msgstr "upovídaný výstup"
 

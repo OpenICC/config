@@ -26,6 +26,9 @@
 #define oyjl_string_add                openiccStringAddPrintf
 #define oyjl_string_copy               openiccStringCopy
 #define oyjl_string_split              openiccStringSplit
+#define oyjl_string_appendn            openiccStringAppendN
+#define oyjl_string_addn               openiccStringAddN
+#define oyjl_string_replace            openiccStringReplace
 #define oyjl_string_list_add_list      openiccStringListAdd
 #define oyjl_string_list_cat_list      openiccStringListCat
 #define oyjl_string_list_release       openiccStringListRelease

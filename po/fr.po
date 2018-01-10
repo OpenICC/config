@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-01-08 12:09+0100\n"
+"POT-Creation-Date: 2018-01-10 12:30+0100\n"
 "PO-Revision-Date: 2006-06-29 19:31+0200\n"
 "Last-Translator: Pascal LACROIX <lacroixpascal at vfemail.net>\n"
 "Language-Team: <fr@li.org>\n"
@@ -84,12 +84,12 @@ msgstr ""
 msgid "Print a help text:"
 msgstr ""
 
-#: tools/openicc_json.c:210
+#: tools/openicc_json.c:213
 #, fuzzy
 msgid "Rendering Intent"
 msgstr "Oyranos Préférences"
 
-#: tools/openicc_json.c:34 tools/openicc_json.c:137
+#: tools/openicc_json.c:34 tools/openicc_json.c:140
 msgid "Usage"
 msgstr ""
 
@@ -103,6 +103,10 @@ msgstr ""
 
 #: tools/openicc_json.c:30
 msgid "is a JSON helper tool"
+msgstr ""
+
+#: tools/openicc_json.c:52
+msgid "language specific wrap; -w C for C static char"
 msgstr ""
 
 #: tools/openicc_json.c:43
@@ -136,7 +140,7 @@ msgstr ""
 msgid "to be used key names in a comma separated list"
 msgstr ""
 
-#: tools/openicc_json.c:52
+#: tools/openicc_json.c:53
 msgid "verbose"
 msgstr ""
 

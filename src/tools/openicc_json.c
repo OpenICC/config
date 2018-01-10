@@ -37,7 +37,7 @@ void printfHelp(int argc OI_UNUSED, char ** argv)
   fprintf( stderr, "        -f              %s\n", _("output format string"));
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Add gettext translated keys to JSON:"));
-  fprintf( stderr, "      %s -a [-v] -i FILE_NAME -o FILE_NAME -k name,description,help -d TEXTDOMAIN -p LOCALEDIR -l de,es\n",        argv[0]);
+  fprintf( stderr, "      %s -a [-v] -i FILE_NAME -o FILE_NAME -k name,description,help -d TEXTDOMAIN -p LOCALEDIR -l de,es [-w C]",        argv[0]);
   fprintf( stderr, "        -d TEXTDOMAIN   %s\n", _("text domain of your project"));
   fprintf( stderr, "        -l locales      %s\n", _("locales in a comma separated list"));
   fprintf( stderr, "        -p LOCALEDIR    %s\n", _("locale directory containing the your-locale/LC_MESSAGES/your-textdomain.mo gettext translations"));
@@ -49,6 +49,7 @@ void printfHelp(int argc OI_UNUSED, char ** argv)
   fprintf( stderr, "        -i FILE_NAME    %s\n", _("specify JSON file"));
   fprintf( stderr, "        -o              %s\n", _("output"));
   fprintf( stderr, "        -k STRING_LIST  %s\n", _("to be used key names in a comma separated list"));
+  fprintf( stderr, "        -w TYPE         %s\n", _("language specific wrap; -w C for C static char"));
   fprintf( stderr, "        -v              %s\n", _("verbose"));
   fprintf( stderr, "\n");
   fprintf( stderr, "\n");
@@ -65,6 +66,7 @@ int main(int argc, char ** argv)
   const char * output = NULL,
              * file_name = NULL,
              * format = NULL,
+             * wrap = NULL,
              * key_list = NULL,
              * lang_list = NULL,
              * localedir = NULL,
@@ -100,6 +102,7 @@ int main(int argc, char ** argv)
               case 'l': OY_PARSE_STRING_ARG(lang_list); break;
               case 'o': OY_PARSE_STRING_ARG(output); break;
               case 'p': OY_PARSE_STRING_ARG(localedir); break;
+              case 'w': OY_PARSE_STRING_ARG(wrap); break;
               case 'v': ++verbose; ++*openicc_debug; break;
               case 'h':
               case '-':
@@ -292,6 +295,23 @@ int main(int argc, char ** argv)
 
     if(text)
     {
+      if(wrap)
+      {
+        char * tmp = NULL;
+        char * sname = strdup(ctextdomain);
+        if(strcmp(wrap,"C") != 0)
+        {
+          fprintf(stderr,"ERROR: Only -w C is supported.\n");
+          exit(1);
+        }
+
+        text = oyjl_string_replace( text, "\"", "\\\"", NULL,NULL );
+        text = oyjl_string_replace( text, "\n", "\\n\\\n", NULL,NULL );
+        sname = oyjl_string_replace( sname, "-", "_", NULL,NULL );
+        oyjl_string_add( &tmp, malloc, free, "#define %s_json \"%s\"\n", sname, text );
+        free(text); text = tmp; tmp = NULL;
+      }
+
       if(!output || strcmp(output,"-") == 0)
         fputs( text, stdout );
       else
