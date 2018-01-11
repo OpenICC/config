@@ -90,7 +90,7 @@ int          openiccReadFileSToMem   ( FILE              * fp,
   if(!fp || !size) return 10;
 
   mem = (char*) malloc(mem_size);
-  if(!mem) return NULL;
+  if(!mem) { *size = 0; return 14; /* system memory error */ }
 
   request = *size;
   *size = 0;
@@ -102,7 +102,7 @@ int          openiccReadFileSToMem   ( FILE              * fp,
     {
       mem_size *= 2;
       mem = realloc( mem, mem_size );
-      if(!mem) { *size = 0; return 14; }
+      if(!mem) { *size = 0; return 14; /* system memory error */ }
     }
 
     mem[(*size)++] = c;
