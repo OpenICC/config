@@ -107,7 +107,7 @@ int          openiccReadFileSToMem   ( FILE              * fp,
 
     mem[(*size)++] = c;
 
-    if(request && *size >= request)
+    if(request && *size > request)
       break;
 
   } while(!feof(fp));
