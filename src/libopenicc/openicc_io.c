@@ -126,17 +126,27 @@ int          openiccReadFileSToMem   ( FILE              * fp,
 #include <sys/stat.h> /* mkdir() */
 char* openiccExtractPathFromFileName_ (const char* file_name)
 {
-  char *path_name = 0;
-  char *ptr;
+  char * path_name = NULL;
+  char * ptr = NULL;
 
   if(!file_name) return NULL;
 
   path_name = strdup( file_name );
-  ptr = strrchr (path_name, '/');
-  if(ptr)
-    ptr[0] = 0;
-  else
-    strcpy( path_name, "." );
+  if(path_name)
+  {
+    ptr = strrchr (path_name, '/');
+    if(ptr)
+      ptr[0] = 0;
+    else
+    {
+      free(path_name);
+      path_name = NULL;
+    }
+  }
+
+  if(!path_name)
+    path_name = strdup( "." );
+
   return path_name;
 }
 int openiccIsDirFull_ (const char* name)
@@ -213,10 +223,8 @@ int openiccMakeDir_ (const char* path)
     {
       path_parent = openiccPathGetParent_(path_name);
       if(!openiccIsDirFull_(path_parent))
-      {
         rc = openiccMakeDir_(path_parent);
-        free( path_parent );
-      }
+      if(path_parent) free( path_parent );
 
       if(!rc)
         rc = mkdir (path_name
