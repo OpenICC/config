@@ -36,6 +36,8 @@ void* myAllocFunc(size_t size) { return calloc(size,1); }
 void  myDeAllocFunc(void* data) { free(data); }
 #endif
 
+#define free_m_( ptr_ ) { if(ptr_) {free(ptr_); ptr_ = NULL;} }
+
 #include <math.h>
 
 
@@ -195,7 +197,7 @@ oiTESTRESULT_e testPaths()
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
     "openiccGetInstallPath( %s, %s ): %s", type_names[i],scope_names[j],
                                                 openiccNoEmptyString_m_(text) );
-    free(text);
+    free_m_(text);
   } else
   { PRINT_SUB( oiTESTRESULT_XFAIL,
     "openiccGetInstallPath( %s, %s ): %s", type_names[i],scope_names[j],
@@ -250,6 +252,7 @@ const char * oiGetConfigFileName()
 }
 
 
+int openiccMakeDir_ (const char *);
 oiTESTRESULT_e testIO ()
 {
   oiTESTRESULT_e result = oiTESTRESULT_UNKNOWN;
@@ -257,11 +260,12 @@ oiTESTRESULT_e testIO ()
   fprintf(stdout, "\n" );
 
   int error = 0;
+  int odo;
 
-  char * t1, *t2, *t3;
+  char * t1 = NULL, *t2 = NULL, *t3 = NULL;
   const char * file_name = "/usr/share/color/icc/OpenICC/sRGB.icc";
   int size = 0;
-  FILE * fp;
+  FILE * fp = NULL;
 
   t1 = openiccExtractPathFromFileName_( file_name );
   fprintf(zout, "file_name: %s\n", file_name );
@@ -300,7 +304,7 @@ oiTESTRESULT_e testIO ()
 
   if(openiccIsDirFull_("/usr/share/color/icc"))
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccIsDirFull_() %s", "/usr/share/color/icc" );
+    "openiccIsDirFull_() %s        ", "/usr/share/color/icc" );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccIsDirFull_() %s               ", "/usr/share/color/icc" );
@@ -314,46 +318,150 @@ oiTESTRESULT_e testIO ()
     "openiccIsDirFull_() ! %s               ", t2?t2:"" );
   }
 
-  if(t3) free(t3);
+  if(openiccIsDirFull_("/not/existing"))
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccIsDirFull_(/not/existing) !               " );
+  } else
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccIsDirFull_(/not/existing) !               " );
+  }
+
+  free_m_(t3);
 
   t3 = openiccPathGetParent_(OPENICC_DEVICE_PATH);
   fprintf(zout, "name: %s\n", OPENICC_DEVICE_PATH );
   error = !t3 || (strlen(t3) >= strlen(OPENICC_DEVICE_PATH));
   if(!error)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccPathGetParent_() %s        ", t3 );
+    "openiccPathGetParent_() %s  ", t3 );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccPathGetParent_() %s               ", t3?t3:"" );
+  }
+  free_m_(t3);
+
+  t3 = openiccPathGetParent_(OPENICC_DEVICE_PATH "/");
+  fprintf(zout, "name: %s\n", OPENICC_DEVICE_PATH "/" );
+  error = !t3 || (strlen(t3) >= strlen(OPENICC_DEVICE_PATH "/"));
+  if(!error)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccPathGetParent_() %s  ", t3 );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccPathGetParent_() %s               ", t3?t3:"" );
   }
 
-  if(t1) free(t1);
-  if(t2) free(t2);
-  if(t3) free(t3);
+  free_m_(t1);
+  free_m_(t2);
+  free_m_(t3);
+
+  odo = *openicc_debug;
+  *openicc_debug = 2;
+
+  if(openiccIsFileFull_("/not/existing", "r"))
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccIsFileFull_(\"/not/existing\", \"r\") !   " );
+  } else
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccIsFileFull_(\"/not/existing\", \"r\") !   " );
+  }
+
+  if(openiccIsFileFull_("/etc/shadow", "rw"))
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccIsFileFull_(/etc/shadow) !             " );
+  } else
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccIsFileFull_(/etc/shadow) !             " );
+  }
 
   file_name = oiGetConfigFileName();
-  t1 = openiccOpenFile( file_name, &size );
-  if(t1)
+
+  if(openiccIsFileFull_("................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................", "rw"))
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccIsFileFull_(longlong) !                " );
+  } else
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccOpenFile() &size %d                       ", size );
+    "openiccIsFileFull_(longlong) !                " );
+  }
+
+  if(openiccIsFileFull_(file_name, "r"))
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccIsFileFull_()                          " );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccIsFileFull_()                          " );
+  }
+
+  t1 = openiccOpenFile( file_name, &size );
+  if(t1 && size == 2394)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccOpenFile() &size %d                    ", size );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccOpenFile() %s    ", file_name );
   }
-  if(t1) free(t1);
+  free_m_(t1);
 
+  t1 = openiccOpenFile( "not_existing.file", &size );
+  if(t1 == NULL)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccOpenFile(not existing) &size %d           ", size );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccOpenFile(not existing) %s    ", file_name );
+  }
+  free_m_(t1);
 
+  error = openiccMakeDir_ ("");
+  if(!error)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccMakeDir_(\"\")  %d                       ", error );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccMakeDir_(\"\")  %d                       ", error );
+  }
+
+  error = openiccMakeDir_ (NULL);
+  if(error)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccMakeDir_(NULL)  %d                       ", error );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccMakeDir_(NULL)  %d                       ", error );
+  }
+
+  error = openiccMakeDir_ ("/never");
+  if(error)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccMakeDir_(/never)  %d                       ", error );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccMakeDir_(/never)  %d                       ", error );
+  }
+
+  error = openiccMakeDir_ ("/etc/never/ever");
+  if(error)
+  { PRINT_SUB( oiTESTRESULT_SUCCESS,
+    "openiccMakeDir_(/etc/never/ever)  %d              ", error );
+  } else
+  { PRINT_SUB( oiTESTRESULT_FAIL,
+    "openiccMakeDir_(/etc/never/ever)  %d              ", error );
+  }
+  *openicc_debug = odo;
+
+  t1 = openiccOpenFile( file_name, &size );
   file_name = "test.txt";
   size = openiccWriteFile( file_name,
-                           OPENICC_DEVICE_PATH,
-                           strlen(OPENICC_DEVICE_PATH) + 1 );
+                           t1,
+                           strlen(t1) );
   if(size)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccWriteFile() size %d                         ", size );
+    "openiccWriteFile() size %d                    ", size );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccWriteFile() %s                ", file_name );
   }
+  free_m_(t1);
 
   fp = fopen( file_name, "r" );
   size = 0;
@@ -365,7 +473,7 @@ oiTESTRESULT_e testIO ()
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccReadFileSToMem() %s    ", file_name );
   }
-  if(t1) free(t1);
+  free_m_(t1);
   if(fp) fclose(fp);
 
   return result;
@@ -411,7 +519,7 @@ oiTESTRESULT_e testStringRun ()
   { PRINT_SUB( oiTESTRESULT_FAIL,
     "openiccStringAdd_() ...                            " );
   }
-  if(t) free(t);
+  free_m_(t);
 
   return result;
 }
@@ -451,8 +559,7 @@ oiTESTRESULT_e testConfig()
   }
   oyjl_tree_free( root ); root = NULL;
   fprintf(zout, "%s\n", json );
-  if(json) free(json);
-  json = NULL;
+  free_m_(json);
 
 
   base_key = "org/freedesktop/openicc/device/camera/[1]";
@@ -467,12 +574,12 @@ oiTESTRESULT_e testConfig()
   /* and write back */
   oyjl_tree_to_json( root, &level, &json );
   oyjl_tree_free( root ); root = NULL;
-  if(text) free(text);
+  free_m_(text);
 
 
   /* parse JSON */
   config = openiccConfig_FromMem( json );
-  if(json) free(json);
+  free_m_(json);
   openiccConfig_SetInfo ( config, file_name );
 
   if(config)
@@ -601,7 +708,7 @@ oiTESTRESULT_e testDeviceJSON ()
 
   /* parse JSON */
   config = openiccConfig_FromMem( text );
-  if(text) free(text);
+  free_m_(text);
   openiccConfig_SetInfo ( config, file_name );
   devices_n = openiccConfig_DevicesCount(config, NULL);
   fprintf( zout, "Found %d devices.\n", devices_n );
@@ -630,10 +737,10 @@ oiTESTRESULT_e testDeviceJSON ()
     {
       if(*openicc_debug)
       fprintf(zout, "%s:\"%s\"\n", keys[j], values[j]);
-      free(keys[j]);
-      free(values[j]);
+      free_m_(keys[j]);
+      free_m_(values[j]);
     }
-    free(keys); free(values);
+    free_m_(keys); free_m_(values);
   }
   fprintf(zout, "\n" );
 
@@ -651,8 +758,8 @@ oiTESTRESULT_e testDeviceJSON ()
   { PRINT_SUB( oiTESTRESULT_XFAIL,
     "openiccConfig_DeviceClassGet()...                 " );
   }
-  if(json) free(json);
-  if(device_class) free(device_class);
+  free_m_(json);
+  free_m_(device_class);
   openiccConfig_Release( &config2 );
 
 
@@ -678,14 +785,14 @@ oiTESTRESULT_e testDeviceJSON ()
                                      old_device_class, &json, malloc,free );
     old_device_class = d;
     STRING_ADD( full_json, json );
-    free(json);
+    free_m_(json);
   }
   openiccConfig_Release( &config );
 
 
   config = openiccConfig_FromMem( full_json );
   openiccConfig_SetInfo ( config, "full_json" );
-  if(full_json) free(full_json);
+  free_m_(full_json);
   devices_n = openiccConfig_DevicesCount(config, NULL);
   if( devices_n == 2 )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
@@ -807,7 +914,7 @@ oiTESTRESULT_e testODB()
     {
       int count = openiccArray_Count( (openiccArray_s*)&db->ks );
       openiccConfig_s * config = openiccConfig_FromMem( text );
-      if(text) { free(text); text = NULL; }
+      free_m_(text);
       openiccConfig_SetInfo ( config, db_file );
 
       /* reserve enough memory in list array */
@@ -849,7 +956,7 @@ oiTESTRESULT_e testODB()
   { PRINT_SUB( oiTESTRESULT_FAIL, 
     "openiccGetShortKeyFromFullKeyPath(key.ignore) \"%s\"", key );
   }
-  if(temp) free(temp);
+  free_m_(temp);
 
   key = openiccGetShortKeyFromFullKeyPath( "path/key.attribute", &temp );
   if(strcmp(key,"key") == 0 && temp)
@@ -859,7 +966,7 @@ oiTESTRESULT_e testODB()
   { PRINT_SUB( oiTESTRESULT_FAIL, 
     "openiccGetShortKeyFromFullKeyPath(path/key.ignore)\"%s\"", key );
   }
-  if(temp) free(temp);
+  free_m_(temp);
 
   /* Get key names below some point in the JSON trees. */
   error = openiccDB_GetKeyNames( db, "org", 0,
@@ -933,9 +1040,9 @@ oiTESTRESULT_e testODB()
   }
 
 
-  if(gkey) free(gkey);
-  if(temp) free(temp);
-  if(temp2) free(temp2);
+  free_m_(gkey);
+  free_m_(temp);
+  free_m_(temp2);
 
   return result;
 }
