@@ -25,7 +25,7 @@ msgstr "!!! Fehler"
 
 #: tools/openicc_json.c:39
 msgid "Add gettext translated keys to JSON:"
-msgstr "Füge mit gettext übersezte Schlüssel to JSON hinzu:"
+msgstr "Füge mit gettext übersetzte Schlüssel to JSON hinzu:"
 
 #: tools/openicc_json.c:35
 msgid "Convert JSON to gettext ready C strings:"
