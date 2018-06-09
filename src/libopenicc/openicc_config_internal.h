@@ -158,6 +158,7 @@ char * openiccPathGetParent_         ( const char        * name );
 #define OPENICC_COLOR_DL_CACHE_PATH "openicc/device_link"
 #define OPENICC_ICCDIRNAME "icc"
 #define OPENICC_SETTINGSDIRNAME "settings"
+#define OPENICC_PIXMAPSDIRNAME "pixmaps"
 
 #if defined(__APPLE__)
   /* Apples ColorSync default paths */
@@ -173,10 +174,14 @@ char * openiccPathGetParent_         ( const char        * name );
 # define CSNetworkPath                 "/Network/Library"  OS_ICC_PATH
 
 # define OS_CACHE_PATH       "/Caches/org.freedesktop." OPENICC_COLOR_DL_CACHE_PATH
+# define OS_LOGO_PATH     "/org.freedesktop.openicc/" OPENICC_PIXMAPSDIRNAME
 # define OS_SETTING_PATH     "/Preferences/org.freedesktop.openicc/" OPENICC_SETTINGSDIRNAME
 # define OS_SETTINGS_USER_DIR          OS_USER_DIR           OS_SETTING_PATH
 # define OS_SETTINGS_SYSTEM_DIR        OS_GLOBAL_DIR         OS_SETTING_PATH
 # define OS_SETTINGS_MACHINE_DIR       OS_MACHINE_DIR        OS_SETTING_PATH
+
+# define OS_LOGO_USER_DIR              OS_USER_DIR           OS_LOGO_PATH
+# define OS_LOGO_SYSTEM_DIR            OS_GLOBAL_DIR         OS_LOGO_PATH
 
 #else
 
@@ -190,10 +195,15 @@ char * openiccPathGetParent_         ( const char        * name );
 # define OS_ICC_MACHINE_DIR            OS_MACHINE_DIR "lib/" OS_ICC_PATH
 
 # define OS_CACHE_PATH       "cache/color/" OPENICC_COLOR_DL_CACHE_PATH
+# define OS_LOGO_PATH        OPENICC_PIXMAPSDIRNAME
 # define OS_SETTING_PATH     "color/" OPENICC_SETTINGSDIRNAME
 # define OS_SETTINGS_USER_DIR          OS_USER_DIR "config/" OS_SETTING_PATH
 # define OS_SETTINGS_SYSTEM_DIR        OS_GLOBAL_DIR         OS_SETTING_PATH
 # define OS_SETTINGS_MACHINE_DIR       OS_MACHINE_DIR "lib/" OS_SETTING_PATH
+
+# define OS_LOGO_USER_DIR              OS_USER_DIR "local/share/" OS_LOGO_PATH
+# define OS_LOGO_SYSTEM_DIR            OS_GLOBAL_DIR         OS_LOGO_PATH
+
 #endif
 
 # define OS_DL_CACHE_USER_DIR          OS_USER_DIR           OS_CACHE_PATH

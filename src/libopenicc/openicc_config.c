@@ -712,8 +712,8 @@ int                openiccConfig_GetStrings (
  *  ::openiccPATH_MODULE + ::openiccSCOPE_USER and ::openiccPATH_MODULE + ::openiccSCOPE_OPENICC are
  *  supported.
  *
- *  @version OpenICC: 0.1.0
- *  @date    2015/08/28
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/06/09
  *  @since   2015/02/08 (OpenICC: 0.1.0)
  */
 char *       openiccGetInstallPath   ( openiccPATH_TYPE_e  type,
@@ -795,6 +795,25 @@ char *       openiccGetInstallPath   ( openiccPATH_TYPE_e  type,
           break;
         default:
           path = NULL;
+      }
+      break;
+    }
+    case openiccPATH_LOGO:
+    {
+      switch((int)scope)
+      {
+        case openiccSCOPE_USER:
+          path = C( OS_LOGO_USER_DIR );
+          break;
+        case openiccSCOPE_SYSTEM:
+          path = C( OS_LOGO_SYSTEM_DIR );
+          break;
+        case openiccSCOPE_OPENICC:
+          path = C( OPENICC_DATADIR OPENICC_SLASH OPENICC_PIXMAPSDIRNAME );
+          break;
+        case openiccSCOPE_MACHINE:
+          path = NULL;
+        break;
       }
       break;
     }

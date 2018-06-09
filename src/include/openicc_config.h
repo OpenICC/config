@@ -139,8 +139,9 @@ typedef enum {
   openiccPATH_ICC       = 0x01,        /**< ICC profile path */
   openiccPATH_POLICY    = 0x02,        /**< policy data */
   openiccPATH_MODULE    = 0x04,        /**< module data */
-  openiccPATH_SCRIPT    = 0x08,
-  openiccPATH_CACHE     = 0xf0
+  openiccPATH_SCRIPT    = 0x08,        /**< JIT code */
+  openiccPATH_CACHE     = 0xf0,        /**< cached files */
+  openiccPATH_LOGO      = 0xf1         /**< logo images */
 } openiccPATH_TYPE_e;
 
 /** @brief Select Scope for Installation or Configurations

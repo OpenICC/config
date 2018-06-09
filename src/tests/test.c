@@ -176,10 +176,10 @@ oiTESTRESULT_e testPaths()
   fprintf(stdout, "\n" );
 
   const char * type_names[] = {
-    "openiccPATH_NONE", "openiccPATH_ICC", "openiccPATH_POLICY", "openiccPATH_MODULE", "openiccPATH_SCRIPT", "openiccPATH_CACHE"
+    "openiccPATH_NONE", "openiccPATH_ICC", "openiccPATH_POLICY", "openiccPATH_MODULE", "openiccPATH_SCRIPT", "openiccPATH_CACHE", "openiccPATH_LOGO"
   };
   openiccPATH_TYPE_e types[] = {
-    openiccPATH_NONE, openiccPATH_ICC, openiccPATH_POLICY, openiccPATH_MODULE, openiccPATH_SCRIPT, openiccPATH_CACHE
+    openiccPATH_NONE, openiccPATH_ICC, openiccPATH_POLICY, openiccPATH_MODULE, openiccPATH_SCRIPT, openiccPATH_CACHE, openiccPATH_LOGO
   };
   const char * scope_names[] = {
     "openiccSCOPE_USER_SYS", "openiccSCOPE_USER", "openiccSCOPE_SYSTEM", "openiccSCOPE_OPENICC", "openiccSCOPE_MACHINE"
@@ -189,7 +189,7 @@ oiTESTRESULT_e testPaths()
   };
   int i,j;
 
-  for(i = 1; i <= 5; ++i)
+  for(i = 1; i <= 6; ++i)
   for(j = 1; j <= 4; ++j)
   {
   char * text = openiccGetInstallPath( types[i], scopes[j], malloc );
