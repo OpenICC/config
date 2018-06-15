@@ -23,8 +23,11 @@
 #include "openicc_macros.h"
 #include "openicc_config_internal.h"
 
-void printfHelp(int argc OI_UNUSED, char ** argv)
+void printfHelp(int argc, char ** argv, int verbose_)
 {
+  int pos = 0;
+  while(pos < argc && verbose_)
+    fprintf( stderr, "%s ", argv[pos++]);
   fprintf( stderr, "\n");
   fprintf( stderr, "%s %s\n",   argv[0],
                                 _("is a JSON helper tool"));
@@ -37,7 +40,7 @@ void printfHelp(int argc OI_UNUSED, char ** argv)
   fprintf( stderr, "        -f              %s\n", _("output format string"));
   fprintf( stderr, "\n");
   fprintf( stderr, "  %s\n",               _("Add gettext translated keys to JSON:"));
-  fprintf( stderr, "      %s -a [-v] -i FILE_NAME -o FILE_NAME -k name,description,help -d TEXTDOMAIN -p LOCALEDIR -l de,es [-w C]",        argv[0]);
+  fprintf( stderr, "      %s -a [-v] -i FILE_NAME -o FILE_NAME -k name,description,help -d TEXTDOMAIN -p LOCALEDIR -l de,es [-w C]\n",        argv[0]);
   fprintf( stderr, "        -d TEXTDOMAIN   %s\n", _("text domain of your project"));
   fprintf( stderr, "        -l locales      %s\n", _("locales in a comma separated list"));
   fprintf( stderr, "        -p LOCALEDIR    %s\n", _("locale directory containing the your-locale/LC_MESSAGES/your-textdomain.mo gettext translations"));
@@ -112,27 +115,29 @@ int main(int argc, char ** argv)
                         { ++*openicc_debug; ++verbose; i=100; break; }
                         } OI_FALLTHROUGH
               default:
-                        printfHelp(argc, argv);
+                        WARN( 0, "%s %s", "wrong option:", argv[pos]);
+                        printfHelp(argc, argv, verbose);
                         exit (0);
                         break;
             }
             break;
         default:
-                        printfHelp(argc, argv);
+                        WARN( 0, "%s %s", "wrong option:", argv[pos]);
+                        printfHelp(argc, argv, verbose);
                         exit (0);
                         break;
       }
       if( wrong_arg )
       {
        WARN( 0, "%s %s", "wrong argument to option:", wrong_arg);
-       printfHelp(argc, argv);
+       printfHelp(argc, argv, verbose);
        exit(1);
       }
       ++pos;
     }
   } else
   {
-                        printfHelp(argc, argv);
+                        printfHelp(argc, argv, verbose);
                         exit (0);
   }
 
