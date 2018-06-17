@@ -1,3 +1,8 @@
+# if our static code lands inside a shared lib, we need -fPIC
+IF(ENABLE_SHARED_LIBS)
+  SET( CMAKE_POSITION_INDEPENDENT_CODE ON)
+ENDIF()
+
 SET( CFILES_OBJECT_CONFIG_PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/aglob.c
 	${CMAKE_CURRENT_SOURCE_DIR}/openicc_config.c

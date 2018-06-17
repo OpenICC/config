@@ -154,7 +154,7 @@ int main(int argc, char ** argv)
     text[0] = 0;
 
     /* parse json ... */
-    root = oyjl_tree_parse( json, text, 256 );
+    root = oyjlTreeParse( json, text, 256 );
     if(text[0])
     {
       fprintf( stderr, "ERROR: %s\n%s\n", file_name, text );
@@ -166,7 +166,7 @@ int main(int argc, char ** argv)
     char ** paths = NULL;
     int count = 0, i;
 
-    oyjl_tree_to_paths( root, 1000000, NULL, 0, &paths );
+    oyjlTreeToPaths( root, 1000000, NULL, 0, &paths );
     if(verbose)
       fprintf(stderr, "processed:\t\"%s\"\n", file_name);
     while(paths && paths[count]) ++count;
@@ -174,7 +174,7 @@ int main(int argc, char ** argv)
     if(extract)
     {
       int n = 0;
-      char ** list = oyjl_string_split( key_list, ',', &n, malloc );
+      char ** list = oyjlStringSplit( key_list, ',', &n, malloc );
       if(verbose)
         fprintf(stderr, "use:\t%d keys\n", n);
 
@@ -185,10 +185,10 @@ int main(int argc, char ** argv)
         for(j = 0; j < n; ++j)
         {
           char * key = list[j];
-          if(oyjl_path_match(path, key, OYJL_PATH_MATCH_LAST_ITEMS ))
+          if(oyjlPathMatch(path, key, OYJL_PATH_MATCH_LAST_ITEMS ))
           {
             const char * t = NULL;
-            v = oyjl_tree_get_value( root, 0, path );
+            v = oyjlTreeGetValue( root, 0, path );
             if(v)
               t = OYJL_GET_STRING(v);
             if(verbose)
@@ -196,9 +196,9 @@ int main(int argc, char ** argv)
             if(t)
             {
               if(format)
-                oyjl_string_add( &text, malloc, free, format, t );
+                oyjlStringAdd( &text, malloc, free, format, t );
               else
-                oyjl_string_add( &text, malloc, free, "// %s:%s\n{ const char * t = _(\"%s\"); }\n\n",
+                oyjlStringAdd( &text, malloc, free, "// %s:%s\n{ const char * t = _(\"%s\"); }\n\n",
                                  file_name, path, t );
             }
           }
@@ -208,10 +208,10 @@ int main(int argc, char ** argv)
     } else if(add)
     {
       int ln = 0, n = 0;
-      char ** langs = oyjl_string_split( lang_list, ',', &ln, malloc );
+      char ** langs = oyjlStringSplit( lang_list, ',', &ln, malloc );
       char * var = NULL;
       const char * openicc_domain_path = OPENICC_LOCALEDIR;
-      char ** list = oyjl_string_split( key_list, ',', &n, malloc );
+      char ** list = oyjlStringSplit( key_list, ',', &n, malloc );
       char * dir;
 
       if(verbose)
@@ -260,11 +260,11 @@ int main(int argc, char ** argv)
           {
             char * key = list[k];
 
-            if(oyjl_path_match(path, key, OYJL_PATH_MATCH_LAST_ITEMS ))
+            if(oyjlPathMatch(path, key, OYJL_PATH_MATCH_LAST_ITEMS ))
             {
               const char * t = NULL,
                          * tr = NULL;
-              v = oyjl_tree_get_value( root, 0, path );
+              v = oyjlTreeGetValue( root, 0, path );
               if(v)
                 t = OYJL_GET_STRING(v);
               if(t)
@@ -274,10 +274,10 @@ int main(int argc, char ** argv)
               if(t != tr)
               {
                 char * new_path = NULL;
-                oyjl_string_add( &new_path, malloc, free, "%s.%s", path, lang );
-                v = oyjl_tree_get_value( root, OYJL_CREATE_NEW, new_path );
-                oyjl_value_set_string( v, tr );
-                oyjl_string_add( &text, malloc, free, "%s\n", tr );
+                oyjlStringAdd( &new_path, malloc, free, "%s.%s", path, lang );
+                v = oyjlTreeGetValue( root, OYJL_CREATE_NEW, new_path );
+                oyjlValueSetString( v, tr );
+                oyjlStringAdd( &text, malloc, free, "%s\n", tr );
                 free(new_path);
               }
             }
@@ -290,13 +290,13 @@ int main(int argc, char ** argv)
       if(text) free(text);
       text = NULL;
       i = 0;
-      oyjl_tree_to_json( root, &i, &text );
+      oyjlTreeToJson( root, &i, &text );
 
     } else
       for(i = 0; i < count; ++i)
         fprintf(stdout,"%s\n", paths[i]);
 
-    oyjl_string_list_release( &paths, count, free );
+    oyjlStringListRelease( &paths, count, free );
 
     if(text)
     {
@@ -310,10 +310,10 @@ int main(int argc, char ** argv)
           exit(1);
         }
 
-        text = oyjl_string_replace( text, "\"", "\\\"", NULL,NULL );
-        text = oyjl_string_replace( text, "\n", "\\n\\\n", NULL,NULL );
-        sname = oyjl_string_replace( sname, "-", "_", NULL,NULL );
-        oyjl_string_add( &tmp, malloc, free, "#define %s_json \"%s\"\n", sname, text );
+        text = oyjlStringReplace( text, "\"", "\\\"", NULL,NULL );
+        text = oyjlStringReplace( text, "\n", "\\n\\\n", NULL,NULL );
+        sname = oyjlStringReplace( sname, "-", "_", NULL,NULL );
+        oyjlStringAdd( &tmp, malloc, free, "#define %s_json \"%s\"\n", sname, text );
         free(text); text = tmp; tmp = NULL;
       }
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-01-10 12:30+0100\n"
+"POT-Creation-Date: 2018-06-14 16:47+0200\n"
 "PO-Revision-Date: 2006-06-29 19:31+0200\n"
 "Last-Translator: Pascal LACROIX <lacroixpascal at vfemail.net>\n"
 "Language-Team: <fr@li.org>\n"
@@ -20,11 +20,11 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr ""
 
-#: tools/openicc_json.c:39
+#: tools/openicc_json.c:42
 msgid "Add gettext translated keys to JSON:"
 msgstr ""
 
-#: tools/openicc_json.c:35
+#: tools/openicc_json.c:38
 msgid "Convert JSON to gettext ready C strings:"
 msgstr ""
 
@@ -63,7 +63,7 @@ msgstr ""
 msgid "Could not setup db objetc"
 msgstr "Ouvrir Profil"
 
-#: tools/openicc_json.c:48
+#: tools/openicc_json.c:51
 #, fuzzy
 msgid "General options:"
 msgstr "Options"
@@ -80,16 +80,16 @@ msgstr ""
 msgid "Paths:"
 msgstr ""
 
-#: tools/openicc_json.c:45
+#: tools/openicc_json.c:48
 msgid "Print a help text:"
 msgstr ""
 
-#: tools/openicc_json.c:213
+#: tools/openicc_json.c:218
 #, fuzzy
 msgid "Rendering Intent"
 msgstr "Oyranos Préférences"
 
-#: tools/openicc_json.c:34 tools/openicc_json.c:140
+#: tools/openicc_json.c:37 tools/openicc_json.c:145
 msgid "Usage"
 msgstr ""
 
@@ -101,46 +101,46 @@ msgstr ""
 msgid "Writing failed for"
 msgstr ""
 
-#: tools/openicc_json.c:30
+#: tools/openicc_json.c:33
 msgid "is a JSON helper tool"
 msgstr ""
 
-#: tools/openicc_json.c:52
+#: tools/openicc_json.c:55
 msgid "language specific wrap; -w C for C static char"
 msgstr ""
 
-#: tools/openicc_json.c:43
+#: tools/openicc_json.c:46
 msgid ""
 "locale directory containing the your-locale/LC_MESSAGES/your-textdomain.mo "
 "gettext translations"
 msgstr ""
 
-#: tools/openicc_json.c:42
+#: tools/openicc_json.c:45
 msgid "locales in a comma separated list"
 msgstr ""
 
-#: tools/openicc_json.c:50
+#: tools/openicc_json.c:53
 #, fuzzy
 msgid "output"
 msgstr "Sortie"
 
-#: tools/openicc_json.c:37
+#: tools/openicc_json.c:40
 msgid "output format string"
 msgstr ""
 
-#: tools/openicc_json.c:49
+#: tools/openicc_json.c:52
 msgid "specify JSON file"
 msgstr ""
 
-#: tools/openicc_json.c:41
+#: tools/openicc_json.c:44
 msgid "text domain of your project"
 msgstr ""
 
-#: tools/openicc_json.c:51
+#: tools/openicc_json.c:54
 msgid "to be used key names in a comma separated list"
 msgstr ""
 
-#: tools/openicc_json.c:53
+#: tools/openicc_json.c:56
 msgid "verbose"
 msgstr ""
 

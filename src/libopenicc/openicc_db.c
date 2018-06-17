@@ -117,7 +117,7 @@ char *        openiccDBGetJSONFile   ( openiccSCOPE_e      scope )
     return NULL;
   }
   
-  db_file = openiccStringCopy( paths[0], malloc );
+  db_file = oyjlStringCopy( paths[0], malloc );
   xdg_free(paths, npaths);
 
   return db_file;
@@ -207,7 +207,7 @@ openiccDB_s * openiccDB_NewFrom      ( const char        * top_key_name,
   oyjlAllocHelper_m_(db, openiccDB_s, 1, malloc, return db);
 
   db->type = openiccOBJECT_DB;
-  db->top_key_name = openiccStringCopy( top_key_name, malloc );
+  db->top_key_name = oyjlStringCopy( top_key_name, malloc );
   if( !db->top_key_name ) { openiccDB_Release( &db ); return db; };
   db->scope = scope;
   db->ks_array_reserved_n = 10;
@@ -328,17 +328,17 @@ int                openiccDB_GetKeyNames (
       error = openiccConfig_GetKeyNames( db->ks[i], xpath, child_levels, alloc, &ks_tmp, &ks_tmp_n );
       if(ks_tmp)
       {
-        oyjl_string_list_add_list( &ks, &ks_n, (const char **)ks_tmp, ks_tmp_n,
+        oyjlStringListAddList( &ks, &ks_n, (const char **)ks_tmp, ks_tmp_n,
                                    alloc, dealloc );
-        oyjl_string_list_release( &ks_tmp, ks_tmp_n, dealloc );
-        oyjl_string_list_free_doubles( ks, &ks_n, dealloc );
+        oyjlStringListRelease( &ks_tmp, ks_tmp_n, dealloc );
+        oyjlStringListFreeDoubles( ks, &ks_n, dealloc );
       }
     }
 
     if(key_names)
       *key_names = ks;
     else
-      oyjl_string_list_release( &ks, ks_n, dealloc );
+      oyjlStringListRelease( &ks, ks_n, dealloc );
     if(n) *n = ks_n;
   }
 
@@ -372,7 +372,7 @@ const char * openiccGetShortKeyFromFullKeyPath( const char * key, char ** temp )
   k = strchr( key_short, '.' );
   if(k)
   {
-    k_temp = openiccStringCopy( key_short, malloc );
+    k_temp = oyjlStringCopy( key_short, malloc );
     if(!k_temp)
       ERRc_S( "could not allocate : %s", key_short );
     else
@@ -421,7 +421,7 @@ int      openiccDBSetString          ( const char        * keyName,
     if(openiccArray_Count( (openiccArray_s*)&db->ks ))
     {
       root = db->ks[0]->oyjl;
-      file_name = openiccStringCopy( db->ks[0]->info, malloc );
+      file_name = oyjlStringCopy( db->ks[0]->info, malloc );
     }
     else
     {
@@ -437,14 +437,14 @@ int      openiccDBSetString          ( const char        * keyName,
 
     if(!error && root)
     {
-      oyjl_val o = oyjl_tree_get_value( root, OYJL_CREATE_NEW, xpath );
+      oyjl_val o = oyjlTreeGetValue( root, OYJL_CREATE_NEW, xpath );
       if(o)
       { 
         if(value == NULL && comment && strcmp(comment,"delete") == 0)
         {
-          oyjl_tree_clear_value( root, keyName );
+          oyjlTreeClearValue( root, keyName );
         } else
-          error = oyjl_value_set_string( o, value );
+          error = oyjlValueSetString( o, value );
         if(error)
         {
           ERRcc_S( db, "%s [%s]/%s",
@@ -456,7 +456,7 @@ int      openiccDBSetString          ( const char        * keyName,
           int size = 0, result = 0;
           int level = 0;
 
-          oyjl_tree_to_json( root, &level, &json );
+          oyjlTreeToJson( root, &level, &json );
           if(json)
           {
             size = strlen(json);
@@ -500,7 +500,7 @@ int      openiccDBSetString          ( const char        * keyName,
                _("Could not create root JSON node for"),
                openiccScopeGetString(scope), keyName?keyName:"" );
     }
-    if(root && !db) oyjl_tree_free(root);
+    if(root && !db) oyjlTreeFree(root);
     openiccDB_Release( &db );
     if(file_name) free(file_name);
   }
@@ -530,11 +530,11 @@ char *   openiccDBSearchEmptyKeyname ( const char        * keyParentName,
     int count = openiccArray_Count( (openiccArray_s*)&db->ks ), i;
     for(i = 0; i < count; ++i)
     {
-      oyjl_val o = oyjl_tree_get_value( db->ks[i]->oyjl, 0, xpath );
+      oyjl_val o = oyjlTreeGetValue( db->ks[i]->oyjl, 0, xpath );
       error = !o ? -1:0;
       if(o && !OYJL_IS_ARRAY(o))
         xpath_is_array = 0;
-      end = oyjl_value_count( o );
+      end = oyjlValueCount( o );
       if(error == 0) break;
     }
   }
@@ -542,7 +542,7 @@ char *   openiccDBSearchEmptyKeyname ( const char        * keyParentName,
   openiccDB_Release( &db );
 
   if(xpath_is_array)
-    openiccStringAddPrintf( &key, 0,0, "%s/[%d]", keyParentName, end );
+    oyjlStringAdd( &key, 0,0, "%s/[%d]", keyParentName, end );
 
   return key;
 }

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenICC 0.1\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-06-09 20:52+0200\n"
+"POT-Creation-Date: 2018-06-17 06:22+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,68 +70,68 @@ msgstr ""
 msgid "Could not create root JSON node for"
 msgstr ""
 
-#: tools/openicc_json.c:30
+#: tools/openicc_json.c:33
 msgid "is a JSON helper tool"
 msgstr ""
 
-#: tools/openicc_json.c:34 tools/openicc_json.c:140
+#: tools/openicc_json.c:37 tools/openicc_json.c:145
 msgid "Usage"
 msgstr ""
 
-#: tools/openicc_json.c:35
+#: tools/openicc_json.c:38
 msgid "Convert JSON to gettext ready C strings:"
 msgstr ""
 
-#: tools/openicc_json.c:37
+#: tools/openicc_json.c:40
 msgid "output format string"
 msgstr ""
 
-#: tools/openicc_json.c:39
+#: tools/openicc_json.c:42
 msgid "Add gettext translated keys to JSON:"
 msgstr ""
 
-#: tools/openicc_json.c:41
+#: tools/openicc_json.c:44
 msgid "text domain of your project"
 msgstr ""
 
-#: tools/openicc_json.c:42
+#: tools/openicc_json.c:45
 msgid "locales in a comma separated list"
 msgstr ""
 
-#: tools/openicc_json.c:43
+#: tools/openicc_json.c:46
 msgid ""
 "locale directory containing the your-locale/LC_MESSAGES/your-textdomain.mo "
 "gettext translations"
 msgstr ""
 
-#: tools/openicc_json.c:45
+#: tools/openicc_json.c:48
 msgid "Print a help text:"
 msgstr ""
 
-#: tools/openicc_json.c:48
+#: tools/openicc_json.c:51
 msgid "General options:"
 msgstr ""
 
-#: tools/openicc_json.c:49
+#: tools/openicc_json.c:52
 msgid "specify JSON file"
 msgstr ""
 
-#: tools/openicc_json.c:50
+#: tools/openicc_json.c:53
 msgid "output"
 msgstr ""
 
-#: tools/openicc_json.c:51
+#: tools/openicc_json.c:54
 msgid "to be used key names in a comma separated list"
 msgstr ""
 
-#: tools/openicc_json.c:52
+#: tools/openicc_json.c:55
 msgid "language specific wrap; -w C for C static char"
 msgstr ""
 
-#: tools/openicc_json.c:53
+#: tools/openicc_json.c:56
 msgid "verbose"
 msgstr ""
 
-#: tools/openicc_json.c:213
+#: tools/openicc_json.c:218
 msgid "Rendering Intent"
 msgstr ""

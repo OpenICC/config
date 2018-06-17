@@ -502,13 +502,13 @@ oiTESTRESULT_e testStringRun ()
   }
 
 
-  openiccStringAddPrintf( &t, 0,0, OPENICC_BASE_PATH "%s", "/behaviour");
+  oyjlStringAdd( &t, 0,0, OPENICC_BASE_PATH "%s", "/behaviour");
   if( t && strlen(t) > strlen(OPENICC_BASE_PATH) )
   { PRINT_SUB( oiTESTRESULT_SUCCESS,
-    "openiccStringAddPrintf() %s", t );
+    "oyjlStringAdd() %s", t );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL,
-    "openiccStringAddPrintf() ...                      " );
+    "oyjlStringAdd() ...                      " );
   }
 
   STRING_ADD( t, "/rendering_intent" );
@@ -544,20 +544,20 @@ oiTESTRESULT_e testConfig()
   /* test JSON generation */
   root = (oyjl_val) calloc( sizeof(struct oyjl_val_s), 1 );
   base_key = "org/freedesktop/openicc/[]";
-  array = oyjl_tree_get_value( root, OYJL_CREATE_NEW, base_key );
-  v = oyjl_tree_get_value( array, OYJL_CREATE_NEW, "my_key_A" );
-  oyjl_value_set_string( v, "my_value_A" );
-  v = oyjl_tree_get_value( array, OYJL_CREATE_NEW, "my_key_B" );
-  oyjl_value_set_string( v, "my_value_B" );
-  oyjl_tree_to_json( root, &level, &json ); level = 0;
+  array = oyjlTreeGetValue( root, OYJL_CREATE_NEW, base_key );
+  v = oyjlTreeGetValue( array, OYJL_CREATE_NEW, "my_key_A" );
+  oyjlValueSetString( v, "my_value_A" );
+  v = oyjlTreeGetValue( array, OYJL_CREATE_NEW, "my_key_B" );
+  oyjlValueSetString( v, "my_value_B" );
+  oyjlTreeToJson( root, &level, &json ); level = 0;
   if(root && json)
   { PRINT_SUB( oiTESTRESULT_SUCCESS, 
-    "oyjl_tree_get_value(root,OYJL_CREATE_NEW,\"%s\")", base_key );
+    "oyjlTreeGetValue(root,OYJL_CREATE_NEW,\"%s\")", base_key );
   } else
   { PRINT_SUB( oiTESTRESULT_FAIL, 
-    "oyjl_tree_get_value(root,OYJL_CREATE_NEW,\"%s\")", base_key );
+    "oyjlTreeGetValue(root,OYJL_CREATE_NEW,\"%s\")", base_key );
   }
-  oyjl_tree_free( root ); root = NULL;
+  oyjlTreeFree( root ); root = NULL;
   fprintf(zout, "%s\n", json );
   free_m_(json);
 
@@ -569,11 +569,11 @@ oiTESTRESULT_e testConfig()
   text = openiccOpenFile( file_name, &size );
 
   /* parse json ... */
-  root = oyjl_tree_parse( text, NULL, 0 );
+  root = oyjlTreeParse( text, NULL, 0 );
   
   /* and write back */
-  oyjl_tree_to_json( root, &level, &json );
-  oyjl_tree_free( root ); root = NULL;
+  oyjlTreeToJson( root, &level, &json );
+  oyjlTreeFree( root ); root = NULL;
   free_m_(text);
 
 
@@ -1010,7 +1010,7 @@ oiTESTRESULT_e testODB()
   }
 
   gkey = NULL;
-  openiccStringAddPrintf( &gkey, 0,0, "%s%s", temp, "/my_test_key");
+  oyjlStringAdd( &gkey, 0,0, "%s%s", temp, "/my_test_key");
   error = openiccDBSetString( gkey, openiccSCOPE_SYSTEM, "my_test_value", "my_test_comment" );
   if(!error)
   { PRINT_SUB( oiTESTRESULT_SUCCESS,

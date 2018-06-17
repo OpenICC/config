@@ -39,19 +39,19 @@ openiccConfig_s *  openiccConfig_FromMem( const char       * data )
 
     config->type = openiccOBJECT_CONFIG;
     config->json_text = strdup( (char*)data );
-    config->info = openiccStringCopy( "openiccConfig_FromMem()", malloc );
+    config->info = oyjlStringCopy( "openiccConfig_FromMem()", malloc );
     if(!config->info)
     {
       ERRcc_S( config, "could not allocate%s", "" );
       free(config); config = NULL;
       return config;
     }
-    config->oyjl = oyjl_tree_parse( data, NULL, 0 );
+    config->oyjl = oyjlTreeParse( data, NULL, 0 );
     if(!config->oyjl)
     {
       char * msg = NULL;
       oyjlAllocHelper_m_(msg, char, 1024, malloc, );
-      config->oyjl = oyjl_tree_parse( data, msg, 1024 );
+      config->oyjl = oyjlTreeParse( data, msg, 1024 );
       WARNcc_S( config, "%s\n", msg?msg:"" );
       if( msg ) free(msg);
       openiccConfig_Release( &config );
@@ -79,7 +79,7 @@ void               openiccConfig_Release (
       else
         WARNcc_S( c, "expected openiccConfig_s::json_text", 0 );
       if(c->oyjl)
-        oyjl_tree_free(c->oyjl);
+        oyjlTreeFree(c->oyjl);
       else
         WARNcc_S( c, "expected openiccConfig_s::oyjl",0 );
       if(c->info)
@@ -152,7 +152,7 @@ int                openiccConfig_DevicesCount (
   if(config)
   {
     const char * base_path[] = {"org","freedesktop","openicc","device",0};
-    oyjl_val base = oyjl_tree_get( config->oyjl, base_path, oyjl_t_object );
+    oyjl_val base = oyjlTreeGet( config->oyjl, base_path, oyjl_t_object );
     if(base)
     {
       oyjl_val dev_class;
@@ -165,7 +165,7 @@ int                openiccConfig_DevicesCount (
         for(i = 0; i < device_classes_n; ++i)
         {
           const char * obj_key[] = { device_classes[i], 0 };
-          dev_class = oyjl_tree_get( base, obj_key, oyjl_t_array );
+          dev_class = oyjlTreeGet( base, obj_key, oyjl_t_array );
           if(dev_class)
             n += dev_class->u.array.len;
         }
@@ -204,7 +204,7 @@ const char *       openiccConfig_DeviceGet (
   if(config)
   {
     const char * base_path[] = {"org","freedesktop","openicc","device",0};
-    oyjl_val base = oyjl_tree_get( config->oyjl, (const char**)base_path,
+    oyjl_val base = oyjlTreeGet( config->oyjl, (const char**)base_path,
                                    oyjl_t_object );
     if(base)
     {
@@ -220,7 +220,7 @@ const char *       openiccConfig_DeviceGet (
           const char * obj_key[] = { device_classes[i], 0 };
           int j = 1;
           oyjl_val device = 0;
-          dev_class = oyjl_tree_get( base, obj_key, oyjl_t_array );
+          dev_class = oyjlTreeGet( base, obj_key, oyjl_t_array );
           if(dev_class)
           {
             int elements = dev_class->u.array.len;
@@ -428,7 +428,7 @@ char *             openiccConfig_DeviceClassGet (
   if(config)
   {
     const char * base_path[] = {"org","freedesktop","openicc","device",0};
-    oyjl_val base = oyjl_tree_get( config->oyjl, (const char**)base_path,
+    oyjl_val base = oyjlTreeGet( config->oyjl, (const char**)base_path,
                                    oyjl_t_object );
     if(base && OYJL_IS_OBJECT( base ))
     {
@@ -436,7 +436,7 @@ char *             openiccConfig_DeviceClassGet (
 
       if(v->u.object.keys[0] && v->u.object.keys[0][0])
       {
-        device_class = openiccStringCopy((v->u.object.keys[0]), malloc);
+        device_class = oyjlStringCopy((v->u.object.keys[0]), malloc);
         if(!device_class)
           ERRcc_S( config, "could not allocate string%s", "" );
       }
@@ -447,7 +447,7 @@ char *             openiccConfig_DeviceClassGet (
 
   if(alloc != malloc && device_class)
   {
-    char * custom = openiccStringCopy( device_class, alloc );
+    char * custom = oyjlStringCopy( device_class, alloc );
     free(device_class);
     device_class = custom; custom = NULL;
   }
@@ -485,19 +485,19 @@ int                openiccConfig_GetKeyNames (
   if(!keys) return 1;
 
   if(!error)
-    list = oyjl_tree_get_value( config->oyjl, 0, xpath );
+    list = oyjlTreeGetValue( config->oyjl, 0, xpath );
 
   if(!error)
     error = !list ? -1:0;
 
   if(!error)
   {
-    keys[0] = openiccStringCopy( xpath, malloc );
+    keys[0] = oyjlStringCopy( xpath, malloc );
     error = !keys[0];
   }
 
   if(!error)
-    oyjl_tree_to_paths( list, child_levels, NULL, 0, &keys );
+    oyjlTreeToPaths( list, child_levels, NULL, 0, &keys );
 
   if(!error && n)
   {
@@ -516,14 +516,14 @@ int                openiccConfig_GetKeyNames (
     {
       char ** l = (char**) alloc(sizeof(char*) * (count+1));
       for(i=0; i < count; ++i)
-        l[i] = openiccStringCopy( keys[i], alloc );
-      oyjl_string_list_release( &keys, count, free );
+        l[i] = oyjlStringCopy( keys[i], alloc );
+      oyjlStringListRelease( &keys, count, free );
       keys = l;
       l = NULL;
     }
     *key_names = keys;
   } else
-    oyjl_string_list_release( &keys, count, free );
+    oyjlStringListRelease( &keys, count, free );
 
   return error;
 }
@@ -549,7 +549,7 @@ int                openiccConfig_GetString (
 
   if(error == 0)
   {
-    o = oyjl_tree_get_value( config->oyjl, 0, xpath );
+    o = oyjlTreeGetValue( config->oyjl, 0, xpath );
     error = !o ? -1:0;
   }
 
@@ -678,7 +678,7 @@ int                openiccConfig_GetStrings (
     {
       if(values)
       {
-        vals[pos] = openiccStringCopy( t, alloc );
+        vals[pos] = oyjlStringCopy( t, alloc );
         if(!vals[pos])
         {
           ERRcc_S( config, "could not allocate string : %s", t );
@@ -721,7 +721,7 @@ char *       openiccGetInstallPath   ( openiccPATH_TYPE_e  type,
                                        openiccAlloc_f      allocFunc )
 {
   char * path = NULL;
-#define C(p) openiccStringCopy(p,allocFunc);
+#define C(p) oyjlStringCopy(p,allocFunc);
   switch (type)
   {
     case openiccPATH_ICC:
@@ -769,7 +769,7 @@ char *       openiccGetInstallPath   ( openiccPATH_TYPE_e  type,
         case openiccSCOPE_USER:
         {
           char * t = NULL;
-          openiccStringAddPrintf( &t, 0,0,
+          oyjlStringAdd( &t, 0,0,
                              "~/.local/lib%s/" OPENICC_CMMSUBPATH, strstr(OPENICC_LIBDIR, "lib64") ? "64":"");
           path = C( t );
           if(t) {free(t); t = NULL;}

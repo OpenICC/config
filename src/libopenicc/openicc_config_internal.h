@@ -23,44 +23,7 @@
 #include <stdarg.h>           /* va_list */
 #include <time.h>
 
-#define oyjl_string_add                openiccStringAddPrintf
-#define oyjl_string_copy               openiccStringCopy
-#define oyjl_string_split              openiccStringSplit
-#define oyjl_string_appendn            openiccStringAppendN
-#define oyjl_string_addn               openiccStringAddN
-#define oyjl_string_replace            openiccStringReplace
-#define oyjl_string_list_add_list      openiccStringListAdd
-#define oyjl_string_list_cat_list      openiccStringListCat
-#define oyjl_string_list_release       openiccStringListRelease
-#define oyjl_string_list_free_doubles  openiccStringListFreeDoubles
-#define oyjl_string_list_add_static_string openiccStringListAddStaticString
-#define oyjl_string_to_long            openiccStringToLong
-#define oyjl_array_free                openiccJArrayFree
-#define oyjl_json_indent               openiccJJsonIndent
-#define oyjl_message_func              openiccJMessageFunc
-#define oyjl_message_func_set          openiccJMessageFuncSet
-#define oyjl_message_p                 openiccJMessage_p
-#define oyjl_object_free               openiccJObjectFree
-#define oyjl_path_term_get_index       openiccJPathTermGetIndex
-#define oyjl_path_match                openiccJPathMatch
-#define oyjl_tree_callbacks            openicc_jtree_callbacks
-#define oyjl_tree_new                  openiccJTreeNew
-#define oyjl_tree_free                 openiccJTreeFree
-#define oyjl_tree_clear_value          openiccJTreeClearValue
-#define oyjl_tree_get                  openiccJTreeGet
-#define oyjl_tree_get_value            openiccJTreeGetValue
-#define oyjl_tree_get_value_           openiccJTreeGetValue_
-#define oyjl_tree_get_valuef           openiccJTreeGetValuef
-#define oyjl_tree_parse                openiccJTreeParse
-#define oyjl_tree_to_json              openiccJTreeToJson
-#define oyjl_tree_to_paths             openiccJTreeToPaths
-#define oyjl_tree_find_                openiccJTreeFind_
-#define oyjl_value_count               openiccJValueCount
-#define oyjl_value_pos_get             openiccJValuePosGet
-#define oyjl_value_set_string          openiccJValueSetString
-#define oyjl_value_text                openiccJValueText
-#define oyjl_value_clear               openiccJValueClear
-#include "oyjl_tree.h"
+#include <oyjl.h>
 
 #include "openicc_conf.h"
 #include "openicc_core.h"
@@ -128,7 +91,7 @@ typedef struct openiccArray_s openiccArray_s;
 int      openiccArray_Count          ( openiccArray_s    * array );
 int      openiccArray_Push           ( openiccArray_s    * array );
 
-#define STRING_ADD( t, append ) openiccStringAddPrintf( &t, 0,0, append )
+#define STRING_ADD( t, append ) oyjlStringAdd( &t, 0,0, append )
 char *       openiccStringCopy       ( const char        * text,
                                        openiccAlloc_f      alloc );
 #define openiccNoEmptyString_m_(t) (t?t:"")
