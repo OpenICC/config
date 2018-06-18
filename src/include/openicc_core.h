@@ -76,11 +76,6 @@ int            openiccReadFileSToMem ( FILE              * fp,
                                        char             ** ptr,
                                        int               * size);
 
-int            openiccStringAddPrintf( char             ** string,
-                                       void*            (* alloc)(size_t size),
-                                       void             (* deAlloc)(void * data ),
-                                       const char        * format,
-                                                           ... );
 /** 
  *  @} *//* misc
  */
