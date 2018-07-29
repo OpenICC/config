@@ -41,8 +41,27 @@ option(ENABLE_TESTS "Build tests (requires static libs)" ON)
 option(ENABLE_TOOLS "Build tools (currently openicc-device)" ON)
 option(ENABLE_STATIC_LIBS "Build static libs" ON)
 
+IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+  OPTION(ENABLE_INSTALL_${PROJECT_UP_NAME} "Install files" ON)
+ELSE()
+  MESSAGE( "-- ${PROJECT_NAME}: compile as subproject - skip install (ENABLE_INSTALL_${PROJECT_UP_NAME}=OFF)" )
+  # disable install and build of shared libs for fallback subproject
+  IF(NOT ENABLE_INSTALL_${PROJECT_UP_NAME})
+    SET(ENABLE_INSTALL_${PROJECT_UP_NAME} OFF)
+  ENDIF(NOT ENABLE_INSTALL_${PROJECT_UP_NAME})
+  SET(ENABLE_STATIC_LIBS ON)
+  SET(ENABLE_SHARED_LIBS OFF)
+  SET(ENABLE_TESTS OFF)
+  #SET(ENABLE_TOOLS OFF) #oi-json needs to work for other projects (Oyranos)
+ENDIF()
+
 IF( ENABLE_TESTS )
   SET(ENABLE_STATIC_LIBS ON)
+ENDIF()
+
+# if our static code lands inside a shared lib, we need -fPIC
+IF(ENABLE_SHARED_LIBS)
+  SET( CMAKE_POSITION_INDEPENDENT_CODE ON)
 ENDIF()
 
 IF( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -96,13 +115,16 @@ ADD_SUBDIRECTORY( src )
 ADD_SUBDIRECTORY( cmake )
 ADD_SUBDIRECTORY( extras )
 #ADD_SUBDIRECTORY( settings )
-ADD_SUBDIRECTORY( docs )
+IF(ENABLE_INSTALL_${PROJECT_UP_NAME})
+  ADD_SUBDIRECTORY( docs )
+ENDIF(ENABLE_INSTALL_${PROJECT_UP_NAME})
 
 CONFIGURE_FILE(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/OpenIccUninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cmake/OpenIccUninstall.cmake"
     IMMEDIATE @ONLY)
 
+IF(ENABLE_INSTALL_${PROJECT_UP_NAME})
 ADD_CUSTOM_TARGET( uninstall
 	"${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake/OpenIccUninstall.cmake")
 
@@ -158,6 +180,7 @@ ADD_CUSTOM_TARGET( debian
 		COMMENT Make a ${PACKAGE_NAME} DEB package
 		VERBATIM
 		)
+ENDIF(ENABLE_INSTALL_${PROJECT_UP_NAME})
 
 INCLUDE(FeatureSummary)
 FEATURE_SUMMARY(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
