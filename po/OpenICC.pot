@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenICC 0.1\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-06-17 06:22+0200\n"
+"POT-Creation-Date: 2018-08-14 06:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,102 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: libopenicc/openicc_args.c:154 libopenicc/openicc_args.c:194
+#: libopenicc/openicc_args.c:215 libopenicc/openicc_args.c:237
+#: libopenicc/openicc_args.c:251 libopenicc/openicc_args.c:269
+#: libopenicc/openicc_args.c:292 libopenicc/openicc_args.c:358
+msgid "Usage Error:"
+msgstr ""
+
+#: libopenicc/openicc_args.c:154
+msgid "Double occuring option"
+msgstr ""
+
+#: libopenicc/openicc_args.c:194 libopenicc/openicc_args.c:251
+msgid "Option not supported"
+msgstr ""
+
+#: libopenicc/openicc_args.c:215 libopenicc/openicc_args.c:269
+msgid "Option needs a argument"
+msgstr ""
+
+#: libopenicc/openicc_args.c:237 libopenicc/openicc_args.c:292
+msgid "Option has a unexpected argument"
+msgstr ""
+
+#: libopenicc/openicc_args.c:358
+msgid "Option has a different value range"
+msgstr ""
+
+#: libopenicc/openicc_args.c:528
+msgid "Description"
+msgstr ""
+
+#: libopenicc/openicc_args.c:530
+msgid "Synopsis"
+msgstr ""
+
+#: libopenicc/openicc_args.c:538 tools/openicc_json.c:37
+#: tools/openicc_json.c:145
+msgid "Usage"
+msgstr ""
+
+#: libopenicc/openicc_args.c:650
+msgid "Tool"
+msgstr ""
+
+#: libopenicc/openicc_args.c:652
+msgid "Module"
+msgstr ""
+
+#: libopenicc/openicc_args.c:671
+msgid "Manufacturer"
+msgstr ""
+
+#: libopenicc/openicc_args.c:672
+msgid "Copyright"
+msgstr ""
+
+#: libopenicc/openicc_args.c:673
+msgid "License"
+msgstr ""
+
+#: libopenicc/openicc_args.c:674
+msgid "Url"
+msgstr ""
+
+#: libopenicc/openicc_args.c:675
+msgid "Support"
+msgstr ""
+
+#: libopenicc/openicc_args.c:676
+msgid "Download"
+msgstr ""
+
+#: libopenicc/openicc_args.c:677
+msgid "Sources"
+msgstr ""
+
+#: libopenicc/openicc_args.c:678
+msgid "Development"
+msgstr ""
+
+#: libopenicc/openicc_args.c:679
+msgid "OpenICC Module Author"
+msgstr ""
+
+#: libopenicc/openicc_args.c:680
+msgid "Documentation"
+msgstr ""
+
+#: libopenicc/openicc_args.c:794
+msgid "Yes"
+msgstr ""
+
+#: libopenicc/openicc_args.c:794
+msgid "No"
+msgstr ""
 
 #: libopenicc/openicc_core.c:126
 msgid "WARNING"
@@ -72,10 +168,6 @@ msgstr ""
 
 #: tools/openicc_json.c:33
 msgid "is a JSON helper tool"
-msgstr ""
-
-#: tools/openicc_json.c:37 tools/openicc_json.c:145
-msgid "Usage"
 msgstr ""
 
 #: tools/openicc_json.c:38
