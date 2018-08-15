@@ -83,45 +83,45 @@ int            openiccReadFileSToMem ( FILE              * fp,
 
  *  @{ */
 
-/** @brief Type of widget */
-typedef enum openiccWIDGETTYPE_e {
-    openiccWIDGETTYPE_START,           /**< */
-    openiccWIDGETTYPE_CHOICE,          /**< list of choices */
-    openiccWIDGETTYPE_FUNCTION,        /**< computed list of choices */
-    openiccWIDGETTYPE_DOUBLE,          /**< IEEE floating point number with double precission */
-    openiccWIDGETTYPE_NONE,            /**< no value possible - the option is a flag like -v/--verbose */
-    openiccWIDGETTYPE_END              /**< */
-} openiccWIDGETTYPE_e;
+/** @brief Type of option */
+typedef enum openiccOPTIONTYPE_e {
+    openiccOPTIONTYPE_START,           /**< */
+    openiccOPTIONTYPE_CHOICE,          /**< list of choices */
+    openiccOPTIONTYPE_FUNCTION,        /**< computed list of choices */
+    openiccOPTIONTYPE_DOUBLE,          /**< IEEE floating point number with double precission */
+    openiccOPTIONTYPE_NONE,            /**< no value possible - the option is a flag like -v/--verbose */
+    openiccOPTIONTYPE_END              /**< */
+} openiccOPTIONTYPE_e;
 
 /** @brief Choice item */
-typedef struct openiccWidgetChoice_s {
+typedef struct openiccOptionChoice_s {
   char * nick;                         /**< nick / ID as argument for a option */
   char * name;                         /**< i18n short name for labels */
   char * description;                  /**< i18n description sentence; can be "" */
   char * help;                         /**< i18n longer help text; can be "" */
-} openiccWidgetChoice_s;
-void openiccWidgetChoice_Release        ( openiccWidgetChoice_s**choices );
+} openiccOptionChoice_s;
+void openiccOptionChoice_Release        ( openiccOptionChoice_s**choices );
 typedef struct openiccOptions_s openiccOptions_s;
 typedef struct openiccOption_s openiccOption_s;
-typedef union openiccWidget_u {
+typedef union openiccOption_u {
   struct choices {
-    openiccWidgetChoice_s * list;      /**< used for openiccWIDGETTYPE_CHOICES; not needed when *getChoices* is set */
+    openiccOptionChoice_s * list;      /**< used for openiccOPTIONTYPE_CHOICES; not needed when *getChoices* is set */
     int selected;                      /**< the currently selected choice */
   } choices;
-  /** openiccWIDGETTYPE_FUNCTION used for openiccWIDGETTYPE_CHOICES; not needed when *choices* is set
+  /** openiccOPTIONTYPE_FUNCTION used for openiccOPTIONTYPE_CHOICES; not needed when *choices* is set
    *  @param[in]   opt                 the option context
    *  @param[out]  selected            show the default; optional
    *  @param[in]   context             for more information
    *  @result                          the same as for the *choices::list* member; caller owns the memory
    */
-  openiccWidgetChoice_s * (*getChoices)( openiccOption_s * opt, int * selected, openiccOptions_s * context );
+  openiccOptionChoice_s * (*getChoices)( openiccOption_s * opt, int * selected, openiccOptions_s * context );
   struct dbl {
     double d;                          /**< default / recommendation */
     double start;
     double end;
     double tick;
-  } dbl;                               /**< openiccWIDGETTYPE_DOUBLE */
-} openiccWidget_u;
+  } dbl;                               /**< openiccOPTIONTYPE_DOUBLE */
+} openiccOption_u;
 
 /** @brief abstract UI option */
 struct openiccOption_s {
@@ -134,12 +134,12 @@ struct openiccOption_s {
   const char * description;            /**< i18n short sentence about the option */
   const char * help;                   /**< i18n longer text to explain what the option does; optional */
   const char * value_name;             /**< i18n value string; used only for option args; consider using upper case, e.g. FILENAME, NUMBER ... */
-  openiccWIDGETTYPE_e value_type;      /**< type for *choices* */
-  openiccWidget_u values;              /**< the selectable values for the option; not used for openiccWIDGETTYPE_NONE */
+  openiccOPTIONTYPE_e value_type;      /**< type for *choices* */
+  openiccOption_u values;              /**< the selectable values for the option; not used for openiccOPTIONTYPE_NONE */
 };
 
 /**
-    info to compile a Syntax line and check missing arguments
+    @brief info to compile a Syntax line and check missing arguments
  */
 typedef struct openiccOptionGroup_s {
   char type [4];                       /**< must be 'oiwg' */
@@ -153,7 +153,7 @@ typedef struct openiccOptionGroup_s {
 } openiccOptionGroup_s;
 
 /**
- *   main command line, options and groups
+ *   @brief main command line, options and groups
  */
 struct openiccOptions_s {
   char type [4];                       /**< must be 'oiws' */
@@ -210,7 +210,7 @@ typedef struct openiccUiHeaderSection_s {
   const char * description;            /**< i18n optional second string; might contain a browsable url for further information, e.g. a link to the full text license, home page; optional */
 } openiccUiHeaderSection_s;
 
-/** @brief Info for graphic UI's */
+/** @brief Info for graphic UI's containing options, additional info sections and other bells and whistles */
 struct openiccUi_s {
   char type [4];                       /**< must be 'oiui' */
   const char * app_type;               /**< "tool" or "module" */
@@ -232,7 +232,7 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
                                        int                 flags );
 
 /** 
- *  @} *//* misc
+ *  @} *//* args
  */
 
 #endif /* __OPENICC_CORE_H__ */

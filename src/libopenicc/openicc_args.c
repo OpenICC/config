@@ -6,7 +6,6 @@
  *            2018 (C) Kai-Uwe Behrmann
  *
  *  @brief    OpenICC argument handling
- *  @internal
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
  *  @par License:
  *            MIT <http://www.opensource.org/licenses/mit-license.php>
@@ -21,9 +20,10 @@
 #include <stddef.h>
 
 /** \addtogroup args Options Handling
+ *  @brief   Structured Options and Arguments for more than the command line
  *
  *  Argument handling uses a compact, table like creation syntax. Parsing
- *  detects conflicts during programming and run time. The arguments can
+ *  detects conflicts during programming and on run time. The arguments can
  *  be printed as a typical command line tool help text. The OpenICC JSON
  *  output is useable for automatical generated (G)UI's and further
  *  processing. Generation of other formats is simple. Translations are
@@ -37,16 +37,23 @@
  *
  *  @{ */
 
-void openiccWidgetChoice_Release     ( openiccWidgetChoice_s**choices )
+/** @brief   release structure
+ *  @memberof openiccOptionChoice_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
+void openiccOptionChoice_Release     ( openiccOptionChoice_s**choices )
 {
   int n = 0,i;
-  openiccWidgetChoice_s * ca;
+  openiccOptionChoice_s * ca;
   if(!choices || !*choices) return;
   ca = *choices;
   while(ca[n].nick[0] != '\000') ++n;
   for(i = 0; i < n; ++i)
   {
-    openiccWidgetChoice_s * c = &ca[i];
+    openiccOptionChoice_s * c = &ca[i];
     if(c->nick) free(c->nick);
     if(c->name) free(c->name);
     if(c->description) free(c->description);
@@ -56,12 +63,26 @@ void openiccWidgetChoice_Release     ( openiccWidgetChoice_s**choices )
   free(*choices);
 }
 
+/** @brief   return number of "oiwi" array elements
+ *  @memberof openiccOptions_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 int openiccOptions_Count             ( openiccOptions_s  * opts )
 {
   int n = 0;
   while(memcmp(opts->array[n].type, "oiwi", 4) == 0) ++n;
   return n;
 }
+/** @brief   return number of "oiwi" groups elements
+ *  @memberof openiccOptions_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 int openiccOptions_CountGroups       ( openiccOptions_s  * opts )
 {
   int n = 0;
@@ -93,6 +114,13 @@ void  openiccOption_PrintArg         ( openiccOption_s   * o,
     fprintf( stderr, "]" );
   fprintf( stderr, " " );
 }
+/** @brief   obtain the specified option from option char
+ *  @memberof openiccOptions_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 openiccOption_s * openiccOptions_GetOption (
                                        openiccOptions_s  * opts,
                                        char                oc )
@@ -111,6 +139,13 @@ openiccOption_s * openiccOptions_GetOption (
   }
   return o;
 }
+/** @brief   obtain the specified option from option string
+ *  @memberof openiccOptions_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 openiccOption_s * openiccOptions_GetOptionL (
                                        openiccOptions_s  * opts,
                                        char              * ostring )
@@ -159,6 +194,13 @@ openiccOPTIONSTATE_e openiccOptions_Check (
   return openiccOPTION_NONE;
 }
 
+/** @brief   parse the options into a private data structure
+ *  @memberof openiccOptions_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 openiccOPTIONSTATE_e openiccOptions_Parse (
                                        openiccOptions_s  * opts )
 {
@@ -195,7 +237,7 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
             state = openiccOPTION_NOT_SUPPORTED;
             return state;
           }
-          require_value = o->value_type != openiccWIDGETTYPE_NONE;
+          require_value = o->value_type != openiccOPTIONTYPE_NONE;
           if( require_value )
           {
             value = NULL;
@@ -252,7 +294,7 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
           state = openiccOPTION_NOT_SUPPORTED;
           return state;
         }
-        require_value = o->value_type != openiccWIDGETTYPE_NONE;
+        require_value = o->value_type != openiccOPTIONTYPE_NONE;
         if( require_value )
         {
           value = NULL;
@@ -306,8 +348,22 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
 
   return state;
 }
+/** @brief   obtain the parsed result
+ *  @memberof openiccOptions_s
+ *
+ *  If the option was not specified the state openiccOPTION_NONE will be
+ *  returned and otherwise openiccOPTION_USER_CHANGED. With result_int and
+ *  a option type of openiccOPTIONTYPE_NONE, the number of occurences is
+ *  obtained, e.g. -vvv will give result_int = 3. A option type
+ *  openiccOPTIONTYPE_DOUBLE can ask for the floating point result with a
+ *  result_dbl argument.
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 openiccOPTIONSTATE_e openiccOptions_GetResult (
-                                       openiccOptions_s     * opts,
+                                       openiccOptions_s  * opts,
                                        char                oc,
                                        const char       ** result_string,
                                        double            * result_dbl,
@@ -351,7 +407,7 @@ openiccOPTIONSTATE_e openiccOptions_GetResult (
   {
     openiccOption_s * o = openiccOptions_GetOption( opts, oc );
     oyjlStringToDouble( t, result_dbl );
-    if( o->value_type == openiccWIDGETTYPE_DOUBLE &&
+    if( o->value_type == openiccOPTIONTYPE_DOUBLE &&
         ( o->values.dbl.start > *result_dbl ||
           o->values.dbl.end < *result_dbl) )
     {
@@ -362,7 +418,7 @@ openiccOPTIONSTATE_e openiccOptions_GetResult (
   {
     int l = strlen( list ), i,n = 0;
     openiccOption_s * o = openiccOptions_GetOption( opts, oc );
-    if(o->value_type == openiccWIDGETTYPE_NONE)
+    if(o->value_type == openiccOPTIONTYPE_NONE)
     {
       for(i = 0; i < l; ++i)
         if(list[i] == oc)
@@ -379,6 +435,13 @@ openiccOPTIONSTATE_e openiccOptions_GetResult (
   return state;
 }
 
+/** @brief   convert the parsed content to JSON
+ *  @memberof openiccOptions_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 char * openiccOptions_ResultsToJson  ( openiccOptions_s  * opts )
 {
   char * args = NULL,
@@ -410,6 +473,13 @@ char * openiccOptions_ResultsToJson  ( openiccOptions_s  * opts )
 
   return rjson;
 }
+/** @brief   convert the parsed content to simple text
+ *  @memberof openiccOptions_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 char * openiccOptions_ResultsToText  ( openiccOptions_s  * opts )
 {
   char * args = NULL,
@@ -435,6 +505,13 @@ char * openiccOptions_ResultsToText  ( openiccOptions_s  * opts )
   return text;
 }
 
+/** @brief   print synopsis of a option group to stderr
+ *  @memberof openiccOptions_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 void  openiccOptions_PrintHelpSynopsis(openiccOptions_s  * opts,
                                        openiccOptionGroup_s * g,
                                        int                 style )
@@ -475,9 +552,9 @@ void  openiccOptions_PrintHelpSynopsis(openiccOptions_s  * opts,
 
   fprintf( stderr, "\n" );
 }
-static openiccWidgetChoice_s ** openicc_get_choices_list_ = NULL;
+static openiccOptionChoice_s ** openicc_get_choices_list_ = NULL;
 static int openicc_get_choices_list_selected_[256];
-openiccWidgetChoice_s * openiccOption_GetChoices_ (
+openiccOptionChoice_s * openiccOption_GetChoices_ (
                                        openiccOption_s      * o,
                                        int               * selected,
                                        openiccOptions_s     * opts )
@@ -488,7 +565,7 @@ openiccWidgetChoice_s * openiccOption_GetChoices_ (
   {
     int i;
     for(i = 0; i < 256; ++i) openicc_get_choices_list_selected_[i] = -1;
-    openicc_get_choices_list_ = calloc( sizeof(openiccWidgetChoice_s*), 256 ); /* number of possible chars */
+    openicc_get_choices_list_ = calloc( sizeof(openiccOptionChoice_s*), 256 ); /* number of possible chars */
   }
 
   if( !openicc_get_choices_list_[(int)o->o] ||
@@ -500,6 +577,18 @@ openiccWidgetChoice_s * openiccOption_GetChoices_ (
   return openicc_get_choices_list_[(int)o->o];
 }
 #include <stdarg.h> /* va_list */
+/** @brief   print help text to stderr
+ *  @memberof openiccOptions_s
+ *
+ *  @param   opts                      options to print
+ *  @param   ui                        more info for e.g. the description block; optional
+ *  @param   verbose                   gives debug output
+ *  @param   motto_format              prints a customised intoduction line
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
                                        openiccUi_s       * ui,
                                        int                 verbose,
@@ -559,7 +648,7 @@ void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
       for(k = 0; k < indent; ++k) fprintf( stderr, " " );
       switch(o->value_type)
       {
-        case openiccWIDGETTYPE_CHOICE:
+        case openiccOPTIONTYPE_CHOICE:
           {
             int n = 0,l;
             while(o->values.choices.list[n].nick[0] != '\000')
@@ -568,30 +657,30 @@ void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
               fprintf( stderr, "\t  -%c %s\t\t# %s\n", o->o, o->values.choices.list[l].nick, o->values.choices.list[l].name && o->values.choices.list[l].nick[0] ? o->values.choices.list[l].name : o->values.choices.list[l].description );
           }
           break;
-        case openiccWIDGETTYPE_FUNCTION:
+        case openiccOPTIONTYPE_FUNCTION:
           {
             int n = 0,l;
-            openiccWidgetChoice_s * list = openiccOption_GetChoices_(o, NULL, opts );
+            openiccOptionChoice_s * list = openiccOption_GetChoices_(o, NULL, opts );
             if(list)
               while(list[n].nick[0] != '\000')
                 ++n;
             for(l = 0; l < n; ++l)
               fprintf( stderr, "\t  -%c %s\t\t# %s\n", o->o, list[l].nick, list[l].name && list[l].nick[0] ? list[l].name : list[l].description );
-            /* not possible, as the result of openiccOption_GetChoices_() is cached - openiccWidgetChoice_Release( &list ); */
+            /* not possible, as the result of openiccOption_GetChoices_() is cached - openiccOptionChoice_Release( &list ); */
           }
           break;
-        case openiccWIDGETTYPE_DOUBLE:
+        case openiccOPTIONTYPE_DOUBLE:
           fprintf( stderr, "\t" );
           openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING);
           fprintf( stderr, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
           break;
-        case openiccWIDGETTYPE_NONE:
+        case openiccOPTIONTYPE_NONE:
           fprintf( stderr, "\t" );
           openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING);
           fprintf( stderr, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
         break;
-        case openiccWIDGETTYPE_START: break;
-        case openiccWIDGETTYPE_END: break;
+        case openiccOPTIONTYPE_START: break;
+        case openiccOPTIONTYPE_END: break;
       }
     }
     if(d) fprintf( stderr, "\n" );
@@ -599,6 +688,13 @@ void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
   fprintf( stderr, "\n" );
 }
 
+/** @brief   allocate a new options structure
+ *  @memberof openiccOptions_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 openiccOptions_s * openiccOptions_New( int                 argc,
                                        char             ** argv )
 {
@@ -609,6 +705,15 @@ openiccOptions_s * openiccOptions_New( int                 argc,
   opts->argv = argv;
   return opts;
 }
+/** @brief   allocate a new ui structure
+ *  @memberof openiccUi_s
+ *
+ *  The openiccUi_s contains already options in the opts member.
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 openiccUi_s* openiccUi_New           ( int                 argc,
                                        char             ** argv )
 {
@@ -617,12 +722,28 @@ openiccUi_s* openiccUi_New           ( int                 argc,
   ui->opts = openiccOptions_New( argc, argv );
   return ui;
 }
+/** @brief   return the number of sections of type "oihs"
+ *  @memberof openiccUi_s
+ *
+ *  The openiccUi_s contains already options in the opts member.
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 int     openiccUi_CountHeaderSections( openiccUi_s       * ui )
 {
   int n = 0;
   while(memcmp(ui->sections[n].type, "oihs", 4) == 0) ++n;
   return n;
 }
+/** @brief   return the section which was specified by its nick name
+ *  @memberof openiccUi_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 openiccUiHeaderSection_s * openiccUi_GetHeaderSection (
                                        openiccUi_s       * ui,
                                        const char        * nick )
@@ -634,6 +755,13 @@ openiccUiHeaderSection_s * openiccUi_GetHeaderSection (
       section = &ui->sections[i];
   return section;
 }
+/** @brief   return a JSON representation of the options
+ *  @memberof openiccUi_s
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 char *       openiccUi_ToJson        ( openiccUi_s       * ui,
                                        int                 flags OYJL_UNUSED )
 {
@@ -731,7 +859,7 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
 
       switch(o->value_type)
       {
-        case openiccWIDGETTYPE_CHOICE:
+        case openiccOPTIONTYPE_CHOICE:
           {
             int n = 0,l;
             key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "default" );
@@ -748,10 +876,10 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
             }
           }
           break;
-        case openiccWIDGETTYPE_FUNCTION:
+        case openiccOPTIONTYPE_FUNCTION:
           {
             int n = 0,l, selected;
-            openiccWidgetChoice_s * list = openiccOption_GetChoices_(o, &selected, opts );
+            openiccOptionChoice_s * list = openiccOption_GetChoices_(o, &selected, opts );
             if(list)
               while(list[n].nick[0] != '\000')
                 ++n;
@@ -767,10 +895,10 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
               key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/choices/[%d]/%s", i,j,l, "name" );
               oyjlValueSetString( key, list[l].name );
             }
-            /* not possible, as the result of openiccOption_GetChoices_() is cached - openiccWidgetChoice_Release( &list ); */
+            /* not possible, as the result of openiccOption_GetChoices_() is cached - openiccOptionChoice_Release( &list ); */
           }
           break;
-        case openiccWIDGETTYPE_DOUBLE:
+        case openiccOPTIONTYPE_DOUBLE:
           key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "default" );
           sprintf( num, "%g", o->values.dbl.d ); oyjlValueSetString( key, num );
           key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "start" );
@@ -780,7 +908,7 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
           key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "tick" );
           sprintf( num, "%g", o->values.dbl.tick ); oyjlValueSetString( key, num );
           break;
-        case openiccWIDGETTYPE_NONE:
+        case openiccOPTIONTYPE_NONE:
           key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "default" );
           oyjlValueSetString( key, "0" );
           {
@@ -795,8 +923,8 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
             }
           }
         break;
-        case openiccWIDGETTYPE_START: break;
-        case openiccWIDGETTYPE_END: break;
+        case openiccOPTIONTYPE_START: break;
+        case openiccOPTIONTYPE_END: break;
       }
     }
   }
@@ -805,6 +933,12 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
 
   return t;
 }
+/** @brief   return the copy of a pointer
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
 void * openiccMemDup                 ( void              * ptr,
                                        size_t              size )
 {
