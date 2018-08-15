@@ -11,7 +11,7 @@
  *            MIT http://www.opensource.org/licenses/mit-license.php
 
     @author Kai-Uwe Behrmann and others
-    @since  September 2011-2016
+    @since  September 2011-2018
 
     @par Development
           https://github.com/OpenICC/config
@@ -27,6 +27,10 @@
     The OpenICC Configuration API is declared in the openicc_config.h and openicc_db.h header files.
     - @ref OpenICC_config - Configuration Access API
     - @ref path_names - Configuration Location API
+
+    The following API is declared in openicc_core.h.
+    - @ref args - Argument API handles structured options and arguments for more than the command line.
+    - @ref misc
 
     @subsection api_tutorial Programming Tutorial
     Frist you have to put a
