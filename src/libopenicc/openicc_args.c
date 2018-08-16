@@ -23,11 +23,12 @@
  *  @brief   Structured Options and Arguments for more than the command line
  *
  *  Argument handling uses a compact, table like creation syntax. Parsing
- *  detects conflicts during programming and on run time. The arguments can
- *  be printed as a typical command line tool help text. The OpenICC JSON
- *  output is useable for automatical generated (G)UI's and further
- *  processing. Generation of other formats is simple. Translations are
- *  supported.
+ *  with openiccOptions_Parse() detects conflicts during programming and
+ *  on run time. The arguments can be printed as a typical command line tool
+ *  help text with openiccOptions_PrintHelp(). The OpenICC JSON
+ *  output from openiccUi_ToJson() is useable for automatical generated
+ *  (G)UI's and further processing. Generation of other formats is simple.
+ *  Translations are supported.
  *
  *  Command line options support single letter and long options without
  *  and with empty space and equal sign style single argument.
@@ -35,9 +36,14 @@
     > myProgramm -o --option -w=1 --with-argument 1
     @endverbatim
  *
+ *  **Basic Tutorial** from @ref openicc_config_read.c :
+    @dontinclude openicc_config_read.c
+    @skip allocate basic options structure
+    @until done with options handling
+ *
  *  @{ */
 
-/** @brief   release structure
+/** @brief   release dynamic structure
  *  @memberof openiccOptionChoice_s
  *
  *  @version OpenICC: 0.1.1
@@ -76,6 +82,7 @@ int openiccOptions_Count             ( openiccOptions_s  * opts )
   while(memcmp(opts->array[n].type, "oiwi", 4) == 0) ++n;
   return n;
 }
+
 /** @brief   return number of "oiwi" groups elements
  *  @memberof openiccOptions_s
  *
@@ -114,6 +121,7 @@ void  openiccOption_PrintArg         ( openiccOption_s   * o,
     fprintf( stderr, "]" );
   fprintf( stderr, " " );
 }
+
 /** @brief   obtain the specified option from option char
  *  @memberof openiccOptions_s
  *
@@ -139,6 +147,7 @@ openiccOption_s * openiccOptions_GetOption (
   }
   return o;
 }
+
 /** @brief   obtain the specified option from option string
  *  @memberof openiccOptions_s
  *
@@ -348,6 +357,7 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
 
   return state;
 }
+
 /** @brief   obtain the parsed result
  *  @memberof openiccOptions_s
  *
@@ -473,6 +483,7 @@ char * openiccOptions_ResultsToJson  ( openiccOptions_s  * opts )
 
   return rjson;
 }
+
 /** @brief   convert the parsed content to simple text
  *  @memberof openiccOptions_s
  *
@@ -552,6 +563,7 @@ void  openiccOptions_PrintHelpSynopsis(openiccOptions_s  * opts,
 
   fprintf( stderr, "\n" );
 }
+
 static openiccOptionChoice_s ** openicc_get_choices_list_ = NULL;
 static int openicc_get_choices_list_selected_[256];
 openiccOptionChoice_s * openiccOption_GetChoices_ (
@@ -576,6 +588,7 @@ openiccOptionChoice_s * openiccOption_GetChoices_ (
     *selected = openicc_get_choices_list_selected_[(int)o->o];
   return openicc_get_choices_list_[(int)o->o];
 }
+
 #include <stdarg.h> /* va_list */
 /** @brief   print help text to stderr
  *  @memberof openiccOptions_s
@@ -705,6 +718,7 @@ openiccOptions_s * openiccOptions_New( int                 argc,
   opts->argv = argv;
   return opts;
 }
+
 /** @brief   allocate a new ui structure
  *  @memberof openiccUi_s
  *
@@ -722,6 +736,7 @@ openiccUi_s* openiccUi_New           ( int                 argc,
   ui->opts = openiccOptions_New( argc, argv );
   return ui;
 }
+
 /** @brief   return the number of sections of type "oihs"
  *  @memberof openiccUi_s
  *
@@ -737,6 +752,7 @@ int     openiccUi_CountHeaderSections( openiccUi_s       * ui )
   while(memcmp(ui->sections[n].type, "oihs", 4) == 0) ++n;
   return n;
 }
+
 /** @brief   return the section which was specified by its nick name
  *  @memberof openiccUi_s
  *
@@ -755,6 +771,7 @@ openiccUiHeaderSection_s * openiccUi_GetHeaderSection (
       section = &ui->sections[i];
   return section;
 }
+
 /** @brief   return a JSON representation of the options
  *  @memberof openiccUi_s
  *
@@ -933,24 +950,11 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
 
   return t;
 }
-/** @brief   return the copy of a pointer
- *
- *  @version OpenICC: 0.1.1
- *  @date    2018/08/14
- *  @since   2018/08/14 (OpenICC: 0.1.1)
- */
-void * openiccMemDup                 ( void              * ptr,
-                                       size_t              size )
-{
-  void * dest = malloc(size);
-  if(dest)
-    memcpy( dest, ptr, size );
-  return dest;
-}
 // TODO: explicite allow for non option bound arguments, for syntax checking - use '-' as special option inside openiccOptionGroup_s::mandatory
 // TODO: export man page
+
+
 
 /** 
  *  @} *//* args
  */
-

@@ -43,8 +43,9 @@ int main(int argc, char ** argv)
   openiccInit();
 
   /* handle options */
-  openiccOptions_s * options = openiccOptions_New( argc, argv );
-  /* declare option choices */
+  /* allocate basic options structure */
+  openiccOptions_s * options = openiccOptions_New( argc, argv ); /* argc+argv are required for parsing the command line options */
+  /* declare some option choices */
   openiccOptionChoice_s i_choices[] = {{"openicc.json", _("openicc.json"), _("openicc.json"), ""},
                                     {"","","",""}};
   openiccOptionChoice_s o_choices[] = {{"0", _("Print All"), _("Print All"), ""},
@@ -53,20 +54,20 @@ int main(int argc, char ** argv)
                                     {"","","",""}};
   /* declare options */
   openiccOption_s oarray[] = {
-  /* type,   flags, o, option, key, name, description, help, value_name, value_type, values */
-    {"oiwi", 0, 'i', "input", NULL, _("input"), _("Set Input"), NULL, _("FILENAME"), openiccOPTIONTYPE_CHOICE, {.choices.list = openiccMemDup( i_choices, sizeof(i_choices) )} },
-    {"oiwi", 0, 'o', "output", NULL, _("output"), _("Control Output"), NULL, "0|1|2", openiccOPTIONTYPE_CHOICE, {.choices.list = openiccMemDup( o_choices, sizeof(o_choices) )} },
-    {"oiwi", 0, 'h', "help", NULL, _("help"), _("Help"), NULL, NULL, openiccOPTIONTYPE_NONE, {} },
-    {"oiwi", 0, 'v', "verbose", NULL, _("verbose"), _("verbose"), NULL, NULL, openiccOPTIONTYPE_NONE, {} },
+  /* type,   flags, o,   option,    key,  name,         description,         help, value_name,    value_type,               values */
+    {"oiwi", 0,     'i', "input",   NULL, _("input"),   _("Set Input"),      NULL, _("FILENAME"), openiccOPTIONTYPE_CHOICE, {.choices.list = openiccMemDup( i_choices, sizeof(i_choices) )} },
+    {"oiwi", 0,     'o', "output",  NULL, _("output"),  _("Control Output"), NULL, "0|1|2",       openiccOPTIONTYPE_CHOICE, {.choices.list = openiccMemDup( o_choices, sizeof(o_choices) )} },
+    {"oiwi", 0,     'h', "help",    NULL, _("help"),    _("Help"),           NULL, NULL,          openiccOPTIONTYPE_NONE,   {} },
+    {"oiwi", 0,     'v', "verbose", NULL, _("verbose"), _("verbose"),        NULL, NULL,          openiccOPTIONTYPE_NONE,   {} },
     {"",0,0,0,0,0,0,0, NULL, openiccOPTIONTYPE_END, {}}
   };
   /* copy in */
   options->array = openiccMemDup( oarray, sizeof(oarray) );
   /* declare option groups */
   openiccOptionGroup_s groups[] = {
-  /* type,   flags, name, description, help, mandatory, optional, detail */
-    {"oiwg", 0, _("Mode"), _("Actual mode"), NULL, "io", "v", "io" },
-    {"oiwg", 0, _("Misc"), _("General options"), NULL, "", "", "vh" },
+  /* type,   flags, name,      description,          help, mandatory, optional, detail */
+    {"oiwg", 0,     _("Mode"), _("Actual mode"),     NULL, "io",      "v",      "io" },
+    {"oiwg", 0,     _("Misc"), _("General options"), NULL, "",        "",       "vh" },
     {"",0,0,0,0,0,0,0}
   };
   /* copy in */
@@ -94,7 +95,7 @@ int main(int argc, char ** argv)
   {
     openiccOptions_PrintHelp( options, /*ui*/ NULL, verbose, "%s example tool", argv[0] );
     return 0;
-  }
+  } /* done with options handling */
 
   /* read JSON input file */
   if(file) file_name = file;
