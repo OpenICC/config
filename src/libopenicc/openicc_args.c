@@ -38,7 +38,7 @@
  *
  *  **Basic Tutorial** from @ref openicc_config_read.c :
     @dontinclude openicc_config_read.c
-    @skip allocate basic options structure
+    @skip allocate options structure
     @until done with options handling
  *
  *  @{ */
@@ -594,7 +594,7 @@ openiccOptionChoice_s * openiccOption_GetChoices_ (
  *  @memberof openiccOptions_s
  *
  *  @param   opts                      options to print
- *  @param   ui                        more info for e.g. the description block; optional
+ *  @param   ui                        more info for e.g. from the documentation section for the description block; optional
  *  @param   verbose                   gives debug output
  *  @param   motto_format              prints a customised intoduction line
  *
@@ -823,6 +823,7 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
       else if(strcmp(s->nick, "development") == 0) oyjlValueSetString( key, _("Development") );
       else if(strcmp(s->nick, "openicc_module_author") == 0) oyjlValueSetString( key, _("OpenICC Module Author") );
       else if(strcmp(s->nick, "documentation") == 0) oyjlValueSetString( key, _("Documentation") );
+      else if(strcmp(s->nick, "version") == 0) oyjlValueSetString( key, _("Version") );
       else oyjlValueSetString( key, _(s->nick) );
     }
     key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/information/[%d]/%s", i, "name" );
