@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-16 07:04+0200\n"
+"POT-Creation-Date: 2018-08-16 08:34+0200\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -104,7 +104,7 @@ msgstr "Výrobce"
 msgid "Module"
 msgstr "Volby modulu:"
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "No"
 msgstr "Ne"
 
@@ -182,6 +182,11 @@ msgstr "Použití"
 msgid "Usage Error:"
 msgstr ""
 
+#: libopenicc/openicc_args.c:826
+#, fuzzy
+msgid "Version"
+msgstr "ICC Examin Verze"
+
 #: libopenicc/openicc_core.c:125
 msgid "WARNING"
 msgstr "VAROVÁNÍ"
@@ -190,7 +195,7 @@ msgstr "VAROVÁNÍ"
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "Yes"
 msgstr "Ano"
 
@@ -3604,10 +3609,6 @@ msgstr "upovídaný výstup"
 
 #~ msgid "Value"
 #~ msgstr "Hodnota"
-
-#, fuzzy
-#~ msgid "Version"
-#~ msgstr "ICC Examin Verze"
 
 #, fuzzy
 #~ msgid "Version:         "

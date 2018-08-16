@@ -204,7 +204,7 @@ void   openiccOptions_PrintHelp      ( openiccOptions_s  * opts,
 /** @brief Header section */
 typedef struct openiccUiHeaderSection_s {
   char type [4];                       /**< must be 'oihs' */
-  const char * nick;                   /**< single word well known identifier; *manufacturer*, *copyright*, *license*, *url*, *support*, *download*, *sources*, *openicc_modules_author*, *documentation* */
+  const char * nick;                   /**< single word well known identifier; *version*, *manufacturer*, *copyright*, *license*, *url*, *support*, *download*, *sources*, *openicc_modules_author*, *documentation* */
   const char * label;                  /**< i18n short string, in case this section nick is not well known; optional */
   const char * name;                   /**< i18n short content */
   const char * description;            /**< i18n optional second string; might contain a browsable url for further information, e.g. a link to the full text license, home page; optional */
@@ -218,7 +218,7 @@ struct openiccUi_s {
   const char * name;                   /**< i18n short name for tool bars, app lists */
   const char * description;            /**< i18n name, version, maybe more for a prominent one liner */
   const char * logo;                   /**< file name body without path, for relocation, nor file type ending; typical a PNG or SVG icon; e.g. "lcms_icon" for lcms_icon.png or lcms_icon.svg; optional */
-  /** We describe here a particular tool/module. Each property object contains at least one 'name' key. All values shall be strings. *nick* or *description* keys are optional. If they are not contained, fall back to *name*. Well known objects are *manufacturer*, *copyright*, *license*, *url*, *support*, *download*, *sources*, *development*, *openicc_modules_author*, *documentation* and *logo*. The *modules/[]/nick* shall contain a four byte string in as the CMM identifier. */
+  /** We describe here a particular tool/module. Each property object contains at least one 'name' key. All values shall be strings. *nick* or *description* keys are optional. If they are not contained, fall back to *name*. Well known objects are *version*, *manufacturer*, *copyright*, *license*, *url*, *support*, *download*, *sources*, *development*, *openicc_modules_author*, *documentation* and *logo*. The *modules/[]/nick* shall contain a four byte string in as the CMM identifier. */
   openiccUiHeaderSection_s * sections;
   openiccOptions_s * opts;             /**< info for UI logic */
 };

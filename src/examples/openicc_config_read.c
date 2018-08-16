@@ -43,8 +43,25 @@ int main(int argc, char ** argv)
   openiccInit();
 
   /* handle options */
-  /* allocate basic options structure */
-  openiccOptions_s * options = openiccOptions_New( argc, argv ); /* argc+argv are required for parsing the command line options */
+  /* allocate options structure */
+  openiccUi_s * ui = openiccUi_New( argc, argv ); /* argc+argv are required for parsing the command line options */
+  /* tell about the tool */
+  ui->app_type = "tool";
+  memcpy( ui->nick, "oiCR", 4 );
+  ui->name = "openicc-config-read";
+  ui->description = _("Short example tool using libOpenIcc");
+  /* Select from *version*, *manufacturer*, *copyright*, *license*, *url*,
+   * *support*, *download*, *sources*, *openicc_modules_author* and
+   * *documentation* what you see fit. Add new ones as needed. */
+  openiccUiHeaderSection_s sections[] = {
+    /* type, nick,            label, name,      , description  */
+    {"oihs", "version",       NULL,  "1.0",       NULL},
+    {"oihs", "documentation", NULL,  "",          _("The example tool demontrates the usage of the libOpenIcc config and options API's.")},
+    {"",0,0,0,0}};
+  /* copy in */
+  ui->sections = openiccMemDup( sections, sizeof(sections) );
+  openiccOptions_s * options = ui->opts;
+
   /* declare some option choices */
   openiccOptionChoice_s i_choices[] = {{"openicc.json", _("openicc.json"), _("openicc.json"), ""},
                                     {"","","",""}};
@@ -52,7 +69,8 @@ int main(int argc, char ** argv)
                                     {"1", _("Print Camera"), _("Print Camera JSON"), ""},
                                     {"2", _("Print None"), _("Print None"), ""},
                                     {"","","",""}};
-  /* declare options */
+
+  /* declare options - the core information; use previously declared choices */
   openiccOption_s oarray[] = {
   /* type,   flags, o,   option,    key,  name,         description,         help, value_name,    value_type,               values */
     {"oiwi", 0,     'i', "input",   NULL, _("input"),   _("Set Input"),      NULL, _("FILENAME"), openiccOPTIONTYPE_CHOICE, {.choices.list = openiccMemDup( i_choices, sizeof(i_choices) )} },
@@ -63,7 +81,8 @@ int main(int argc, char ** argv)
   };
   /* copy in */
   options->array = openiccMemDup( oarray, sizeof(oarray) );
-  /* declare option groups */
+
+  /* declare option groups, for better syntax checking and UI groups */
   openiccOptionGroup_s groups[] = {
   /* type,   flags, name,      description,          help, mandatory, optional, detail */
     {"oiwg", 0,     _("Mode"), _("Actual mode"),     NULL, "io",      "v",      "io" },
@@ -73,8 +92,9 @@ int main(int argc, char ** argv)
   /* copy in */
   options->groups = openiccMemDup( groups, sizeof(groups));
 
-  /* check syntax */
+  /* check syntax ... */
   openiccOPTIONSTATE_e state = openiccOptions_Parse( options );
+  /* ... and report detected errors */
   if(state != openiccOPTION_NONE)
   {
     fputs( _("... try with --help|-h option for usage text. give up"), stderr );
@@ -82,7 +102,7 @@ int main(int argc, char ** argv)
     exit(1);
   }
 
-  /* get options */
+  /* get option results */
   int output = 0;
   const char * file = NULL;
   int help = 0;
@@ -93,7 +113,7 @@ int main(int argc, char ** argv)
   openiccOptions_GetResult( options, 'v', 0, 0, &verbose );
   if(help)
   {
-    openiccOptions_PrintHelp( options, /*ui*/ NULL, verbose, "%s example tool", argv[0] );
+    openiccOptions_PrintHelp( options, ui, verbose, "%s example tool", argv[0] );
     return 0;
   } /* done with options handling */
 
@@ -102,7 +122,7 @@ int main(int argc, char ** argv)
   text = openiccOpenFile( file_name, &size );
   if(!text)
   {
-    openiccOptions_PrintHelp( options, /*ui*/ NULL, verbose, "%s example tool", argv[0] );
+    openiccOptions_PrintHelp( options, ui, verbose, "%s example tool", argv[0] );
     return 0;
   }
  

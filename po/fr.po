@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-16 07:04+0200\n"
+"POT-Creation-Date: 2018-08-16 08:34+0200\n"
 "PO-Revision-Date: 2006-06-29 19:31+0200\n"
 "Last-Translator: Pascal LACROIX <lacroixpascal at vfemail.net>\n"
 "Language-Team: <fr@li.org>\n"
@@ -107,7 +107,7 @@ msgstr "Fabricant:   "
 msgid "Module"
 msgstr "Options"
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "No"
 msgstr ""
 
@@ -184,6 +184,11 @@ msgstr ""
 msgid "Usage Error:"
 msgstr ""
 
+#: libopenicc/openicc_args.c:826
+#, fuzzy
+msgid "Version"
+msgstr "ICC Examin Version"
+
 #: libopenicc/openicc_core.c:125
 msgid "WARNING"
 msgstr ""
@@ -192,7 +197,7 @@ msgstr ""
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "Yes"
 msgstr "Oui"
 
@@ -1450,10 +1455,6 @@ msgstr ""
 
 #~ msgid "Value"
 #~ msgstr "Valeur"
-
-#, fuzzy
-#~ msgid "Version"
-#~ msgstr "ICC Examin Version"
 
 #, fuzzy
 #~ msgid "Version:         "

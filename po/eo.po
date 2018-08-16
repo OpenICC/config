@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: eo\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-16 07:04+0200\n"
+"POT-Creation-Date: 2018-08-16 08:34+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  <eo@li.org>\n"
@@ -101,7 +101,7 @@ msgstr "kolora"
 msgid "Module"
 msgstr ""
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "No"
 msgstr ""
 
@@ -177,6 +177,10 @@ msgstr ""
 msgid "Usage Error:"
 msgstr ""
 
+#: libopenicc/openicc_args.c:826
+msgid "Version"
+msgstr ""
+
 #: libopenicc/openicc_core.c:125
 msgid "WARNING"
 msgstr ""
@@ -185,7 +189,7 @@ msgstr ""
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "Yes"
 msgstr "Jes"
 

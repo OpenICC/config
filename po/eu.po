@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-16 07:04+0200\n"
+"POT-Creation-Date: 2018-08-16 08:34+0200\n"
 "PO-Revision-Date: 2007-11-07 11:11+0100\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
 "Language-Team: Basque <itzulpena@euskalgnu.org>\n"
@@ -110,7 +110,7 @@ msgstr "Hornitzailea:   "
 msgid "Module"
 msgstr "Bereizketa"
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "No"
 msgstr ""
 
@@ -188,6 +188,11 @@ msgstr ""
 msgid "Usage Error:"
 msgstr ""
 
+#: libopenicc/openicc_args.c:826
+#, fuzzy
+msgid "Version"
+msgstr "ICC Examin-en bertsioa"
+
 #: libopenicc/openicc_core.c:125
 msgid "WARNING"
 msgstr ""
@@ -196,7 +201,7 @@ msgstr ""
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "Yes"
 msgstr "Bai"
 
@@ -2204,10 +2209,6 @@ msgstr ""
 
 #~ msgid "Value"
 #~ msgstr "Balioa"
-
-#, fuzzy
-#~ msgid "Version"
-#~ msgstr "ICC Examin-en bertsioa"
 
 #, fuzzy
 #~ msgid "Version:         "

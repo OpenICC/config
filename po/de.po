@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-16 07:04+0200\n"
+"POT-Creation-Date: 2018-08-16 08:34+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -100,7 +100,7 @@ msgstr "Hersteller"
 msgid "Module"
 msgstr "Modul"
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "No"
 msgstr "Nein"
 
@@ -176,6 +176,10 @@ msgstr "Benutzung"
 msgid "Usage Error:"
 msgstr "Benutzerfehler:"
 
+#: libopenicc/openicc_args.c:826
+msgid "Version"
+msgstr "Version"
+
 #: libopenicc/openicc_core.c:125
 msgid "WARNING"
 msgstr "WARNUNG"
@@ -184,7 +188,7 @@ msgstr "WARNUNG"
 msgid "Writing failed for"
 msgstr "Schreiben mislungen für"
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:940
 msgid "Yes"
 msgstr "Ja"
 
@@ -3617,9 +3621,6 @@ msgstr "plaudernd"
 
 #~ msgid "Value"
 #~ msgstr "Wert"
-
-#~ msgid "Version"
-#~ msgstr "Version"
 
 #~ msgid "Version:         "
 #~ msgstr "Version:         "
