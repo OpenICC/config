@@ -75,6 +75,8 @@ void           openiccSetDebugVariable(int               * cmm_debug );
 int            openiccReadFileSToMem ( FILE              * fp,
                                        char             ** ptr,
                                        int               * size);
+void *         openiccMemDup         ( const void        * src,
+                                       size_t              size );
 /** 
  *  @} *//* misc
  */
@@ -181,6 +183,8 @@ typedef enum {
   openiccOPTION_NOT_SUPPORTED,         /**< user error */
   openiccOPTION_DOUBLE_OCCURENCE       /**< user error */
 } openiccOPTIONSTATE_e;
+openiccOptions_s * openiccOptions_New( int                 argc,
+                                       char             ** argv );
 openiccOPTIONSTATE_e openiccOptions_Parse  (
                                        openiccOptions_s  * opts );
 openiccOPTIONSTATE_e openiccOptions_GetResult (
@@ -197,10 +201,6 @@ void   openiccOptions_PrintHelp      ( openiccOptions_s  * opts,
                                        int                 verbose,
                                        const char        * motto_format,
                                                            ... );
-openiccOptions_s * openiccOptions_New( int                 argc,
-                                       char             ** argv );
-void * openiccMemDup                 ( void              * ptr,
-                                       size_t              size );
 /** @brief Header section */
 typedef struct openiccUiHeaderSection_s {
   char type [4];                       /**< must be 'oihs' */

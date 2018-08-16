@@ -298,4 +298,19 @@ int            openiccInit           ( void )
   return -1;
 }
 
+/** @brief   return the malloced copy of a pointer
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
+void *         openiccMemDup         ( const void        * src,
+                                       size_t              size )
+{
+  void * dest = malloc(size);
+  if(dest)
+    memcpy( dest, src, size );
+  return dest;
+}
+
 /*  @} *//* misc */
