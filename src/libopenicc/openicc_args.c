@@ -805,7 +805,7 @@ openiccUi_s* openiccUi_New           ( int                 argc,
  *  @param[in]     nick                four byte string; e.g. "myCl"
  *  @param[in]     name                short name of the tool; i18n;
  *                 e.g. _("My Command")
- *  @param[in]     description         longer name; i18n;
+ *  @param[in]     description         compact sentence starting with full name; i18n;
  *                 e.g. _("My Command line tool from Me")
  *  @param[in]     logo                icon name; This variable must contain
  *                 the file name only, without ending. The icon needs
@@ -871,7 +871,11 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
     verbose = *v->variable.i;
   if(help)
   {
-    openiccOptions_PrintHelp( ui->opts, ui, verbose, "%s example tool", argv[0] );
+    openiccUiHeaderSection_s * version = openiccUi_GetHeaderSection( ui,
+                                                               "version" );
+    openiccOptions_PrintHelp( ui->opts, ui, verbose, "%s v%s - %s", argv[0],
+                              version && version->name ? version->name : "",
+                              ui->description ? ui->description : "" );
     free(ui->opts); free(ui);
     return NULL;
   } /* done with options handling */

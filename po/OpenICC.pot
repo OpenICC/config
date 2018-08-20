@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenICC 0.1\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-20 11:36+0200\n"
+"POT-Creation-Date: 2018-08-20 22:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,63 +61,63 @@ msgstr ""
 msgid "... try with --help|-h option for usage text. give up"
 msgstr ""
 
-#: libopenicc/openicc_args.c:937
+#: libopenicc/openicc_args.c:941
 msgid "Tool"
 msgstr ""
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:943
 msgid "Module"
 msgstr ""
 
-#: libopenicc/openicc_args.c:958
+#: libopenicc/openicc_args.c:962
 msgid "Manufacturer"
 msgstr ""
 
-#: libopenicc/openicc_args.c:959
+#: libopenicc/openicc_args.c:963
 msgid "Copyright"
 msgstr ""
 
-#: libopenicc/openicc_args.c:960
+#: libopenicc/openicc_args.c:964
 msgid "License"
 msgstr ""
 
-#: libopenicc/openicc_args.c:961
+#: libopenicc/openicc_args.c:965
 msgid "Url"
 msgstr ""
 
-#: libopenicc/openicc_args.c:962
+#: libopenicc/openicc_args.c:966
 msgid "Support"
 msgstr ""
 
-#: libopenicc/openicc_args.c:963
+#: libopenicc/openicc_args.c:967
 msgid "Download"
 msgstr ""
 
-#: libopenicc/openicc_args.c:964
+#: libopenicc/openicc_args.c:968
 msgid "Sources"
 msgstr ""
 
-#: libopenicc/openicc_args.c:965
+#: libopenicc/openicc_args.c:969
 msgid "Development"
 msgstr ""
 
-#: libopenicc/openicc_args.c:966
+#: libopenicc/openicc_args.c:970
 msgid "OpenICC Module Author"
 msgstr ""
 
-#: libopenicc/openicc_args.c:967
+#: libopenicc/openicc_args.c:971
 msgid "Documentation"
 msgstr ""
 
-#: libopenicc/openicc_args.c:968
+#: libopenicc/openicc_args.c:972
 msgid "Version"
 msgstr ""
 
-#: libopenicc/openicc_args.c:1082
+#: libopenicc/openicc_args.c:1086
 msgid "Yes"
 msgstr ""
 
-#: libopenicc/openicc_args.c:1082
+#: libopenicc/openicc_args.c:1086
 msgid "No"
 msgstr ""
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-20 11:36+0200\n"
+"POT-Creation-Date: 2018-08-20 22:38+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -35,7 +35,7 @@ msgstr "Füge mit gettext übersetzte Schlüssel to JSON hinzu:"
 msgid "Convert JSON to gettext ready C strings:"
 msgstr "Wandle JSON in gettext lesbare C Texte:"
 
-#: libopenicc/openicc_args.c:959
+#: libopenicc/openicc_args.c:963
 msgid "Copyright"
 msgstr "Kopierrecht"
 
@@ -72,11 +72,11 @@ msgstr "Konnte DB Objekt nicht erstellen"
 msgid "Description"
 msgstr "Beschreibung"
 
-#: libopenicc/openicc_args.c:965
+#: libopenicc/openicc_args.c:969
 msgid "Development"
 msgstr "Entwicklung"
 
-#: libopenicc/openicc_args.c:967
+#: libopenicc/openicc_args.c:971
 msgid "Documentation"
 msgstr "Dokumente"
 
@@ -84,7 +84,7 @@ msgstr "Dokumente"
 msgid "Double occuring option"
 msgstr "Doppelte Option"
 
-#: libopenicc/openicc_args.c:963
+#: libopenicc/openicc_args.c:967
 msgid "Download"
 msgstr "Bezugsquelle"
 
@@ -92,19 +92,19 @@ msgstr "Bezugsquelle"
 msgid "General options:"
 msgstr "Allgemeine Optionen:"
 
-#: libopenicc/openicc_args.c:960
+#: libopenicc/openicc_args.c:964
 msgid "License"
 msgstr "Lizenz"
 
-#: libopenicc/openicc_args.c:958
+#: libopenicc/openicc_args.c:962
 msgid "Manufacturer"
 msgstr "Hersteller"
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:943
 msgid "Module"
 msgstr "Modul"
 
-#: libopenicc/openicc_args.c:1082
+#: libopenicc/openicc_args.c:1086
 msgid "No"
 msgstr "Nein"
 
@@ -116,7 +116,7 @@ msgstr "Kein JSON Inhalt erhalten für"
 msgid "No JSON obtained for"
 msgstr "Kein JSON erhalten für"
 
-#: libopenicc/openicc_args.c:966
+#: libopenicc/openicc_args.c:970
 msgid "OpenICC Module Author"
 msgstr "Autor des OpenICC Modules"
 
@@ -148,11 +148,11 @@ msgstr "Zeige einen Hilfetext an:"
 msgid "Rendering Intent"
 msgstr "Übertragungsart"
 
-#: libopenicc/openicc_args.c:964
+#: libopenicc/openicc_args.c:968
 msgid "Sources"
 msgstr "Quellen"
 
-#: libopenicc/openicc_args.c:962
+#: libopenicc/openicc_args.c:966
 msgid "Support"
 msgstr "Unterstützung"
 
@@ -160,11 +160,11 @@ msgstr "Unterstützung"
 msgid "Synopsis"
 msgstr "Übersicht"
 
-#: libopenicc/openicc_args.c:937
+#: libopenicc/openicc_args.c:941
 msgid "Tool"
 msgstr "Werkzeug"
 
-#: libopenicc/openicc_args.c:961
+#: libopenicc/openicc_args.c:965
 msgid "Url"
 msgstr "Url"
 
@@ -180,7 +180,7 @@ msgstr "Benutzung"
 msgid "Usage Error:"
 msgstr "Benutzerfehler:"
 
-#: libopenicc/openicc_args.c:968
+#: libopenicc/openicc_args.c:972
 msgid "Version"
 msgstr "Version"
 
@@ -192,7 +192,7 @@ msgstr "WARNUNG"
 msgid "Writing failed for"
 msgstr "Schreiben mislungen für"
 
-#: libopenicc/openicc_args.c:1082
+#: libopenicc/openicc_args.c:1086
 msgid "Yes"
 msgstr "Ja"
 

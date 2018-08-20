@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: eo\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-20 11:36+0200\n"
+"POT-Creation-Date: 2018-08-20 22:38+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  <eo@li.org>\n"
@@ -35,7 +35,7 @@ msgstr ""
 msgid "Convert JSON to gettext ready C strings:"
 msgstr ""
 
-#: libopenicc/openicc_args.c:959
+#: libopenicc/openicc_args.c:963
 msgid "Copyright"
 msgstr ""
 
@@ -72,11 +72,11 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: libopenicc/openicc_args.c:965
+#: libopenicc/openicc_args.c:969
 msgid "Development"
 msgstr ""
 
-#: libopenicc/openicc_args.c:967
+#: libopenicc/openicc_args.c:971
 msgid "Documentation"
 msgstr ""
 
@@ -84,7 +84,7 @@ msgstr ""
 msgid "Double occuring option"
 msgstr ""
 
-#: libopenicc/openicc_args.c:963
+#: libopenicc/openicc_args.c:967
 msgid "Download"
 msgstr ""
 
@@ -92,20 +92,20 @@ msgstr ""
 msgid "General options:"
 msgstr ""
 
-#: libopenicc/openicc_args.c:960
+#: libopenicc/openicc_args.c:964
 msgid "License"
 msgstr ""
 
-#: libopenicc/openicc_args.c:958
+#: libopenicc/openicc_args.c:962
 #, fuzzy
 msgid "Manufacturer"
 msgstr "kolora"
 
-#: libopenicc/openicc_args.c:939
+#: libopenicc/openicc_args.c:943
 msgid "Module"
 msgstr ""
 
-#: libopenicc/openicc_args.c:1082
+#: libopenicc/openicc_args.c:1086
 msgid "No"
 msgstr ""
 
@@ -117,7 +117,7 @@ msgstr ""
 msgid "No JSON obtained for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:966
+#: libopenicc/openicc_args.c:970
 msgid "OpenICC Module Author"
 msgstr ""
 
@@ -149,11 +149,11 @@ msgstr ""
 msgid "Rendering Intent"
 msgstr ""
 
-#: libopenicc/openicc_args.c:964
+#: libopenicc/openicc_args.c:968
 msgid "Sources"
 msgstr ""
 
-#: libopenicc/openicc_args.c:962
+#: libopenicc/openicc_args.c:966
 msgid "Support"
 msgstr ""
 
@@ -161,11 +161,11 @@ msgstr ""
 msgid "Synopsis"
 msgstr ""
 
-#: libopenicc/openicc_args.c:937
+#: libopenicc/openicc_args.c:941
 msgid "Tool"
 msgstr ""
 
-#: libopenicc/openicc_args.c:961
+#: libopenicc/openicc_args.c:965
 msgid "Url"
 msgstr ""
 
@@ -181,7 +181,7 @@ msgstr ""
 msgid "Usage Error:"
 msgstr ""
 
-#: libopenicc/openicc_args.c:968
+#: libopenicc/openicc_args.c:972
 msgid "Version"
 msgstr ""
 
@@ -193,7 +193,7 @@ msgstr ""
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:1082
+#: libopenicc/openicc_args.c:1086
 msgid "Yes"
 msgstr "Jes"
 
