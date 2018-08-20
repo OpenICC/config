@@ -206,8 +206,13 @@ openiccOPTIONSTATE_e openiccOptions_Check (
 /** @brief   parse the options into a private data structure
  *  @memberof openiccOptions_s
  *
+ *  The returned status can be used to detect usage errors and hint them on
+ *  the command line.
+ *  In the usual case where the variable fields are set, the results
+ *  will be set too.
+ *
  *  @version OpenICC: 0.1.1
- *  @date    2018/08/14
+ *  @date    2018/08/19
  *  @since   2018/08/14 (OpenICC: 0.1.1)
  */
 openiccOPTIONSTATE_e openiccOptions_Parse (
@@ -353,6 +358,20 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
       }
     }
     opts->private_data = result;
+
+    pos = 0;
+    while(result[0][pos])
+    {
+      openiccOption_s * o = openiccOptions_GetOption( opts, result[0][pos] );
+      switch(o->variable_type)
+      {
+        case openiccNONE:   break;
+        case openiccSTRING: openiccOptions_GetResult( opts, o->o, o->variable.s, 0, 0 ); break;
+        case openiccDOUBLE: openiccOptions_GetResult( opts, o->o, 0, o->variable.d, 0 ); break;
+        case openiccINT:    openiccOptions_GetResult( opts, o->o, 0, 0, o->variable.i ); break;
+      }
+      ++pos;
+    }
   }
 
   return state;
@@ -360,6 +379,9 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
 
 /** @brief   obtain the parsed result
  *  @memberof openiccOptions_s
+ *
+ *  This function is only useful, if the results shall be obtained
+ *  independently from openiccOptions_Parse().
  *
  *  If the option was not specified the state openiccOPTION_NONE will be
  *  returned and otherwise openiccOPTION_USER_CHANGED. With result_int and
@@ -664,6 +686,12 @@ void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
         case openiccOPTIONTYPE_CHOICE:
           {
             int n = 0,l;
+            if(o->value_name)
+            {
+              fprintf( stderr, "\t" );
+              openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING);
+              fprintf( stderr, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
+            }
             while(o->values.choices.list[n].nick[0] != '\000')
               ++n;
             for(l = 0; l < n; ++l)
@@ -959,3 +987,35 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
 /** 
  *  @} *//* args
  */
+
+/* private stuff */
+
+void oiUiFill                        ( openiccUi_s         * ui,
+                                       const char          * nick,
+                                       const char          * name,
+                                       const char          * description,
+                                       const char          * icon,
+                                       const char          * documentation )
+{
+  openiccUiHeaderSection_s s[] = {
+    /* type,  nick,      label,name,                 description */
+    { "oihs", "version", NULL, OPENICC_VERSION_NAME, NULL },
+    { "oihs", "manufacturer", NULL, "Kai-Uwe Behrmann", "http://www.openicc.org" },
+    { "oihs", "copyright", NULL, "Copyright 2018 Kai-Uwe Behrmann", NULL },
+    { "oihs", "license", NULL, "newBSD", "http://www.openicc.org" },
+    { "oihs", "url", NULL, "http://www.openicc.org", NULL },
+    { "oihs", "support", NULL, "https://www.github.com/OpenICC/config/issues", NULL },
+    { "oihs", "download", NULL, "https://github.com/OpenICC/config/releases", NULL },
+    { "oihs", "sources", NULL, "https://github.com/OpenICC/config", NULL },
+    { "oihs", "development", NULL, "https://github.com/OpenICC/config", NULL },
+    { "oihs", "openicc_module_author", NULL, "Kai-Uwe Behrmann", "http://www.behrmann.name" },
+    { "oihs", "documentation", NULL, "http://www.openicc.info", documentation },
+    { "", NULL, NULL, NULL, NULL }
+  };
+  ui->app_type = "tool";
+  memcpy( ui->nick, nick, 4 );
+  ui->name = name;
+  ui->description = description;
+  ui->logo = icon;
+  ui->sections = openiccMemDup( s, sizeof(s) );
+}
