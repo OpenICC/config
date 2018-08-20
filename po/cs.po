@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-16 08:34+0200\n"
+"POT-Creation-Date: 2018-08-19 21:42+0200\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -27,7 +27,7 @@ msgstr ""
 msgid "Convert JSON to gettext ready C strings:"
 msgstr ""
 
-#: libopenicc/openicc_args.c:817
+#: libopenicc/openicc_args.c:845
 msgid "Copyright"
 msgstr "Copyright"
 
@@ -66,16 +66,16 @@ msgstr ""
 msgid "Could not setup db objetc"
 msgstr "Nelze rozpoznat zařízení"
 
-#: libopenicc/openicc_args.c:630
+#: libopenicc/openicc_args.c:652
 #, fuzzy
 msgid "Description"
 msgstr "popis"
 
-#: libopenicc/openicc_args.c:823
+#: libopenicc/openicc_args.c:851
 msgid "Development"
 msgstr ""
 
-#: libopenicc/openicc_args.c:825
+#: libopenicc/openicc_args.c:853
 msgid "Documentation"
 msgstr "Dokumentace"
 
@@ -83,7 +83,7 @@ msgstr "Dokumentace"
 msgid "Double occuring option"
 msgstr ""
 
-#: libopenicc/openicc_args.c:821
+#: libopenicc/openicc_args.c:849
 msgid "Download"
 msgstr ""
 
@@ -91,20 +91,20 @@ msgstr ""
 msgid "General options:"
 msgstr "Obecné volby:"
 
-#: libopenicc/openicc_args.c:818
+#: libopenicc/openicc_args.c:846
 msgid "License"
 msgstr "Licence"
 
-#: libopenicc/openicc_args.c:816
+#: libopenicc/openicc_args.c:844
 msgid "Manufacturer"
 msgstr "Výrobce"
 
-#: libopenicc/openicc_args.c:797
+#: libopenicc/openicc_args.c:825
 #, fuzzy
 msgid "Module"
 msgstr "Volby modulu:"
 
-#: libopenicc/openicc_args.c:940
+#: libopenicc/openicc_args.c:968
 msgid "No"
 msgstr "Ne"
 
@@ -116,23 +116,23 @@ msgstr ""
 msgid "No JSON obtained for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:824
+#: libopenicc/openicc_args.c:852
 msgid "OpenICC Module Author"
 msgstr ""
 
-#: libopenicc/openicc_args.c:424
+#: libopenicc/openicc_args.c:446
 msgid "Option has a different value range"
 msgstr ""
 
-#: libopenicc/openicc_args.c:288 libopenicc/openicc_args.c:343
+#: libopenicc/openicc_args.c:293 libopenicc/openicc_args.c:348
 msgid "Option has a unexpected argument"
 msgstr ""
 
-#: libopenicc/openicc_args.c:266 libopenicc/openicc_args.c:320
+#: libopenicc/openicc_args.c:271 libopenicc/openicc_args.c:325
 msgid "Option needs a argument"
 msgstr ""
 
-#: libopenicc/openicc_args.c:245 libopenicc/openicc_args.c:302
+#: libopenicc/openicc_args.c:250 libopenicc/openicc_args.c:307
 #, fuzzy
 msgid "Option not supported"
 msgstr "Volba nepodporovaného typu:"
@@ -150,39 +150,39 @@ msgstr "Vytisknout nápovědu:"
 msgid "Rendering Intent"
 msgstr "Záměr transformace"
 
-#: libopenicc/openicc_args.c:822
+#: libopenicc/openicc_args.c:850
 msgid "Sources"
 msgstr ""
 
-#: libopenicc/openicc_args.c:820
+#: libopenicc/openicc_args.c:848
 msgid "Support"
 msgstr ""
 
-#: libopenicc/openicc_args.c:632
+#: libopenicc/openicc_args.c:654
 msgid "Synopsis"
 msgstr ""
 
-#: libopenicc/openicc_args.c:795
+#: libopenicc/openicc_args.c:823
 msgid "Tool"
 msgstr ""
 
-#: libopenicc/openicc_args.c:819
+#: libopenicc/openicc_args.c:847
 msgid "Url"
 msgstr ""
 
-#: libopenicc/openicc_args.c:640 tools/openicc_json.c:37
+#: libopenicc/openicc_args.c:662 tools/openicc_json.c:37
 #: tools/openicc_json.c:145
 msgid "Usage"
 msgstr "Použití"
 
-#: libopenicc/openicc_args.c:198 libopenicc/openicc_args.c:245
-#: libopenicc/openicc_args.c:266 libopenicc/openicc_args.c:288
-#: libopenicc/openicc_args.c:302 libopenicc/openicc_args.c:320
-#: libopenicc/openicc_args.c:343 libopenicc/openicc_args.c:424
+#: libopenicc/openicc_args.c:198 libopenicc/openicc_args.c:250
+#: libopenicc/openicc_args.c:271 libopenicc/openicc_args.c:293
+#: libopenicc/openicc_args.c:307 libopenicc/openicc_args.c:325
+#: libopenicc/openicc_args.c:348 libopenicc/openicc_args.c:446
 msgid "Usage Error:"
 msgstr ""
 
-#: libopenicc/openicc_args.c:826
+#: libopenicc/openicc_args.c:854
 #, fuzzy
 msgid "Version"
 msgstr "ICC Examin Verze"
@@ -195,7 +195,7 @@ msgstr "VAROVÁNÍ"
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:940
+#: libopenicc/openicc_args.c:968
 msgid "Yes"
 msgstr "Ano"
 
