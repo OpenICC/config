@@ -488,6 +488,10 @@ char * openiccOptions_ResultsToJson  ( openiccOptions_s  * opts )
   {
     if(openiccOptions_Parse( opts ))
       return NULL;
+
+    results = opts->private_data;
+    if(!results)
+      return NULL;
   }
 
   args = results[0];
