@@ -247,6 +247,15 @@ struct openiccUi_s {
 };
 openiccUi_s *  openiccUi_New         ( int                 argc,
                                        char             ** argv );
+openiccUi_s *  openiccUi_Create      ( int                 argc,
+                                       char             ** argv,
+                                       const char        * nick,
+                                       const char        * name,
+                                       const char        * description,
+                                       const char        * logo,
+                                       openiccUiHeaderSection_s * info,
+                                       openiccOption_s   * options,
+                                       openiccOptionGroup_s * groups );
 int    openiccUi_CountHeaderSections ( openiccUi_s       * ui );
 openiccUiHeaderSection_s * openiccUi_GetHeaderSection (
                                        openiccUi_s       * ui,
