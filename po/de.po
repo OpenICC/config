@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-19 21:42+0200\n"
+"POT-Creation-Date: 2018-08-20 10:23+0200\n"
 "PO-Revision-Date: 2005-08-13 17:35+0200\n"
 "Last-Translator: Kai-Uwe Behrmann\n"
 "Language-Team:  Deutsch <de@li.org>\n"
@@ -23,6 +23,10 @@ msgstr ""
 msgid "!!! ERROR"
 msgstr "!!! Fehler"
 
+#: libopenicc/openicc_args.c:846
+msgid "... try with --help|-h option for usage text. give up"
+msgstr "... versuche bitte die --help|-h Option für einen Hilfetext. Gebe auf"
+
 #: tools/openicc_json.c:42
 msgid "Add gettext translated keys to JSON:"
 msgstr "Füge mit gettext übersetzte Schlüssel to JSON hinzu:"
@@ -31,7 +35,7 @@ msgstr "Füge mit gettext übersetzte Schlüssel to JSON hinzu:"
 msgid "Convert JSON to gettext ready C strings:"
 msgstr "Wandle JSON in gettext lesbare C Texte:"
 
-#: libopenicc/openicc_args.c:845
+#: libopenicc/openicc_args.c:943
 msgid "Copyright"
 msgstr "Kopierrecht"
 
@@ -64,23 +68,23 @@ msgstr "Konnte keinen JSON Text setzen für"
 msgid "Could not setup db objetc"
 msgstr "Konnte DB Objekt nicht erstellen"
 
-#: libopenicc/openicc_args.c:652
+#: libopenicc/openicc_args.c:654
 msgid "Description"
 msgstr "Beschreibung"
 
-#: libopenicc/openicc_args.c:851
+#: libopenicc/openicc_args.c:949
 msgid "Development"
 msgstr "Entwicklung"
 
-#: libopenicc/openicc_args.c:853
+#: libopenicc/openicc_args.c:951
 msgid "Documentation"
 msgstr "Dokumente"
 
-#: libopenicc/openicc_args.c:198
+#: libopenicc/openicc_args.c:200
 msgid "Double occuring option"
 msgstr "Doppelte Option"
 
-#: libopenicc/openicc_args.c:849
+#: libopenicc/openicc_args.c:947
 msgid "Download"
 msgstr "Bezugsquelle"
 
@@ -88,19 +92,19 @@ msgstr "Bezugsquelle"
 msgid "General options:"
 msgstr "Allgemeine Optionen:"
 
-#: libopenicc/openicc_args.c:846
+#: libopenicc/openicc_args.c:944
 msgid "License"
 msgstr "Lizenz"
 
-#: libopenicc/openicc_args.c:844
+#: libopenicc/openicc_args.c:942
 msgid "Manufacturer"
 msgstr "Hersteller"
 
-#: libopenicc/openicc_args.c:825
+#: libopenicc/openicc_args.c:923
 msgid "Module"
 msgstr "Modul"
 
-#: libopenicc/openicc_args.c:968
+#: libopenicc/openicc_args.c:1066
 msgid "No"
 msgstr "Nein"
 
@@ -112,23 +116,23 @@ msgstr "Kein JSON Inhalt erhalten für"
 msgid "No JSON obtained for"
 msgstr "Kein JSON erhalten für"
 
-#: libopenicc/openicc_args.c:852
+#: libopenicc/openicc_args.c:950
 msgid "OpenICC Module Author"
 msgstr "Autor des OpenICC Modules"
 
-#: libopenicc/openicc_args.c:446
+#: libopenicc/openicc_args.c:448
 msgid "Option has a different value range"
 msgstr "Die Option besitzt einen anderen Wertebereich"
 
-#: libopenicc/openicc_args.c:293 libopenicc/openicc_args.c:348
+#: libopenicc/openicc_args.c:295 libopenicc/openicc_args.c:350
 msgid "Option has a unexpected argument"
 msgstr "Die Option hat einen unerwartetes Argument"
 
-#: libopenicc/openicc_args.c:271 libopenicc/openicc_args.c:325
+#: libopenicc/openicc_args.c:273 libopenicc/openicc_args.c:327
 msgid "Option needs a argument"
 msgstr "Die Option erwartet ein Argument"
 
-#: libopenicc/openicc_args.c:250 libopenicc/openicc_args.c:307
+#: libopenicc/openicc_args.c:252 libopenicc/openicc_args.c:309
 msgid "Option not supported"
 msgstr "Die Option ist nicht unterstützt"
 
@@ -144,39 +148,39 @@ msgstr "Zeige einen Hilfetext an:"
 msgid "Rendering Intent"
 msgstr "Übertragungsart"
 
-#: libopenicc/openicc_args.c:850
+#: libopenicc/openicc_args.c:948
 msgid "Sources"
 msgstr "Quellen"
 
-#: libopenicc/openicc_args.c:848
+#: libopenicc/openicc_args.c:946
 msgid "Support"
 msgstr "Unterstützung"
 
-#: libopenicc/openicc_args.c:654
+#: libopenicc/openicc_args.c:656
 msgid "Synopsis"
-msgstr ""
+msgstr "Übersicht"
 
-#: libopenicc/openicc_args.c:823
+#: libopenicc/openicc_args.c:921
 msgid "Tool"
 msgstr "Werkzeug"
 
-#: libopenicc/openicc_args.c:847
+#: libopenicc/openicc_args.c:945
 msgid "Url"
-msgstr ""
+msgstr "Url"
 
-#: libopenicc/openicc_args.c:662 tools/openicc_json.c:37
+#: libopenicc/openicc_args.c:664 tools/openicc_json.c:37
 #: tools/openicc_json.c:145
 msgid "Usage"
 msgstr "Benutzung"
 
-#: libopenicc/openicc_args.c:198 libopenicc/openicc_args.c:250
-#: libopenicc/openicc_args.c:271 libopenicc/openicc_args.c:293
-#: libopenicc/openicc_args.c:307 libopenicc/openicc_args.c:325
-#: libopenicc/openicc_args.c:348 libopenicc/openicc_args.c:446
+#: libopenicc/openicc_args.c:200 libopenicc/openicc_args.c:252
+#: libopenicc/openicc_args.c:273 libopenicc/openicc_args.c:295
+#: libopenicc/openicc_args.c:309 libopenicc/openicc_args.c:327
+#: libopenicc/openicc_args.c:350 libopenicc/openicc_args.c:448
 msgid "Usage Error:"
 msgstr "Benutzerfehler:"
 
-#: libopenicc/openicc_args.c:854
+#: libopenicc/openicc_args.c:952
 msgid "Version"
 msgstr "Version"
 
@@ -188,7 +192,7 @@ msgstr "WARNUNG"
 msgid "Writing failed for"
 msgstr "Schreiben mislungen für"
 
-#: libopenicc/openicc_args.c:968
+#: libopenicc/openicc_args.c:1066
 msgid "Yes"
 msgstr "Ja"
 
@@ -198,7 +202,7 @@ msgstr "ist ein JSON Hilfswerkzeug"
 
 #: tools/openicc_json.c:55
 msgid "language specific wrap; -w C for C static char"
-msgstr ""
+msgstr "sprachspezifische Hülle; -w C für C static char"
 
 #: tools/openicc_json.c:46
 msgid ""

@@ -92,13 +92,6 @@ int main(int argc, char ** argv)
 #endif
   openiccInit();
 
-  openiccUi_s * ui = openiccUi_New( argc, argv );
-  ui->app_type = "tool";
-  oiUiFill( ui, "oiDv", "openicc-device", _("OpenICC devices"), "openicc-logo",
-            _("Manipulation of OpenICC color management data base device entries.") );
-
-  openiccOptions_s * options = ui->opts;
-
   /* declare some option choices */
   openiccOptionChoice_s b_choices[] = {{"DB-file-name.json", _("DB File"), _("File Name of device JSON Data Base"), ""},
                                        {"","","",""}};
@@ -130,8 +123,6 @@ int main(int argc, char ** argv)
     {"oiwi", 0,    'w', "write",         NULL, _("write"),       _("Write DB File"),  NULL, NULL, openiccOPTIONTYPE_NONE,     {},      openiccINT,   {.i=&write_db_file} },
     {"",0,0,0,0,0,0,0, NULL, 0,{},0,{}}
   };
-  /* copy in */
-  options->array = openiccMemDup( oarray, sizeof(oarray) );
 
   /* declare option groups, for better syntax checking and UI groups */
   openiccOptionGroup_s groups[] = {
@@ -143,32 +134,13 @@ int main(int argc, char ** argv)
     {"oiwg", 0,     _("Misc"),         _("General options"),                 NULL, "",        "",       "bvh" },
     {"",0,0,0,0,0,0,0}
   };
-  /* copy in */
-  options->groups = openiccMemDup( groups, sizeof(groups));
 
-  openiccOPTIONSTATE_e state = openiccOptions_Parse( options );
-  /* ... and report detected errors */
-  if(state != openiccOPTION_NONE)
-  {
-    fputs( _("... try with --help|-h option for usage text. give up"), stderr );
-    fputs( "\n", stderr );
-    exit(1);
-  }
-  if(help)
-  {
-    openiccOptions_PrintHelp( options, ui, verbose, "%s %s %s", argv[0],
-                              OPENICC_VERSION_NAME,
-                              _("is a color management data base tool"));
-    exit(0);
-  }
 
-  if(erase_device && list_pos == -1)
-  {
-    openiccOptions_PrintHelp( options, ui, verbose, "%s %s %s", argv[0],
-                              OPENICC_VERSION_NAME,
-                              _("is a color management data base tool"));
-                        exit (0);
-  }
+  openiccUiHeaderSection_s * info = oiUiInfo(_("Manipulation of OpenICC color management data base device entries."));
+  openiccUi_s * ui = openiccUi_Create( argc, argv,
+      "oiDv", "openicc-device", _("OpenICC devices"), "openicc-logo",
+      info, oarray, groups );
+  if(!ui) return 0;
 
   if(!db_file)
   {
