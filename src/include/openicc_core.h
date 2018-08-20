@@ -95,6 +95,13 @@ typedef enum openiccOPTIONTYPE_e {
     openiccOPTIONTYPE_END              /**< */
 } openiccOPTIONTYPE_e;
 
+typedef enum openiccVARIABLETYPE_e {
+    openiccNONE,                       /**< no variable given, will be asked later with openiccOptions_GetResult() */
+    openiccSTRING,                     /**< pointer to a array of char */
+    openiccDOUBLE,                     /**< IEEE floating point number with double precission */
+    openiccINT                         /**< integer number declared as int */
+} openiccVARIABLE_e;                   /**< @brief type of result */
+
 /** @brief Choice item */
 typedef struct openiccOptionChoice_s {
   char * nick;                         /**< nick / ID as argument for a option */
@@ -103,14 +110,28 @@ typedef struct openiccOptionChoice_s {
   char * help;                         /**< i18n longer help text; can be "" */
 } openiccOptionChoice_s;
 void openiccOptionChoice_Release        ( openiccOptionChoice_s**choices );
+
 typedef struct openiccOptions_s openiccOptions_s;
 typedef struct openiccOption_s openiccOption_s;
+
+/** @brief abstract value
+ *
+ *  The type is declared inside the ::openiccVARIABLE_e enum range. */
+typedef union openiccVariable_u {
+  const char ** s;                     /**< @brief openiccVARIABLE_STRING */
+  double * d;                          /**< @brief openiccVARIABLE_DOUBLE */
+  int * i;                             /**< @brief openiccVARIABLE_INT */
+} openiccVariable_u;
+
+/** @brief abstract option
+ *
+ *  The type is declared inside the ::openiccOPTIONTYPE_e enum range. */
 typedef union openiccOption_u {
   struct choices {
-    openiccOptionChoice_s * list;      /**< used for openiccOPTIONTYPE_CHOICES; not needed when *getChoices* is set */
+    openiccOptionChoice_s * list;      /**< used for openiccOPTIONTYPE_CHOICE */
     int selected;                      /**< the currently selected choice */
-  } choices;
-  /** openiccOPTIONTYPE_FUNCTION used for openiccOPTIONTYPE_CHOICES; not needed when *choices* is set
+  } choices;                           /**< @brief openiccOPTIONTYPE_CHOICE */
+  /** @brief openiccOPTIONTYPE_FUNCTION
    *  @param[in]   opt                 the option context
    *  @param[out]  selected            show the default; optional
    *  @param[in]   context             for more information
@@ -122,7 +143,7 @@ typedef union openiccOption_u {
     double start;
     double end;
     double tick;
-  } dbl;                               /**< openiccOPTIONTYPE_DOUBLE */
+  } dbl;                               /**< @brief openiccOPTIONTYPE_DOUBLE */
 } openiccOption_u;
 
 /** @brief abstract UI option */
@@ -136,8 +157,10 @@ struct openiccOption_s {
   const char * description;            /**< i18n short sentence about the option */
   const char * help;                   /**< i18n longer text to explain what the option does; optional */
   const char * value_name;             /**< i18n value string; used only for option args; consider using upper case, e.g. FILENAME, NUMBER ... */
-  openiccOPTIONTYPE_e value_type;      /**< type for *choices* */
+  openiccOPTIONTYPE_e value_type;      /**< type for *values* */
   openiccOption_u values;              /**< the selectable values for the option; not used for openiccOPTIONTYPE_NONE */
+  openiccVARIABLE_e variable_type;     /**< type for *variable* */
+  openiccVariable_u variable;          /**< automatically filled variable depending on *value_type* */
 };
 
 /**
