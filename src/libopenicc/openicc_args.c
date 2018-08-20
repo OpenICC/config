@@ -222,15 +222,16 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
 {
   openiccOPTIONSTATE_e state = openiccOPTION_NONE;
   openiccOption_s * o;
+  char ** result;
 
   /* parse the command line arguments */
   if(!opts->private_data)
   {
     int i, pos = 0;
-    char ** result = (char**) calloc( 2, sizeof(char*) );
+    result = (char**) calloc( 2, sizeof(char*) );
     result[0] = (char*) calloc( 65536, sizeof(char) );
     if((state = openiccOptions_Check(opts)) != openiccOPTION_NONE)
-      return state;
+      goto clean_parse;
     for(i = 1; i < opts->argc; ++i)
     {
       char * str = opts->argv[i];
@@ -251,7 +252,7 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
           {
             fprintf( stderr, "%s %s \'%c\'\n", _("Usage Error:"), _("Option not supported"), arg );
             state = openiccOPTION_NOT_SUPPORTED;
-            return state;
+            goto clean_parse;
           }
           require_value = o->value_type != openiccOPTIONTYPE_NONE;
           if( require_value )
@@ -308,7 +309,7 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
         {
           fprintf( stderr, "%s %s \'%s\'\n", _("Usage Error:"), _("Option not supported"), long_arg );
           state = openiccOPTION_NOT_SUPPORTED;
-          return state;
+          goto clean_parse;
         }
         require_value = o->value_type != openiccOPTIONTYPE_NONE;
         if( require_value )
@@ -376,6 +377,11 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
     }
   }
 
+  return state;
+
+clean_parse:
+  free(result[0]);
+  free(result);
   return state;
 }
 
@@ -529,6 +535,10 @@ char * openiccOptions_ResultsToText  ( openiccOptions_s  * opts )
   if(!results)
   {
     if(openiccOptions_Parse( opts ))
+      return NULL;
+
+    results = opts->private_data;
+    if(!results)
       return NULL;
   }
 
@@ -849,6 +859,7 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
   {
     fputs( _("... try with --help|-h option for usage text. give up"), stderr );
     fputs( "\n", stderr );
+    free(ui->opts); free(ui);
     return NULL;
   }
 
@@ -861,6 +872,7 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
   if(help)
   {
     openiccOptions_PrintHelp( ui->opts, ui, verbose, "%s example tool", argv[0] );
+    free(ui->opts); free(ui);
     return NULL;
   } /* done with options handling */
 
@@ -918,7 +930,7 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
 
   root = oyjlTreeNew( "" );
   oyjlTreeSetValueString( root, "org/freedesktop/openicc/modules/[0]/openicc_module_api_version", "1" );
-  if(ui->type)
+  if(ui->app_type && ui->app_type[0])
   {
     oyjlTreeSetValueString( root, "org/freedesktop/openicc/modules/[0]/type", ui->app_type );
     if(strcmp( ui->app_type, "tool" ) == 0)
