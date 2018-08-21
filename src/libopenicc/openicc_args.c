@@ -81,7 +81,7 @@ void openiccOptionChoice_Release     ( openiccOptionChoice_s**choices )
 int openiccOptions_Count             ( openiccOptions_s  * opts )
 {
   int n = 0;
-  while(memcmp(opts->array[n].type, "oiwi", 4) == 0) ++n;
+  while(openiccObjectToType( &opts->array[n] ) /*"oiwi"*/ == openiccOBJECT_OPTION) ++n;
   return n;
 }
 
@@ -95,7 +95,7 @@ int openiccOptions_Count             ( openiccOptions_s  * opts )
 int openiccOptions_CountGroups       ( openiccOptions_s  * opts )
 {
   int n = 0;
-  while(memcmp(opts->groups[n].type, "oiwg", 4) == 0) ++n;
+  while(openiccObjectToType( &opts->groups[n] ) /*"oiwg"*/ == openiccOBJECT_OPTION_GROUP) ++n;
   return n;
 }
 
@@ -252,7 +252,7 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
           {
             fprintf( stderr, "%s %s \'%c\'\n", _("Usage Error:"), _("Option not supported"), arg );
             state = openiccOPTION_NOT_SUPPORTED;
-            goto clean_parse;
+            break;
           }
           require_value = o->value_type != openiccOPTIONTYPE_NONE;
           if( require_value )
@@ -863,7 +863,7 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
   {
     fputs( _("... try with --help|-h option for usage text. give up"), stderr );
     fputs( "\n", stderr );
-    free(ui->opts); free(ui);
+    openiccUi_Release( &ui);
     return NULL;
   }
 
@@ -880,11 +880,42 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
     openiccOptions_PrintHelp( ui->opts, ui, verbose, "%s v%s - %s", argv[0],
                               version && version->name ? version->name : "",
                               ui->description ? ui->description : "" );
-    free(ui->opts); free(ui);
+    openiccUi_Release( &ui);
     return NULL;
   } /* done with options handling */
 
   return ui;
+}
+
+/** @brief    Release "oiui"
+ *  @memberof openiccUi_s
+ *
+ *  Release openiccUi_s::opts, openiccUi_s::private_data and openiccUi_s.
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/08/14
+ *  @since   2018/08/14 (OpenICC: 0.1.1)
+ */
+void           openiccUi_Release     ( openiccUi_s      ** ui )
+{
+  char ** list;
+  int pos = 0;
+  if(!ui || !*ui) return;
+  if(openiccObjectToType( *ui ) != openiccOBJECT_UI)
+  {
+    char * a = (char*)*ui;
+    char type[5] = {a[0],a[1],a[2],a[3],0};
+    fprintf(stderr, "Unexpected object: \"%s\"(expected: \"%s\")\n", type, 
+            openiccObjectTypeToString( *((openiccOBJECT_e*) (*ui)->type) ) );
+    return;
+  }
+  list = (*ui)->opts->private_data;
+  while( list && list[pos] )
+    free(list[pos++]);
+  if((*ui)->opts->private_data) free((*ui)->opts->private_data);
+  if((*ui)->opts) free((*ui)->opts);
+  free((*ui));
+  *ui = NULL;
 }
 
 /** @brief    Return the number of sections of type "oihs"
@@ -899,7 +930,7 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
 int     openiccUi_CountHeaderSections( openiccUi_s       * ui )
 {
   int n = 0;
-  while(memcmp(ui->sections[n].type, "oihs", 4) == 0) ++n;
+  while(openiccObjectToType( &ui->sections[n] ) /*"oihs"*/ == openiccOBJECT_UI_HEADER_SECTION) ++n;
   return n;
 }
 
