@@ -447,7 +447,7 @@ oyjlTESTRESULT_e testOiArgs()
   int help = 0;
   int verbose = 0;
   int argc = 1;
-  char * argv[] = {"test","-v","-i","file-name.json", "-z"};
+  char * argv[] = {"test","-v","--input","file-name.json", "-z"};
 
   /* handle options */
   /* Select from *version*, *manufacturer*, *copyright*, *license*, *url*,
