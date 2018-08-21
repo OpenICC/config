@@ -48,6 +48,8 @@
 
  *  @{ */
 
+int            openiccInit           ( void );
+
 typedef void * (*openiccAlloc_f)     ( size_t              size );
 typedef void   (*openiccDeAlloc_f)   ( void              * data );
 

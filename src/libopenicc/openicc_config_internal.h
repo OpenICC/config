@@ -97,8 +97,6 @@ void         oyjlTreeSetValueString  ( oyjl_val            root,
                                        const char        * value );
 #define openiccNoEmptyString_m_(t) (t?t:"")
 
-int            openiccInit           ( void );
-
 
 extern openiccMessage_f     openiccMessage_p;
 int  openiccMessageFunc              ( int/*openiccMSG_e*/ code,
