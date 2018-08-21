@@ -553,6 +553,49 @@ oyjlTESTRESULT_e testOiArgs()
   openiccUi_Release( &ui);
 
 
+  argc = 4;
+  ui = openiccUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
+                                       "oiCR", "openicc-config-read", _("Short example tool using libOpenIcc"), "oi-logo",
+                                       sections, oarray, groups );
+  char * text = openiccUi_ToJson( ui, 0 );
+  if(text && strlen(text))
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
+    "openiccUi_ToJson() %lu                        ", strlen(text) );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL, 
+    "openiccUi_ToJson() %lu                        ", strlen(text) );
+  }
+  if(text) {free(text);} text = NULL;
+
+  text = openiccOptions_ResultsToJson( ui->opts );
+  if(text && strlen(text) == 39)
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
+    "openiccOptions_ResultsToJson() %lu              ", strlen(text) );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL, 
+    "openiccOptions_ResultsToJson() %lu              ", strlen(text) );
+  }
+  if(text) {free(text);} text = NULL;
+
+  text = openiccOptions_ResultsToText( ui->opts );
+  if(text && strlen(text) == 21)
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
+    "openiccOptions_ResultsToText() %lu              ", strlen(text) );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL, 
+    "openiccOptions_ResultsToText() %lu              ", strlen(text) );
+  }
+  if(text) {free(text);} text = NULL;
+
+  fprintf(stdout, "Help text -> stderr:\n" );
+  openiccOptions_PrintHelp( ui->opts, ui, 1, "%s v%s - %s", argv[0],
+                            "1.0", "Test Tool for testing" );
+
+  openiccUi_Release( &ui);
+  char * wrong = "test";
+  fprintf(stdout, "openiccUi_Release(&\"test\")\n" );
+  openiccUi_Release( (openiccUi_s **)&wrong);
+
   free(oarray[0].values.choices.list);
   free(oarray[1].values.choices.list);
 

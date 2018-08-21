@@ -906,7 +906,7 @@ void           openiccUi_Release     ( openiccUi_s      ** ui )
     char * a = (char*)*ui;
     char type[5] = {a[0],a[1],a[2],a[3],0};
     fprintf(stderr, "Unexpected object: \"%s\"(expected: \"%s\")\n", type, 
-            openiccObjectTypeToString( *((openiccOBJECT_e*) (*ui)->type) ) );
+            openiccObjectTypeToString( openiccOBJECT_UI ) );
     return;
   }
   list = (*ui)->opts->private_data;
