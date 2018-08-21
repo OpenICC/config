@@ -652,13 +652,16 @@ void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
   openiccUiHeaderSection_s * section = NULL;
   fprintf( stderr, "\n");
   if(verbose)
+  {
     for(i = 0; i < opts->argc; ++i)
       fprintf( stderr, "\'%s\' ", opts->argv[i]);
-  fprintf( stderr, "\n");
+    fprintf( stderr, "\n");
+  }
 
   va_start( list, motto_format );
   vfprintf( stderr, motto_format, list );
   va_end  ( list );
+  fprintf( stderr, "\n");
 
   ng = openiccOptions_CountGroups(opts);
   if(!ng) return;
@@ -835,6 +838,7 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
 {
   int help = 0, verbose = 0;
   openiccOption_s * h, * v;
+  openiccInit();
 
   /* allocate options structure */
   openiccUi_s * ui = openiccUi_New( argc, argv ); /* argc+argv are required for parsing the command line options */
