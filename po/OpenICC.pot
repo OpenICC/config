@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenICC 0.1\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-20 23:14+0200\n"
+"POT-Creation-Date: 2018-08-21 16:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,71 +61,71 @@ msgstr ""
 msgid "... try with --help|-h option for usage text. give up"
 msgstr ""
 
-#: libopenicc/openicc_args.c:945
+#: libopenicc/openicc_args.c:976
 msgid "Tool"
 msgstr ""
 
-#: libopenicc/openicc_args.c:947
+#: libopenicc/openicc_args.c:978
 msgid "Module"
 msgstr ""
 
-#: libopenicc/openicc_args.c:966
+#: libopenicc/openicc_args.c:997
 msgid "Manufacturer"
 msgstr ""
 
-#: libopenicc/openicc_args.c:967
+#: libopenicc/openicc_args.c:998
 msgid "Copyright"
 msgstr ""
 
-#: libopenicc/openicc_args.c:968
+#: libopenicc/openicc_args.c:999
 msgid "License"
 msgstr ""
 
-#: libopenicc/openicc_args.c:969
+#: libopenicc/openicc_args.c:1000
 msgid "Url"
 msgstr ""
 
-#: libopenicc/openicc_args.c:970
+#: libopenicc/openicc_args.c:1001
 msgid "Support"
 msgstr ""
 
-#: libopenicc/openicc_args.c:971
+#: libopenicc/openicc_args.c:1002
 msgid "Download"
 msgstr ""
 
-#: libopenicc/openicc_args.c:972
+#: libopenicc/openicc_args.c:1003
 msgid "Sources"
 msgstr ""
 
-#: libopenicc/openicc_args.c:973
+#: libopenicc/openicc_args.c:1004
 msgid "Development"
 msgstr ""
 
-#: libopenicc/openicc_args.c:974
+#: libopenicc/openicc_args.c:1005
 msgid "OpenICC Module Author"
 msgstr ""
 
-#: libopenicc/openicc_args.c:975
+#: libopenicc/openicc_args.c:1006
 msgid "Documentation"
 msgstr ""
 
-#: libopenicc/openicc_args.c:976
+#: libopenicc/openicc_args.c:1007
 msgid "Version"
 msgstr ""
 
-#: libopenicc/openicc_args.c:1090
+#: libopenicc/openicc_args.c:1121
 msgid "Yes"
 msgstr ""
 
-#: libopenicc/openicc_args.c:1090
+#: libopenicc/openicc_args.c:1121
 msgid "No"
 msgstr ""
 
-#: libopenicc/openicc_core.c:125
+#: libopenicc/openicc_core.c:130
 msgid "WARNING"
 msgstr ""
 
-#: libopenicc/openicc_core.c:128
+#: libopenicc/openicc_core.c:133
 msgid "!!! ERROR"
 msgstr ""
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-20 23:14+0200\n"
+"POT-Creation-Date: 2018-08-21 15:38+0200\n"
 "PO-Revision-Date: 2012-10-19 15:10+0100\n"
 "Last-Translator: Milan Knížek <knizek@volny.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: libopenicc/openicc_core.c:128
+#: libopenicc/openicc_core.c:133
 msgid "!!! ERROR"
 msgstr "!!! CHYBA"
 
@@ -31,7 +31,7 @@ msgstr ""
 msgid "Convert JSON to gettext ready C strings:"
 msgstr ""
 
-#: libopenicc/openicc_args.c:967
+#: libopenicc/openicc_args.c:998
 msgid "Copyright"
 msgstr "Copyright"
 
@@ -75,11 +75,11 @@ msgstr "Nelze rozpoznat zařízení"
 msgid "Description"
 msgstr "popis"
 
-#: libopenicc/openicc_args.c:973
+#: libopenicc/openicc_args.c:1004
 msgid "Development"
 msgstr ""
 
-#: libopenicc/openicc_args.c:975
+#: libopenicc/openicc_args.c:1006
 msgid "Documentation"
 msgstr "Dokumentace"
 
@@ -87,7 +87,7 @@ msgstr "Dokumentace"
 msgid "Double occuring option"
 msgstr ""
 
-#: libopenicc/openicc_args.c:971
+#: libopenicc/openicc_args.c:1002
 msgid "Download"
 msgstr ""
 
@@ -95,20 +95,20 @@ msgstr ""
 msgid "General options:"
 msgstr "Obecné volby:"
 
-#: libopenicc/openicc_args.c:968
+#: libopenicc/openicc_args.c:999
 msgid "License"
 msgstr "Licence"
 
-#: libopenicc/openicc_args.c:966
+#: libopenicc/openicc_args.c:997
 msgid "Manufacturer"
 msgstr "Výrobce"
 
-#: libopenicc/openicc_args.c:947
+#: libopenicc/openicc_args.c:978
 #, fuzzy
 msgid "Module"
 msgstr "Volby modulu:"
 
-#: libopenicc/openicc_args.c:1090
+#: libopenicc/openicc_args.c:1121
 msgid "No"
 msgstr "Ne"
 
@@ -120,7 +120,7 @@ msgstr ""
 msgid "No JSON obtained for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:974
+#: libopenicc/openicc_args.c:1005
 msgid "OpenICC Module Author"
 msgstr ""
 
@@ -154,11 +154,11 @@ msgstr "Vytisknout nápovědu:"
 msgid "Rendering Intent"
 msgstr "Záměr transformace"
 
-#: libopenicc/openicc_args.c:972
+#: libopenicc/openicc_args.c:1003
 msgid "Sources"
 msgstr ""
 
-#: libopenicc/openicc_args.c:970
+#: libopenicc/openicc_args.c:1001
 msgid "Support"
 msgstr ""
 
@@ -166,11 +166,11 @@ msgstr ""
 msgid "Synopsis"
 msgstr ""
 
-#: libopenicc/openicc_args.c:945
+#: libopenicc/openicc_args.c:976
 msgid "Tool"
 msgstr ""
 
-#: libopenicc/openicc_args.c:969
+#: libopenicc/openicc_args.c:1000
 msgid "Url"
 msgstr ""
 
@@ -186,12 +186,12 @@ msgstr "Použití"
 msgid "Usage Error:"
 msgstr ""
 
-#: libopenicc/openicc_args.c:976
+#: libopenicc/openicc_args.c:1007
 #, fuzzy
 msgid "Version"
 msgstr "ICC Examin Verze"
 
-#: libopenicc/openicc_core.c:125
+#: libopenicc/openicc_core.c:130
 msgid "WARNING"
 msgstr "VAROVÁNÍ"
 
@@ -199,7 +199,7 @@ msgstr "VAROVÁNÍ"
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:1090
+#: libopenicc/openicc_args.c:1121
 msgid "Yes"
 msgstr "Ano"
 

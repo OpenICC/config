@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2018-08-20 23:14+0200\n"
+"POT-Creation-Date: 2018-08-21 15:38+0200\n"
 "PO-Revision-Date: 2007-11-07 11:11+0100\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
 "Language-Team: Basque <itzulpena@euskalgnu.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: libopenicc/openicc_core.c:128
+#: libopenicc/openicc_core.c:133
 msgid "!!! ERROR"
 msgstr ""
 
@@ -35,7 +35,7 @@ msgstr ""
 msgid "Convert JSON to gettext ready C strings:"
 msgstr ""
 
-#: libopenicc/openicc_args.c:967
+#: libopenicc/openicc_args.c:998
 msgid "Copyright"
 msgstr "Copyright-a"
 
@@ -79,11 +79,11 @@ msgstr "Ezin izan da letra-tipoa ireki:"
 msgid "Description"
 msgstr "Azalpena"
 
-#: libopenicc/openicc_args.c:973
+#: libopenicc/openicc_args.c:1004
 msgid "Development"
 msgstr ""
 
-#: libopenicc/openicc_args.c:975
+#: libopenicc/openicc_args.c:1006
 msgid "Documentation"
 msgstr "Dokumentazioa"
 
@@ -91,7 +91,7 @@ msgstr "Dokumentazioa"
 msgid "Double occuring option"
 msgstr ""
 
-#: libopenicc/openicc_args.c:971
+#: libopenicc/openicc_args.c:1002
 msgid "Download"
 msgstr ""
 
@@ -100,21 +100,21 @@ msgstr ""
 msgid "General options:"
 msgstr "Bereizketa"
 
-#: libopenicc/openicc_args.c:968
+#: libopenicc/openicc_args.c:999
 msgid "License"
 msgstr "Lizentzia"
 
-#: libopenicc/openicc_args.c:966
+#: libopenicc/openicc_args.c:997
 #, fuzzy
 msgid "Manufacturer"
 msgstr "Hornitzailea:   "
 
-#: libopenicc/openicc_args.c:947
+#: libopenicc/openicc_args.c:978
 #, fuzzy
 msgid "Module"
 msgstr "Bereizketa"
 
-#: libopenicc/openicc_args.c:1090
+#: libopenicc/openicc_args.c:1121
 msgid "No"
 msgstr ""
 
@@ -126,7 +126,7 @@ msgstr ""
 msgid "No JSON obtained for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:974
+#: libopenicc/openicc_args.c:1005
 msgid "OpenICC Module Author"
 msgstr ""
 
@@ -160,11 +160,11 @@ msgstr ""
 msgid "Rendering Intent"
 msgstr "Oyranos-en ezarpenak"
 
-#: libopenicc/openicc_args.c:972
+#: libopenicc/openicc_args.c:1003
 msgid "Sources"
 msgstr ""
 
-#: libopenicc/openicc_args.c:970
+#: libopenicc/openicc_args.c:1001
 msgid "Support"
 msgstr ""
 
@@ -172,11 +172,11 @@ msgstr ""
 msgid "Synopsis"
 msgstr ""
 
-#: libopenicc/openicc_args.c:945
+#: libopenicc/openicc_args.c:976
 msgid "Tool"
 msgstr ""
 
-#: libopenicc/openicc_args.c:969
+#: libopenicc/openicc_args.c:1000
 msgid "Url"
 msgstr ""
 
@@ -192,12 +192,12 @@ msgstr ""
 msgid "Usage Error:"
 msgstr ""
 
-#: libopenicc/openicc_args.c:976
+#: libopenicc/openicc_args.c:1007
 #, fuzzy
 msgid "Version"
 msgstr "ICC Examin-en bertsioa"
 
-#: libopenicc/openicc_core.c:125
+#: libopenicc/openicc_core.c:130
 msgid "WARNING"
 msgstr ""
 
@@ -205,7 +205,7 @@ msgstr ""
 msgid "Writing failed for"
 msgstr ""
 
-#: libopenicc/openicc_args.c:1090
+#: libopenicc/openicc_args.c:1121
 msgid "Yes"
 msgstr "Bai"
 
