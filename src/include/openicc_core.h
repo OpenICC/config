@@ -258,6 +258,7 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
                                        openiccUiHeaderSection_s * info,
                                        openiccOption_s   * options,
                                        openiccOptionGroup_s * groups );
+void           openiccUi_Release     ( openiccUi_s      ** ui );
 int    openiccUi_CountHeaderSections ( openiccUi_s       * ui );
 openiccUiHeaderSection_s * openiccUi_GetHeaderSection (
                                        openiccUi_s       * ui,
