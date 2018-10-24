@@ -2,7 +2,7 @@
  *
  *  libOpenICC - OpenICC Colour Management Configuration
  *
- *  Copyright (C) 2011-2017  Kai-Uwe Behrmann
+ *  Copyright (C) 2011-2018  Kai-Uwe Behrmann
  *
  *  @brief    OpenICC test suite
  *  @internal
@@ -454,9 +454,10 @@ oyjlTESTRESULT_e testOiArgs()
    * *support*, *download*, *sources*, *openicc_modules_author* and
    * *documentation* what you see fit. Add new ones as needed. */
   openiccUiHeaderSection_s sections[] = {
-    /* type, nick,            label, name,      , description  */
-    {"oihs", "version",       NULL,  "1.0",       NULL},
-    {"oihs", "documentation", NULL,  "",          _("The example tool demontrates the usage of the libOpenIcc config and options API's.")},
+    /* type, nick,            label, name,                  description  */
+    {"oihs", "version",       NULL,  "1.0",                 NULL},
+    {"oihs", "documentation", NULL,  "",                    _("The example tool demontrates the usage of the libOpenIcc config and options API's.")},
+    {"oihs", "date",          NULL,  "2018-10-10T12:00:00", _("October 10, 2018")},
     {"",0,0,0,0}};
 
   /* declare some option choices */
@@ -555,8 +556,9 @@ oyjlTESTRESULT_e testOiArgs()
 
   argc = 4;
   ui = openiccUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
-                                       "oiCR", "openicc-config-read", _("Short example tool using libOpenIcc"), "oi-logo",
+                                       "openicc-config-read", "OpenICC Config Reader", _("Short example tool using libOpenIcc"), "oi-logo",
                                        sections, oarray, groups );
+  int size = 0;
   char * text = openiccUi_ToJson( ui, 0 );
   if(text && strlen(text))
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
@@ -565,6 +567,22 @@ oyjlTESTRESULT_e testOiArgs()
   { PRINT_SUB( oyjlTESTRESULT_FAIL, 
     "openiccUi_ToJson() %lu                        ", strlen(text) );
   }
+  size = openiccWriteFile( "test.json",
+                           text,
+                           strlen(text) );
+  if(text) {free(text);} text = NULL;
+
+  text = openiccUi_ToMan( ui, 0 );
+  if(text && strlen(text))
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
+    "openiccUi_ToMan()  %lu                        ", strlen(text) );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL, 
+    "openiccUi_ToMan()  %lu                        ", strlen(text) );
+  }
+  size = openiccWriteFile( "test.1",
+                           text,
+                           strlen(text) );
   if(text) {free(text);} text = NULL;
 
   text = openiccOptions_ResultsToJson( ui->opts );
