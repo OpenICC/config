@@ -30,7 +30,8 @@
  *  on run time. The arguments can be printed as a typical command line tool
  *  help text with openiccOptions_PrintHelp(). The OpenICC JSON
  *  output from openiccUi_ToJson() is useable for automatical generated
- *  (G)UI's and further processing. Generation of other formats is simple.
+ *  (G)UI's and further processing. openiccUi_ToMan() creates unix manual pages.
+ *  Generation of other formats is simple.
  *  Translations are supported.
  *
  *  Command line options support single letter and long options without
