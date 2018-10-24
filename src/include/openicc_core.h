@@ -198,7 +198,7 @@ openiccOption_s * openiccOptions_GetOption (
                                        char                oc );
 openiccOption_s * openiccOptions_GetOptionL(
                                        openiccOptions_s  * opts,
-                                       char              * ostring );
+                                       const char        * ostring );
 /** @brief option state */
 typedef enum {
   openiccOPTION_NONE,                  /**< untouched */
@@ -239,11 +239,11 @@ typedef struct openiccUiHeaderSection_s {
 struct openiccUi_s {
   char type [4];                       /**< must be 'oiui' */
   const char * app_type;               /**< "tool" or "module" */
-  char         nick[8];                /**< four byte ID, e.g. "openicc" */
+  const char * nick;                   /**< four byte ID for module or plain comand line tool name, e.g. "openicc-tool" */
   const char * name;                   /**< i18n short name for tool bars, app lists */
   const char * description;            /**< i18n name, version, maybe more for a prominent one liner */
   const char * logo;                   /**< file name body without path, for relocation, nor file type ending; typical a PNG or SVG icon; e.g. "lcms_icon" for lcms_icon.png or lcms_icon.svg; optional */
-  /** We describe here a particular tool/module. Each property object contains at least one 'name' key. All values shall be strings. *nick* or *description* keys are optional. If they are not contained, fall back to *name*. Well known objects are *version*, *manufacturer*, *copyright*, *license*, *url*, *support*, *download*, *sources*, *development*, *openicc_modules_author*, *documentation* and *logo*. The *modules/[]/nick* shall contain a four byte string in as the CMM identifier. */
+  /** We describe here a particular tool/module. Each property object contains at least one 'name' key. All values shall be strings. *nick* or *description* keys are optional. If they are not contained, fall back to *name*. Well known objects are *version*, *manufacturer*, *copyright*, *license*, *url*, *support*, *download*, *sources*, *development*, *openicc_modules_author*, *documentation*, *date* and *logo*. The *modules/[]/nick* shall contain a four byte string in as the CMM identifier. */
   openiccUiHeaderSection_s * sections;
   openiccOptions_s * opts;             /**< info for UI logic */
 };
@@ -264,6 +264,8 @@ openiccUiHeaderSection_s * openiccUi_GetHeaderSection (
                                        openiccUi_s       * ui,
                                        const char        * nick );
 char *       openiccUi_ToJson        ( openiccUi_s       * ui,
+                                       int                 flags );
+char *       openiccUi_ToMan         ( openiccUi_s       * ui,
                                        int                 flags );
 
 /** 
