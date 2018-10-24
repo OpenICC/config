@@ -51,7 +51,7 @@ int main(int argc, char ** argv)
   openiccUi_s * ui = openiccUi_New( argc, argv ); /* argc+argv are required for parsing the command line options */
   /* tell about the tool */
   ui->app_type = "tool";
-  memcpy( ui->nick, "oiCR", 4 );
+  ui->nick = "oiCR";
   ui->name = "openicc-config-read";
   ui->description = _("Short example tool using libOpenIcc");
   /* Select from *version*, *manufacturer*, *copyright*, *license*, *url*,
