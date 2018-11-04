@@ -446,6 +446,7 @@ oyjlTESTRESULT_e testOiArgs()
   const char * file = NULL;
   int help = 0;
   int verbose = 0;
+  int state = 0;
   int argc = 1;
   char * argv[] = {"test","-v","--input","file-name.json", "-z"};
 
@@ -489,7 +490,7 @@ oyjlTESTRESULT_e testOiArgs()
   /* tell about the tool */
   openiccUi_s * ui = openiccUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
                                        "oiCR", "openicc-config-read", _("Short example tool using libOpenIcc"), "oi-logo",
-                                       sections, oarray, groups );
+                                       sections, oarray, groups, NULL );
 
   if(ui)
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
@@ -503,7 +504,7 @@ oyjlTESTRESULT_e testOiArgs()
   argc = 2;
   ui = openiccUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
                                        "oiCR", "openicc-config-read", _("Short example tool using libOpenIcc"), "oi-logo",
-                                       sections, oarray, groups );
+                                       sections, oarray, groups, NULL );
 
   if(ui)
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
@@ -517,10 +518,10 @@ oyjlTESTRESULT_e testOiArgs()
   argc = 3;
   ui = openiccUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
                                        "oiCR", "openicc-config-read", _("Short example tool using libOpenIcc"), "oi-logo",
-                                       sections, oarray, groups );
+                                       sections, oarray, groups, &state );
   if(!ui)
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
-    "ui not created - missing arg                   " );
+    "ui not created - missing arg %d                " , state >> openiccUI_STATE_OPTION );
   } else
   { PRINT_SUB( oyjlTESTRESULT_FAIL, 
     "ui not created - missing arg                   " );
@@ -530,7 +531,7 @@ oyjlTESTRESULT_e testOiArgs()
   argc = 4;
   ui = openiccUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
                                        "oiCR", "openicc-config-read", _("Short example tool using libOpenIcc"), "oi-logo",
-                                       sections, oarray, groups );
+                                       sections, oarray, groups, NULL );
   if(ui && strcmp(file,"file-name.json") == 0)
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
     "ui created - parse string                      " );
@@ -543,10 +544,10 @@ oyjlTESTRESULT_e testOiArgs()
   argc = 5;
   ui = openiccUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
                                        "oiCR", "openicc-config-read", _("Short example tool using libOpenIcc"), "oi-logo",
-                                       sections, oarray, groups );
+                                       sections, oarray, groups, &state );
   if(!ui)
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
-    "ui not created - wrong arg                     " );
+    "ui not created - wrong arg  %d                 ", state >> openiccUI_STATE_OPTION );
   } else
   { PRINT_SUB( oyjlTESTRESULT_FAIL, 
     "ui not created - wrong arg                     " );
@@ -557,7 +558,7 @@ oyjlTESTRESULT_e testOiArgs()
   argc = 4;
   ui = openiccUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
                                        "openicc-config-read", "OpenICC Config Reader", _("Short example tool using libOpenIcc"), "oi-logo",
-                                       sections, oarray, groups );
+                                       sections, oarray, groups, NULL );
   int size = 0;
   char * text = openiccUi_ToJson( ui, 0 );
   if(text && strlen(text))

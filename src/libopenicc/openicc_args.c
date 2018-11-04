@@ -105,16 +105,20 @@ int openiccOptions_CountGroups       ( openiccOptions_s  * opts )
 enum {
   openiccOPTIONSTYLE_ONELETTER = 0x01,
   openiccOPTIONSTYLE_STRING = 0x02,
-  openiccOPTIONSTYLE_OPTIONAL = 0x04,
-  openiccOPTIONSTYLE_MAN = 0x08
+  openiccOPTIONSTYLE_OPTIONAL_START = 0x04,
+  openiccOPTIONSTYLE_OPTIONAL_END = 0x08,
+  openiccOPTIONSTYLE_OPTIONAL_INSIDE_GROUP = 0x10,
+  openiccOPTIONSTYLE_MAN = 0x20
 };
+#define openiccOPTIONSTYLE_OPTIONAL (openiccOPTIONSTYLE_OPTIONAL_START | openiccOPTIONSTYLE_OPTIONAL_END)
+static
 const char * openiccOption_PrintArg  ( openiccOption_s   * o,
                                        int                 style )
 {
   static char text[80];
   text[0] = '\000';
   if(!o) return "";
-  if(style & openiccOPTIONSTYLE_OPTIONAL)
+  if(style & openiccOPTIONSTYLE_OPTIONAL_START)
     sprintf( &text[strlen(text)], "[" );
   if(style & openiccOPTIONSTYLE_ONELETTER)
   {
@@ -136,12 +140,13 @@ const char * openiccOption_PrintArg  ( openiccOption_s   * o,
   {
     if(style & openiccOPTIONSTYLE_MAN)
       sprintf( &text[strlen(text)], " \\fI%s\\fR", o->value_name );
+    else if(style & openiccOPTIONSTYLE_OPTIONAL_INSIDE_GROUP)
+      sprintf( &text[strlen(text)], "%s", o->value_name );
     else
       sprintf( &text[strlen(text)], " %s", o->value_name );
   }
-  if(style & openiccOPTIONSTYLE_OPTIONAL)
+  if(style & openiccOPTIONSTYLE_OPTIONAL_END)
     sprintf( &text[strlen(text)], "]" );
-  sprintf( &text[strlen(text)], " " );
   return text;
 }
 
@@ -203,6 +208,7 @@ openiccOption_s * openiccOptions_GetOptionL (
 
   return o;
 }
+static
 openiccOPTIONSTATE_e openiccOptions_Check (
                                        openiccOptions_s  * opts )
 {
@@ -369,7 +375,7 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
             oyjlStringListAddStaticString( &result, &llen, "1", malloc, free );
           } else
           {
-            fprintf( stderr, "%s %s \'%c\'\n", _("Usage Error:"), _("Option has a unexpected argument"), arg );
+            fprintf( stderr, "%s %s \'%s\'\n", _("Usage Error:"), _("Option has a unexpected argument"), opts->argv[i+1] );
             state = openiccOPTION_UNEXPECTED_VALUE;
           }
         }
@@ -583,6 +589,7 @@ char * openiccOptions_ResultsToText  ( openiccOptions_s  * opts )
  *  @date    2018/08/14
  *  @since   2018/08/14 (OpenICC: 0.1.1)
  */
+static
 const char * openiccOptions_PrintHelpSynopsis (
                                        openiccOptions_s  * opts,
                                        openiccOptionGroup_s * g,
@@ -592,6 +599,8 @@ const char * openiccOptions_PrintHelpSynopsis (
   int m = g->mandatory ? strlen(g->mandatory) : 0;
   int on = g->optional ? strlen(g->optional) : 0;
   static char text[80];
+  int opt_group = 0;
+  int gstyle = style;
   text[0] = '\000';
 
   if( m || on )
@@ -616,18 +625,39 @@ const char * openiccOptions_PrintHelpSynopsis (
   {
     char oc = g->optional[i];
     openiccOption_s * o = openiccOptions_GetOption( opts, oc );
-    if(!o)
+    gstyle = style | openiccOPTIONSTYLE_OPTIONAL;
+    if(i < on - 1 && g->optional[i+1] == '|')
+    {
+      if(opt_group == 0)
+        gstyle = style | openiccOPTIONSTYLE_OPTIONAL_START | openiccOPTIONSTYLE_OPTIONAL_INSIDE_GROUP;
+      else
+        gstyle = style | openiccOPTIONSTYLE_OPTIONAL_INSIDE_GROUP;
+      opt_group = 1;
+    }
+    else if(oc == '|')
+    {
+      sprintf( &text[strlen(text)], "|" );
+      continue;
+    }
+    else if(opt_group)
+    {
+      gstyle = style | openiccOPTIONSTYLE_OPTIONAL_END;
+      opt_group = 0;
+    }
+    else if(!o)
     {
       printf("\n%s: option not declared: %c\n", g->name, oc);
       exit(1);
     }
-    sprintf( &text[strlen(text)], "%s", openiccOption_PrintArg(o, style | openiccOPTIONSTYLE_OPTIONAL) );
+
+    sprintf( &text[strlen(text)], "%s%s", gstyle & openiccOPTIONSTYLE_OPTIONAL_START ? " ":"", openiccOption_PrintArg(o, gstyle) );
   }
   return text;
 }
 
 static openiccOptionChoice_s ** openicc_get_choices_list_ = NULL;
 static int openicc_get_choices_list_selected_[256];
+static
 openiccOptionChoice_s * openiccOption_GetChoices_ (
                                        openiccOption_s      * o,
                                        int               * selected,
@@ -822,7 +852,7 @@ openiccUi_s* openiccUi_New           ( int                 argc,
                                        _("My Command"),
                                        _("My Command line tool from Me"),
                                        "my_logo",
-                                       info, options, groups )
+                                       info, options, groups, NULL )
     @endcode
  *
  *  @param[in]     argc                number of command line arguments
@@ -842,6 +872,10 @@ openiccUi_s* openiccUi_New           ( int                 argc,
  *                 syntax declaration and variable passing for setting results
  *  @param[in]     groups              the option grouping declares
  *                 dependencies of options and provides a UI layout
+ *  @param[out]    state               inform about processing
+ *                                     - openiccUI_STATE_HELP : help was detected, printed and openiccUi_s was released
+ *                                     - openiccUI_STATE_VERBOSE : verbose was detected
+ *                                     - openiccUI_STATE_OPTION+ : error occured in option parser, message printed, openiccOPTIONSTATE_e is placed in >> openiccUI_STATE_OPTION and openiccUi_s was released
  *  @return                            UI object for later use
  *
  *  @version OpenICC: 0.1.1
@@ -856,10 +890,12 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
                                        const char        * logo,
                                        openiccUiHeaderSection_s * info,
                                        openiccOption_s   * options,
-                                       openiccOptionGroup_s * groups )
+                                       openiccOptionGroup_s * groups,
+                                       int               * status )
 {
   int help = 0, verbose = 0;
   openiccOption_s * h, * v;
+  openiccOPTIONSTATE_e opt_state = openiccOPTION_NONE;
   openiccInit();
 
   /* allocate options structure */
@@ -879,13 +915,15 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
   ui->opts->groups = groups;
 
   /* get results and check syntax ... */
-  openiccOPTIONSTATE_e state = openiccOptions_Parse( ui->opts );
+  opt_state = openiccOptions_Parse( ui->opts );
   /* ... and report detected errors */
-  if(state != openiccOPTION_NONE)
+  if(opt_state != openiccOPTION_NONE)
   {
     fputs( _("... try with --help|-h option for usage text. give up"), stderr );
     fputs( "\n", stderr );
     openiccUi_Release( &ui);
+    if(status)
+      *status = opt_state << openiccUI_STATE_OPTION;
     return NULL;
   }
 
@@ -894,7 +932,11 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
     help = *h->variable.i;
   v = openiccOptions_GetOption( ui->opts, 'v' );
   if(v && v->variable_type == openiccINT && v->variable.i)
+  {
     verbose = *v->variable.i;
+    if(status)
+      *status |= openiccUI_STATE_VERBOSE;
+  }
   if(help)
   {
     openiccUiHeaderSection_s * version = openiccUi_GetHeaderSection( ui,
@@ -903,6 +945,8 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
                               version && version->name ? version->name : "",
                               ui->description ? ui->description : "" );
     openiccUi_Release( &ui);
+    if(status)
+      *status |= openiccUI_STATE_HELP;
     return NULL;
   } /* done with options handling */
 
@@ -1167,6 +1211,7 @@ char *       openiccStringToUpper    ( const char        * t )
   return text;
 }
 
+static
 char *       openiccExtraManSection  ( openiccOptions_s  * opts,
                                        const char        * opt_name )
 {
@@ -1207,6 +1252,7 @@ char *       openiccExtraManSection  ( openiccOptions_s  * opts,
   return text;
 }
 
+static
 char *       openiccExtraManSections ( openiccOptions_s  * opts )
 {
   char * text = NULL;
@@ -1432,7 +1478,6 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
   return text;
 }
 // TODO: explicite allow for non option bound arguments, for syntax checking - use '-' as special option inside openiccOptionGroup_s::mandatory
-// TODO: export man page
 
 
 

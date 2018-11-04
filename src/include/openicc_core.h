@@ -184,7 +184,7 @@ typedef struct openiccOptionGroup_s {
  */
 struct openiccOptions_s {
   char type [4];                       /**< must be 'oiws' */
-  openiccOption_s * array;             /**< the options */
+  openiccOption_s * array;             /**< the options; make shure to add -h|--help and -v|--verbose options */
   openiccOptionGroup_s * groups;       /**< groups of options, which form a command */
   void * user_data;                    /**< will be passed to functions; optional */
   int argc;                            /**< plain reference from main(argc,argv) */
@@ -249,6 +249,12 @@ struct openiccUi_s {
 };
 openiccUi_s *  openiccUi_New         ( int                 argc,
                                        char             ** argv );
+enum {
+  openiccUI_STATE_NONE,                /**< nothing to report */
+  openiccUI_STATE_HELP,                /**< --help printed */
+  openiccUI_STATE_VERBOSE = 2,         /**< --verbose option detected */
+  openiccUI_STATE_OPTION = 24,         /**< bit shift for detected error from option parser */
+};
 openiccUi_s *  openiccUi_Create      ( int                 argc,
                                        char             ** argv,
                                        const char        * nick,
@@ -257,7 +263,8 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
                                        const char        * logo,
                                        openiccUiHeaderSection_s * info,
                                        openiccOption_s   * options,
-                                       openiccOptionGroup_s * groups );
+                                       openiccOptionGroup_s * groups,
+                                       int               * status );
 void           openiccUi_Release     ( openiccUi_s      ** ui );
 int    openiccUi_CountHeaderSections ( openiccUi_s       * ui );
 openiccUiHeaderSection_s * openiccUi_GetHeaderSection (

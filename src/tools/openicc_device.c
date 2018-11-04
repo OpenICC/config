@@ -139,7 +139,7 @@ int main(int argc, char ** argv)
   openiccUiHeaderSection_s * info = oiUiInfo(_("Manipulation of OpenICC color management data base device entries."));
   openiccUi_s * ui = openiccUi_Create( argc, argv,
       "oiDv", "openicc-device", _("OpenICC devices"), "openicc-logo",
-      info, oarray, groups );
+      info, oarray, groups, NULL );
   if(!ui) return 0;
 
   if(!db_file)
