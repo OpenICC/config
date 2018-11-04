@@ -712,9 +712,20 @@ void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
     fprintf( stderr, "\n");
   }
 
-  va_start( list, motto_format );
-  vfprintf( stderr, motto_format, list );
-  va_end  ( list );
+  if(!motto_format)
+  {
+    openiccUiHeaderSection_s * version = openiccUi_GetHeaderSection( ui,
+                                                               "version" );
+    fprintf( stderr, "%s v%s - %s", opts->argv[0],
+                              version && version->name ? version->name : "",
+                              ui->description ? ui->description : "" );
+  }
+  else
+  {
+    va_start( list, motto_format );
+    vfprintf( stderr, motto_format, list );
+    va_end  ( list );
+  }
   fprintf( stderr, "\n");
 
   ng = openiccOptions_CountGroups(opts);
