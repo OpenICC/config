@@ -93,6 +93,7 @@ typedef enum openiccOPTIONTYPE_e {
     openiccOPTIONTYPE_CHOICE,          /**< list of choices */
     openiccOPTIONTYPE_FUNCTION,        /**< computed list of choices */
     openiccOPTIONTYPE_DOUBLE,          /**< IEEE floating point number with double precission */
+    openiccOPTIONTYPE_STRING,          /**< text string */
     openiccOPTIONTYPE_NONE,            /**< no value possible - the option is a flag like -v/--verbose */
     openiccOPTIONTYPE_END              /**< */
 } openiccOPTIONTYPE_e;
@@ -146,6 +147,7 @@ typedef union openiccOption_u {
     double end;
     double tick;
   } dbl;                               /**< @brief openiccOPTIONTYPE_DOUBLE */
+  char * suggest;                      /**< @brief openiccOPTIONTYPE_STRING initial suggested string of a text field */
 } openiccOption_u;
 
 /** @brief abstract UI option */

@@ -320,6 +320,10 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
           }
           else
           {
+            int i;
+            for(i = 0; i < opts->argc; ++i)
+              fprintf( stderr, "\'%s\' ", opts->argv[i]);
+            fprintf( stderr, "\n");
             fprintf( stderr, "%s %s \'%c\'\n", _("Usage Error:"), _("Option has a unexpected argument"), arg );
             state = openiccOPTION_UNEXPECTED_VALUE;
             j = l;
@@ -393,6 +397,7 @@ openiccOPTIONSTATE_e openiccOptions_Parse (
     while(result[0][pos])
     {
       openiccOption_s * o = openiccOptions_GetOption( opts, result[0][pos] );
+      if(o)
       switch(o->variable_type)
       {
         case openiccNONE:   break;
@@ -598,9 +603,11 @@ const char * openiccOptions_PrintHelpSynopsis (
   int i;
   int m = g->mandatory ? strlen(g->mandatory) : 0;
   int on = g->optional ? strlen(g->optional) : 0;
-  static char text[80];
+  static char * text = NULL;
   int opt_group = 0;
   int gstyle = style;
+
+  if(!text) text = (char*) malloc(128);
   text[0] = '\000';
 
   if( m || on )
@@ -793,6 +800,11 @@ void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
           }
           break;
         case openiccOPTIONTYPE_DOUBLE:
+          fprintf( stderr, "\t" );
+          fprintf( stderr, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING) );
+          fprintf( stderr, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
+          break;
+        case openiccOPTIONTYPE_STRING:
           fprintf( stderr, "\t" );
           fprintf( stderr, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING) );
           fprintf( stderr, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
@@ -1116,6 +1128,8 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
         fprintf(stderr, "found help: %s\n", g->help);
     }
 
+    key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/%s", i, "mandatory" );
+    oyjlValueSetString( key, g->mandatory );
     int d = g->detail ? strlen(g->detail) : 0,
         j;
     for(j = 0; j < d; ++j)
@@ -1154,6 +1168,8 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
               oyjlValueSetString( key, o->values.choices.list[l].name );
             }
           }
+          key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "type" );
+          oyjlValueSetString( key, "choice" );
           break;
         case openiccOPTIONTYPE_FUNCTION:
           {
@@ -1176,6 +1192,8 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
             }
             /* not possible, as the result of openiccOption_GetChoices_() is cached - openiccOptionChoice_Release( &list ); */
           }
+          key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "type" );
+          oyjlValueSetString( key, "choice" );
           break;
         case openiccOPTIONTYPE_DOUBLE:
           key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "default" );
@@ -1186,10 +1204,14 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
           sprintf( num, "%g", o->values.dbl.end ); oyjlValueSetString( key, num );
           key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "tick" );
           sprintf( num, "%g", o->values.dbl.tick ); oyjlValueSetString( key, num );
+          key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "type" );
+          oyjlValueSetString( key, "double" );
           break;
         case openiccOPTIONTYPE_NONE:
           key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "default" );
           oyjlValueSetString( key, "0" );
+          key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "type" );
+          oyjlValueSetString( key, "bool" );
           {
             int l; char t[12];
             for(l = 0; l < 2; ++l)
@@ -1201,7 +1223,16 @@ char *       openiccUi_ToJson        ( openiccUi_s       * ui,
               oyjlValueSetString( key, l?_("Yes"):_("No") );
             }
           }
-        break;
+          break;
+        case openiccOPTIONTYPE_STRING:
+          if(o->values.suggest)
+          {
+            key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "suggest" );
+            oyjlValueSetString( key, o->values.suggest );
+          }
+          key = oyjlTreeGetValuef( root, OYJL_CREATE_NEW, "org/freedesktop/openicc/modules/[0]/groups/[%d]/options/[%d]/%s", i,j, "type" );
+          oyjlValueSetString( key, "string" );
+          break;
         case openiccOPTIONTYPE_START: break;
         case openiccOPTIONTYPE_END: break;
       }
@@ -1252,9 +1283,9 @@ char *       openiccExtraManSection  ( openiccOptions_s  * opts,
           section = _("FILES");
         else if(strcmp(section,"SEE AS WELL") == 0)
           section = _("SEE AS WELL");
-        oyjlStringAdd( &text, malloc, free, ".SH\n.B %s\n", _(section) );
+        oyjlStringAdd( &text, malloc, free, ".SH %s\n", _(section) );
         for(l = 0; l < n; ++l)
-          oyjlStringAdd( &text, malloc, free, ".TP\n%s\n.br\n%s %s %s\n.br\n", list[l].nick, list[l].name, list[l].description, list[l].help );
+          oyjlStringAdd( &text, malloc, free, ".TP\n%s\n.br\n%s %s %s\n", list[l].nick, list[l].name, list[l].description, list[l].help );
         free(sect);
         free(up);
       }
@@ -1339,15 +1370,15 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
     else if(strcmp(s->nick, "date") == 0) date = s->description ? s->description : s->name;
   }
 
+  ng = openiccOptions_CountGroups(opts);
+  if(!ng) return NULL;
+
   if(ui->app_type && ui->app_type[0])
   {
     int tool = strcmp( ui->app_type, "tool" ) == 0;
     oyjlStringAdd( &text, malloc, free, ".TH \"%s\" %d \"%s\" \"%s\"\n", ui->nick,
                    tool?1:7, date?date:"", tool?"User Commands":"Misc" );
   }
-
-  ng = openiccOptions_CountGroups(opts);
-  if(!ng) return NULL;
 
   if( ui )
     oyjlStringAdd( &text, malloc, free, ".SH NAME\n%s %s%s \\- %s\n", ui->nick, vers?"v":"", vers?vers:"", ui->name );
@@ -1359,7 +1390,7 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
     const char * syn = openiccOptions_PrintHelpSynopsis( opts, g,
                          openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_MAN );
     if(syn[0])
-      oyjlStringAdd( &text, malloc, free, "%s\n%s", syn, (i < (ng-1)) ? ".fi\n" : "" );
+      oyjlStringAdd( &text, malloc, free, "%s\n%s", syn, (i < (ng-1)) ? ".br\n" : "" );
   }
 
   if(desc)
@@ -1376,7 +1407,7 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
     {
       oyjlStringAdd( &text, malloc, free, ".B %s\n", openiccOptions_PrintHelpSynopsis( opts, g, openiccOPTIONSTYLE_ONELETTER ) );
     }
-    oyjlStringAdd( &text, malloc, free, ".sp\n.br\n"  );
+    oyjlStringAdd( &text, malloc, free, ".br\n"  );
     if(g->help)
     {
       oyjlStringAdd( &text, malloc, free, "%s\n.br\n.sp\n.br\n", g->help );
@@ -1421,6 +1452,10 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
           oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING) );
           oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n.br\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
           break;
+        case openiccOPTIONTYPE_STRING:
+          oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING) );
+          oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n.br\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
+          break;
         case openiccOPTIONTYPE_NONE:
           oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING) );
           oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n.br\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
@@ -1437,41 +1472,6 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
     oyjlStringAdd( &text, malloc, free, "%s", tmp );
     free(tmp);
   }
-#if 0
-  o = openiccOptions_GetOptionL( opts, "man-examples" );
-  if(o)
-  {
-    int n = 0,l;
-    if(o->value_type == openiccOPTIONTYPE_CHOICE)
-    {
-      openiccOptionChoice_s * list = o->values.choices.list;
-      while(o->values.choices.list[n].nick[0] != '\000') ++n;
-      if(n)
-      {
-        oyjlStringAdd( &text, malloc, free, ".SH\n.B %s\n", _("EXAMPLES") );
-        for(l = 0; l < n; ++l)
-          oyjlStringAdd( &text, malloc, free, ".TP\n%s\n.br\n%s %s %s\n.br\n", list[l].nick, list[l].name, list[l].description, list[l].help );
-      }
-    }
-  }
-
-  o = openiccOptions_GetOptionL( opts, "man-environment-vaiables" );
-  if(o)
-  {
-    int n = 0,l;
-    if(o->value_type == openiccOPTIONTYPE_CHOICE)
-    {
-      openiccOptionChoice_s * list = o->values.choices.list;
-      while(o->values.choices.list[n].nick[0] != '\000') ++n;
-      if(n)
-      {
-        oyjlStringAdd( &text, malloc, free, ".SH\n.B %s\n", _("ENVIRONMENT VARIABLES") );
-        for(l = 0; l < n; ++l)
-          oyjlStringAdd( &text, malloc, free, ".TP\n%s\n.br\n%s %s %s\n.br\n", list[l].nick, list[l].name, list[l].description, list[l].help );
-      }
-    }
-  }
-#endif
 
   if(mnft)
     oyjlStringAdd( &text, malloc, free, ".SH %s\n%s %s\n", _("AUTHOR"), mnft, mnft_url?mnft_url:"" );
@@ -1489,7 +1489,12 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
   return text;
 }
 // TODO: explicite allow for non option bound arguments, for syntax checking - use '-' as special option inside openiccOptionGroup_s::mandatory
-
+// TODO: implement mandatory checks and support group::flags 0x01 - skip mandatory checks
+// TODO: make the qml renderer aware of mandatory options as part of sending a call to the tool; add action button to all manatory options except bool options; render mandatory switch as a button
+// TODO: the renderer keeps as simple as possible like the command line
+// TODO: MAN page synopsis logic ...
+// TODO: man page generator: /usr/share/man/man1/ftp.1.gz + http://man7.org/linux/man-pages/man7/groff_mdoc.7.html
+// TODO: synopsis syntax ideas: https://unix.stackexchange.com/questions/17833/understand-synopsis-in-manpage
 
 
 /** 
