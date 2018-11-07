@@ -116,7 +116,7 @@ Rectangle {
                 width:  parent.width - dens
                 getLabelWidth: function() { return comboBox.width / 2 };
                 getLabelWidthMin: function() { return 0 }
-                color: bg
+                //color: bg
                 property bool init: true
                 Component.onCompleted: {
                     if(type === "double")
@@ -146,6 +146,80 @@ Rectangle {
                     appData.setOption(key, slider.value)
                     var k = key
                     callback( k, slider.value, 1 )
+                }
+            }
+            LSwitch {
+                id: lswitch
+                objectName: "lswitch"
+                label: name
+                width:  parent.width - dens
+                getLabelWidth: function() { return comboBox.width / 2 };
+                getLabelWidthMin: function() { return 0 }
+                //color: bg
+                property bool init: true
+                Component.onCompleted: {
+                    if(type === "bool")
+                    {
+                        var j = JSON.parse(text)
+                        key = j.key
+                        var v = parseFloat(j.current)
+                        defaultValue = v
+                        //switcher.position = v
+                        if(app_debug)
+                            statusText = key + " bool"
+                        visible = true
+                        init = false
+                    } else
+                        visible = false
+                }
+                switcher.onCheckedChanged: {
+                    var cV = currentValue
+                    var sv = switcher.checked
+                    if(sv === currentValue || init)
+                        return;
+                    statusText = key + ":" + currentValue + " " + sv + " " + "selected " + " " + qsTr("new/old") + ": " + sv + "/" + currentValue
+                    currentValue = sv;
+                    appData.setOption(key, sv)
+                    var k = key
+                    callback( k, "", 1 )
+                }
+            }
+            LInput {
+                id: linput
+                objectName: "linput"
+                label: name
+                width:  parent.width - dens
+                getLabelWidth: function() { return linput.width / 2 };
+                getLabelWidthMin: function() { return 0 }
+                color: bg
+                property bool init: true
+                Component.onCompleted: {
+                    if(type === "string")
+                    {
+                        var j = JSON.parse(text)
+                        key = j.key
+                        if(typeof j.suggest !== "undefined")
+                            defaultValue = j.suggest
+                        if(app_debug)
+                            statusText = key + " string"
+                        visible = true
+                        init = false
+                    } else
+                        visible = false
+                }
+                input.onCurrentTextChanged: {
+                    var cV = currentValue
+                    var sv = value
+                    if(value === currentValue || init)
+                        return;
+                    statusText = key + ":" + currentValue + " " + value + " " + "selected " + " " + qsTr("new/old") + ": " + value + "/" + currentValue
+                    currentValue = value;
+                    appData.setOption(key, value)
+                    var k = key
+                    callback( k, currentValue, 1 )
+                }
+                input.onPressedChanged: {
+                    callback( k, value, 1 )
                 }
             }
             MouseArea {

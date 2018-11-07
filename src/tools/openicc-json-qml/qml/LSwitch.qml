@@ -1,4 +1,4 @@
-﻿/** @file LSlider.qml
+﻿/** @file LSwitch.qml
  *
  *  @par Copyright:
  *            2018 (C) Kai-Uwe Behrmann
@@ -6,9 +6,9 @@
  *
  *  @par License:
  *            MIT <http://www.opensource.org/licenses/mit-license.php>
- *  @since    2018/07/16
+ *  @since    2018/11/05
  *
- *  Slider with label and translated items
+ *  Switch with label and translated items
  */
 
 import QtQuick 2.7
@@ -26,7 +26,7 @@ Rectangle {
     property var getLabelWidthMin: function() { return all.labelWidth }
     property var getLabelWidth: function() { return all.labelWidth }
 
-    property alias slider: slider
+    property alias switcher: switcher
 
     width: parent.width
     height: textMetrics.font.pixelSize * 3
@@ -50,7 +50,6 @@ Rectangle {
             y: (all.height - height) / 2
             width: row.labelWidth_
             height: label_.height
-            color: "transparent"
             Text {
                 id: label_
                 objectName: "label_"
@@ -60,42 +59,17 @@ Rectangle {
             MouseArea {
                 width: parent.width
                 height: parent.height
-                onClicked: slider.focus = false
             }
         }
         Rectangle {
             width : all.width - row.labelWidth_ - space
-            height: slider.height
-            Text {
-                id: value_
-                objectName: "value"
-                color: fg
-                text: slider.value
-            }
-            Slider {
-                id: slider
-                objectName: "slider"
+            height: switcher.height
+            y: (all.height - height) / 2
+            Switch {
+                id: switcher
+                objectName: "switcher"
                 width: parent.width
-                height: all.height - value_.height
-                y: value_.height
-                value: currentValue
                 property real s: space
-                /*onActiveFocusChanged: {
-                    // make the slider nearly as wide as the all item
-                    // it works not relyable, as it is based on focus handling
-                    if(all.getLabelWidth() === all.getLabelWidthMin())
-                         return;
-                    if(activeFocus)
-                    {
-                        row.labelWidth_ = Qt.binding( function() { return all.getLabelWidthMin() } )
-                        slider.width = Qt.binding( function() { return all.width - row.labelWidth_ } )
-                    } else
-                    {
-                        row.labelWidth_ = Qt.binding( function() { return all.getLabelWidth() } )
-                        slider.width = Qt.binding( function() { return all.width - row.labelWidth_ - space } )
-                    }
-                    //statusText = activeFocus + " " + row.labelWidth_ + "/" + labelWidth
-                }*/
             }
         }
     }

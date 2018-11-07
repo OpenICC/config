@@ -10,7 +10,9 @@
         <file>images/logo.png</file>
         <file>images/logo-sw.svg</file>
         <file>qml/Combo.qml</file>
+        <file>qml/LInput.qml</file>
         <file>qml/LSlider.qml</file>
+        <file>qml/LSwitch.qml</file>
         <file>qml/OptionsList.qml</file>
     </qresource>
 </RCC>

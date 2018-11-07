@@ -88,7 +88,7 @@ AppWindow {
     property string processGetCommand: ""
     property var processGetArgs: [ ]
 
-    Process { id: processSet; onReadChannelFinished: statusText = readAll(); }
+    Process { id: processSet; onReadChannelFinished: helpText = readAll(); }
     property string processSetCommand: ""
     property var processSetArgs: [ ]
     property string command_set_delimiter: "="
@@ -107,8 +107,9 @@ AppWindow {
                 else
                     arg = "-" + key
             }
-            if(typeof command_set_delimiter !== "undefined")
-                arg += command_set_delimiter + value
+            if(value.length)
+                if(typeof command_set_delimiter !== "undefined")
+                    arg += command_set_delimiter + value
             var args = []
             args = processSetArgs.slice()
             var count = args.length
@@ -144,6 +145,16 @@ AppWindow {
     property string cmmText: "Description"
     property string cmmHelp: ""
     property string helpText: ""
+    property bool helpTextChanging: false
+    onHelpTextChanged: {
+        if(helpTextChanging)
+            return
+        helpTextChanging = true
+        var text = helpText.replace(/\n/g,"<br />")
+        helpText = text
+        helpTextChanging = false
+    }
+
     property var groupDescriptions: []
     property int groupCount: 0
     property url uiLogo: ""
@@ -314,10 +325,11 @@ AppWindow {
             var opt = options[index];
             var def = opt.default;
             var current = -1;
+            var suggest;
             var choices = opt.choices
-            var type = "choice"
+            var type = opt.type
             var dbl = {"start":0,"end":1}
-            if( typeof choices === "undefined" )
+            if( type === "double" )
                 // try slider
             {
                 var start = opt.start
@@ -326,14 +338,24 @@ AppWindow {
                 current = opt.default
                 if(typeof tick !== "undefined")
                 {
-                    type = "double"
                     dbl["start"] = start
                     dbl["end"] = end
                     dbl["tick"] = tick
                 }
             }
+            if( type === "bool")
+            {
+                current = opt.default;
+            }
+            if( type === "string")
+            {
+                var opt_ = opt
+                if(typeof opt_.suggest !== "undefined")
+                    suggest = opt_.suggest;
+            }
 
             var name
+            if(type === "choice")
             for( var i in choices )
             {
                 if( typeof choices[i].name != "string" )
@@ -356,6 +378,7 @@ AppWindow {
                 choices: opt.choices,
                 dbl: dbl,
                 current: current,
+                suggest: suggest,
                 nick: opt.nick,
                 loc: loc,
                 groupName: groupName,
@@ -412,7 +435,7 @@ AppWindow {
             if(item.type === "date")
                 continue
             var label = P.getTranslatedItem( item, "label", loc );
-            var name = P.getTranslatedItem( item, "name", loc );
+            name = P.getTranslatedItem( item, "name", loc );
             var desc = P.getTranslatedItem( item, "description", loc );
             html += "<tr><td align=\"right\" style=\"padding-right:10;word-wrap:break-word;\">" + label + ":</td><td style=\"font-weight:bold;\">" + name
             if( typeof desc !== "undefined" && item.type !== "documentation" )

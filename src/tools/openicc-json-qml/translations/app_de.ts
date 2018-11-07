@@ -108,6 +108,8 @@
     <message>
         <location filename="../qml/OptionsList.qml" line="105"/>
         <location filename="../qml/OptionsList.qml" line="144"/>
+        <location filename="../qml/OptionsList.qml" line="180"/>
+        <location filename="../qml/OptionsList.qml" line="215"/>
         <source>new/old</source>
         <translation type="unfinished"></translation>
     </message>
@@ -120,13 +122,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="252"/>
-        <location filename="../qml/main.qml" line="282"/>
+        <location filename="../qml/main.qml" line="263"/>
+        <location filename="../qml/main.qml" line="293"/>
         <source>Launched app for </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="395"/>
+        <location filename="../qml/main.qml" line="418"/>
         <source>Load failed</source>
         <translation type="unfinished"></translation>
     </message>
