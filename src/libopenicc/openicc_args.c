@@ -108,7 +108,8 @@ enum {
   openiccOPTIONSTYLE_OPTIONAL_START = 0x04,
   openiccOPTIONSTYLE_OPTIONAL_END = 0x08,
   openiccOPTIONSTYLE_OPTIONAL_INSIDE_GROUP = 0x10,
-  openiccOPTIONSTYLE_MAN = 0x20
+  openiccOPTIONSTYLE_MAN = 0x20,
+  openiccOPTIONSTYLE_MARKDOWN = 0x40
 };
 #define openiccOPTIONSTYLE_OPTIONAL (openiccOPTIONSTYLE_OPTIONAL_START | openiccOPTIONSTYLE_OPTIONAL_END)
 static
@@ -611,7 +612,12 @@ const char * openiccOptions_PrintHelpSynopsis (
   text[0] = '\000';
 
   if( m || on )
-    sprintf( text, "%s ", opts->argv[0] );
+  {
+    if(style & openiccOPTIONSTYLE_MAN)
+      sprintf( text, "\\fB%s\\fR ", opts->argv[0] );
+    else
+      sprintf( text, "%s ", opts->argv[0] );
+  }
   else
     return text;
 
@@ -1405,7 +1411,7 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
     oyjlStringAdd( &text, malloc, free, ".TP\n%s\n", g->description  );
     if(g->mandatory && g->mandatory[0])
     {
-      oyjlStringAdd( &text, malloc, free, ".B %s\n", openiccOptions_PrintHelpSynopsis( opts, g, openiccOPTIONSTYLE_ONELETTER ) );
+      oyjlStringAdd( &text, malloc, free, "%s\n", openiccOptions_PrintHelpSynopsis( opts, g, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_MAN ) );
     }
     oyjlStringAdd( &text, malloc, free, ".br\n"  );
     if(g->help)
@@ -1449,15 +1455,15 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
           }
           break;
         case openiccOPTIONTYPE_DOUBLE:
-          oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING) );
+          oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING | openiccOPTIONSTYLE_MAN) );
           oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n.br\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
           break;
         case openiccOPTIONTYPE_STRING:
-          oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING) );
+          oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING | openiccOPTIONSTYLE_MAN) );
           oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n.br\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
           break;
         case openiccOPTIONTYPE_NONE:
-          oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING) );
+          oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING | openiccOPTIONSTYLE_MAN) );
           oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n.br\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
         break;
         case openiccOPTIONTYPE_START: break;
