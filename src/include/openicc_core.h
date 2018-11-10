@@ -255,6 +255,7 @@ enum {
   openiccUI_STATE_NONE,                /**< nothing to report */
   openiccUI_STATE_HELP,                /**< --help printed */
   openiccUI_STATE_VERBOSE = 2,         /**< --verbose option detected */
+  openiccUI_STATE_EXPORT = 4,          /**< --export=XXX printed */
   openiccUI_STATE_OPTION = 24,         /**< bit shift for detected error from option parser */
 };
 openiccUi_s *  openiccUi_Create      ( int                 argc,
@@ -275,6 +276,8 @@ openiccUiHeaderSection_s * openiccUi_GetHeaderSection (
 char *       openiccUi_ToJson        ( openiccUi_s       * ui,
                                        int                 flags );
 char *       openiccUi_ToMan         ( openiccUi_s       * ui,
+                                       int                 flags );
+char *       openiccUi_ToMarkdown    ( openiccUi_s       * ui,
                                        int                 flags );
 
 /** 
