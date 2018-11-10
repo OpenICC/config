@@ -10,7 +10,7 @@ ADD_CUSTOM_TARGET( openicc-device.md ALL
     COMMENT "Extract markdown formated manual page from tool"
   )
 ADD_CUSTOM_TARGET( openicc-device-de.md ALL
-    COMMAND LANG=de_DE.UTF8 ${CMAKE_CURRENT_BINARY_DIR}/openicc-device -X markdown > openicc-device.md
+    COMMAND LANG=de_DE.UTF8 ${CMAKE_CURRENT_BINARY_DIR}/openicc-device -X markdown > openicc-device-de.md
     DEPENDS openicc-device
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Extrahiere markdown formatiertes Handbuch von Werkzeug"
