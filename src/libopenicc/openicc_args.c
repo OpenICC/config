@@ -1697,7 +1697,7 @@ char *       openiccUi_ToMarkdown    ( openiccUi_s       * ui,
             while(o->values.choices.list[n].nick[0] != '\000')
               ++n;
             for(l = 0; l < n; ++l)
-              oyjlStringAdd( &text, malloc, free, "\t- \\-%c %s\t\t# %s\n", o->o, o->values.choices.list[l].nick, o->values.choices.list[l].name && o->values.choices.list[l].nick[0] ? o->values.choices.list[l].name : o->values.choices.list[l].description );
+              oyjlStringAdd( &text, malloc, free, "   * \\-%c %s\t\t# %s\n", o->o, o->values.choices.list[l].nick, o->values.choices.list[l].name && o->values.choices.list[l].nick[0] ? o->values.choices.list[l].name : o->values.choices.list[l].description );
           }
           break;
         case openiccOPTIONTYPE_FUNCTION:
@@ -1710,7 +1710,7 @@ char *       openiccUi_ToMarkdown    ( openiccUi_s       * ui,
               while(list[n].nick[0] != '\000')
                 ++n;
             for(l = 0; l < n; ++l)
-              oyjlStringAdd( &text, malloc, free, "\t* \\-%c %s\t\t# %s\n", o->o, list[l].nick, list[l].name && list[l].nick[0] ? list[l].name : list[l].description );
+              oyjlStringAdd( &text, malloc, free, "   * \\-%c %s\t\t# %s\n", o->o, list[l].nick, list[l].name && list[l].nick[0] ? list[l].name : list[l].description );
             /* not possible, as the result of openiccOption_GetChoices_() is cached - openiccOptionChoice_Release( &list ); */
           }
           break;
