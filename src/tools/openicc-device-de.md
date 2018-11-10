@@ -2,20 +2,20 @@
 *"openicc\-device"* *1* *""* "User Commands"
 ## NAME
 openicc\-device v0.1.1 \- OpenICC Device
-## ÜBERSICHT
-**/home/kuwe/programme/openicc/build/src/tools/openicc\-device** \-l [\-d *NUMBER*] [\-j] [\-n] [\-b *FILENAME*] [\-v]
+## SYNOPSIS
+**openicc\-device** \-l [\-d *NUMBER*] [\-j] [\-n] [\-b *FILENAME*] [\-v]
 <br />
-**/home/kuwe/programme/openicc/build/src/tools/openicc\-device** \-a\-f *FILENAME* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-a\-f *FILENAME* [\-b *FILENAME*] [\-v]
 <br />
-**/home/kuwe/programme/openicc/build/src/tools/openicc\-device** \-e\-d *NUMBER* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-e\-d *NUMBER* [\-b *FILENAME*] [\-v]
 <br />
-**/home/kuwe/programme/openicc/build/src/tools/openicc\-device** \-p [\-s] [\-v]
+**openicc\-device** \-p [\-s] [\-v]
 <br />
-## BESCHREIBUNG
+## DESCRIPTION
 Manipulation of OpenICC color management data base device entries.
-## OPTIONEN
+## OPTIONS
 ### Print the Devices in the DB
-**/home/kuwe/programme/openicc/build/src/tools/openicc\-device** \-l [\-d *NUMBER*] [\-j] [\-n] [\-b *FILENAME*] [\-v]
+**openicc\-device** \-l [\-d *NUMBER*] [\-j] [\-n] [\-b *FILENAME*] [\-v]
 
 * \-l|\-\-list\-devices	List Devices
 * \-d|\-\-device *NUMBER*	Device position
@@ -23,20 +23,20 @@ Manipulation of OpenICC color management data base device entries.
 * \-n|\-\-long	List all key/values pairs
 
 ### Add a Devices to the DB
-**/home/kuwe/programme/openicc/build/src/tools/openicc\-device** \-a\-f *FILENAME* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-a\-f *FILENAME* [\-b *FILENAME*] [\-v]
 
 * \-a|\-\-add	Add Device to DB
 * \-f|\-\-file\-name *FILENAME*	File Name
 	\- \\-f device\-file\-name.json		# Device File
 
 ### Erase a Devices from the DB
-**/home/kuwe/programme/openicc/build/src/tools/openicc\-device** \-e\-d *NUMBER* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-e\-d *NUMBER* [\-b *FILENAME*] [\-v]
 
 * \-e|\-\-erase\-device	Erase Devices
 * \-d|\-\-device *NUMBER*	Device position
 
 ### Show Filepath to the DB
-**/home/kuwe/programme/openicc/build/src/tools/openicc\-device** \-p [\-s] [\-v]
+**openicc\-device** \-p [\-s] [\-v]
 
 * \-p|\-\-show\-path	Show Path
 * \-s|\-\-scope	System
@@ -50,17 +50,17 @@ Manipulation of OpenICC color management data base device entries.
 	\- \\-X json+command		# Json + Command
 	\- \\-X man		# Man
 	\- \\-X markdown		# Markdown
-* \-v|\-\-verbose	plaudernd
+* \-v|\-\-verbose	verbose
 * \-h|\-\-help	Help
 
-## AUTOR
+## AUTHOR
 Kai\-Uwe Behrmann http://www.openicc.org
-## KOPIERRECHT
+## COPYRIGHT
 *Copyright 2018 Kai\-Uwe Behrmann*
 
 
-###Lizenz
+###License
 newBSD
-## FEHLER
+## BUGS
 [https://www.github.com/OpenICC/config/issues](https://www.github.com/OpenICC/config/issues)
 
