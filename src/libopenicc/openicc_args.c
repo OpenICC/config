@@ -665,11 +665,11 @@ const char * openiccOptions_PrintHelpSynopsis (
   if( m || on )
   {
     if(style & openiccOPTIONSTYLE_MAN)
-      oyjlStringAdd( &text, malloc, free, "\\fB%s\\fR ", opts->argv[0] );
+      oyjlStringAdd( &text, malloc, free, "\\fB%s\\fR", opts->argv[0] );
     else if(style & openiccOPTIONSTYLE_MARKDOWN)
-      oyjlStringAdd( &text, malloc, free, "**%s** ", opts->argv[0] );
+      oyjlStringAdd( &text, malloc, free, "**%s**", opts->argv[0] );
     else
-      oyjlStringAdd( &text, malloc, free, "%s ", opts->argv[0] );
+      oyjlStringAdd( &text, malloc, free, "%s", opts->argv[0] );
   }
   else
     return text;
@@ -679,13 +679,13 @@ const char * openiccOptions_PrintHelpSynopsis (
     char oc = g->mandatory[i];
     openiccOption_s * o = openiccOptions_GetOption( opts, oc );
     if(oc == '|')
-      oyjlStringAdd( &text, malloc, free, "| " );
+      oyjlStringAdd( &text, malloc, free, "|" );
     else if(!o)
     {
       fprintf(stderr, "\n%s: option not declared: %c\n", g->name, oc);
       exit(1);
     }
-    oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, style) );
+    oyjlStringAdd( &text, malloc, free, " %s", openiccOption_PrintArg(o, style) );
   }
   for(i = 0; i < on; ++i)
   {

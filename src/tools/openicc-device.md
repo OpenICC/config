@@ -5,9 +5,9 @@ openicc\-device v0.1.1 \- OpenICC Device
 ## SYNOPSIS
 **openicc\-device** \-l [\-d *NUMBER*] [\-j] [\-n] [\-b *FILENAME*] [\-v]
 <br />
-**openicc\-device** \-a\-f *FILENAME* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-a \-f *FILENAME* [\-b *FILENAME*] [\-v]
 <br />
-**openicc\-device** \-e\-d *NUMBER* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-e \-d *NUMBER* [\-b *FILENAME*] [\-v]
 <br />
 **openicc\-device** \-p [\-s] [\-v]
 <br />
@@ -23,14 +23,14 @@ Manipulation of OpenICC color management data base device entries.
 * \-n|\-\-long	List all key/values pairs
 
 ### Add a Devices to the DB
-**openicc\-device** \-a\-f *FILENAME* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-a \-f *FILENAME* [\-b *FILENAME*] [\-v]
 
 * \-a|\-\-add	Add Device to DB
 * \-f|\-\-file\-name *FILENAME*	File Name
    * \-f device\-file\-name.json		# Device File
 
 ### Erase a Devices from the DB
-**openicc\-device** \-e\-d *NUMBER* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-e \-d *NUMBER* [\-b *FILENAME*] [\-v]
 
 * \-e|\-\-erase\-device	Erase Devices
 * \-d|\-\-device *NUMBER*	Device position
