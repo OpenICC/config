@@ -27,7 +27,7 @@ Manipulation of OpenICC color management data base device entries.
 
 * \-a|\-\-add	Add Device to DB
 * \-f|\-\-file\-name *FILENAME*	File Name
-   * \\-f device\-file\-name.json		# Device File
+   * \-f device\-file\-name.json		# Device File
 
 ### Erase a Devices from the DB
 **openicc\-device** \-e\-d *NUMBER* [\-b *FILENAME*] [\-v]
@@ -44,12 +44,12 @@ Manipulation of OpenICC color management data base device entries.
 ### General options
 
 * \-b|\-\-db\-file *FILENAME*	DB File Name
-   * \\-b DB\-file\-name.json		# DB File
+   * \-b DB\-file\-name.json		# DB File
 * \-X|\-\-export *json|json+command|man|markdown*	Export formated text: Get UI converted into text formats
-   * \\-X json		# Json
-   * \\-X json+command		# Json + Command
-   * \\-X man		# Man
-   * \\-X markdown		# Markdown
+   * \-X json		# Json
+   * \-X json+command		# Json + Command
+   * \-X man		# Man
+   * \-X markdown		# Markdown
 * \-v|\-\-verbose	verbose
 * \-h|\-\-help	Help
 
