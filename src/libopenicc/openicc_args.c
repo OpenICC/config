@@ -31,6 +31,7 @@
  *  help text with openiccOptions_PrintHelp(). The OpenICC JSON
  *  output from openiccUi_ToJson() is useable for automatical generated
  *  (G)UI's and further processing. openiccUi_ToMan() creates unix manual pages.
+ *  openiccUi_ToMarkdown() lets you produce a man page for your web page.
  *  Generation of other formats is simple.
  *  Translations are supported.
  *
@@ -42,7 +43,7 @@
  *
  *  **Basic Tutorial** from @ref openicc_config_read.c :
     @dontinclude openicc_config_read.c
-    @skip allocate options structure
+    @skip handle options
     @until done with options handling
  *
  *  @{ */
@@ -116,39 +117,85 @@ static
 const char * openiccOption_PrintArg  ( openiccOption_s   * o,
                                        int                 style )
 {
-  static char text[80];
-  text[0] = '\000';
+  static char * text = NULL;
+  if(text) text[0] = '\000';
   if(!o) return "";
   if(style & openiccOPTIONSTYLE_OPTIONAL_START)
-    sprintf( &text[strlen(text)], "[" );
+    oyjlStringAdd( &text, malloc, free, "[" );
   if(style & openiccOPTIONSTYLE_ONELETTER)
   {
     if(style & openiccOPTIONSTYLE_MAN)
-      sprintf( &text[strlen(text)], "\\-%c", o->o );
+      oyjlStringAdd( &text, malloc, free, "\\-%c", o->o );
     else
-      sprintf( &text[strlen(text)], "-%c", o->o );
+      oyjlStringAdd( &text, malloc, free, "-%c", o->o );
   }
   if(style & openiccOPTIONSTYLE_ONELETTER && style & openiccOPTIONSTYLE_STRING)
-    sprintf( &text[strlen(text)], "|" );
+    oyjlStringAdd( &text, malloc, free, "|" );
   if(style & openiccOPTIONSTYLE_STRING)
   {
     if(style & openiccOPTIONSTYLE_MAN)
-      sprintf( &text[strlen(text)], "\\-\\-%s", o->option );
+      oyjlStringAdd( &text, malloc, free, "\\-\\-%s", o->option );
     else
-      sprintf( &text[strlen(text)], "--%s", o->option );
+      oyjlStringAdd( &text, malloc, free, "--%s", o->option );
   }
   if(o->value_name)
   {
     if(style & openiccOPTIONSTYLE_MAN)
-      sprintf( &text[strlen(text)], " \\fI%s\\fR", o->value_name );
+      oyjlStringAdd( &text, malloc, free, " \\fI%s\\fR", o->value_name );
+    if(style & openiccOPTIONSTYLE_MARKDOWN)
+      oyjlStringAdd( &text, malloc, free, " *%s*", o->value_name );
     else if(style & openiccOPTIONSTYLE_OPTIONAL_INSIDE_GROUP)
-      sprintf( &text[strlen(text)], "%s", o->value_name );
+      oyjlStringAdd( &text, malloc, free, "%s", o->value_name );
     else
-      sprintf( &text[strlen(text)], " %s", o->value_name );
+      oyjlStringAdd( &text, malloc, free, " %s", o->value_name );
   }
   if(style & openiccOPTIONSTYLE_OPTIONAL_END)
-    sprintf( &text[strlen(text)], "]" );
+    oyjlStringAdd( &text, malloc, free, "]" );
   return text;
+}
+
+openiccOptionChoice_s openicc_X_choices[] = {{"json", "", "", ""},
+                                    {"json+command", "", "", ""},
+                                    {"man", "", "", ""},
+                                    {"markdown", "", "", ""},
+                                    {"","","",""}};
+void openiccOptions_EnrichInbuild( openiccOption_s * o )
+{
+  int oc = o->o;
+
+  if(oc == 'X')
+  {
+    if(o->value_type == openiccOPTIONTYPE_CHOICE && o->values.choices.list == NULL)
+    {
+      openicc_X_choices[0].name = _("Json");
+      openicc_X_choices[0].description = _("GUI");
+      openicc_X_choices[0].help = _("Get a OpenICC Json UI declaration");
+      openicc_X_choices[1].name = _("Json + Command");
+      openicc_X_choices[1].description = _("GUI + Command");
+      openicc_X_choices[1].help = _("Get OpenICC Json UI declaration incuding command");
+      openicc_X_choices[2].name = _("Man");
+      openicc_X_choices[2].description = _("Unix Man page");
+      openicc_X_choices[2].help = _("Get a unix man page");
+      openicc_X_choices[3].name = _("Markdown");
+      openicc_X_choices[3].description = _("Formated text");
+      openicc_X_choices[3].help = _("Get formated text");
+      o->values.choices.list = openicc_X_choices;
+      if(o->value_name == NULL)
+      {
+        o->value_name = "json|json+command|man|markdown";
+        if(o->name == NULL)
+        {
+          o->name = _("export");
+          if(o->description == NULL)
+          {
+            o->description = _("Export formated text");
+            if(o->help == NULL)
+              o->help = _("Get UI converted into text formats");
+          }
+        }
+      }
+    }
+  }
 }
 
 /** @brief    Obtain the specified option from option char
@@ -170,7 +217,12 @@ openiccOption_s * openiccOptions_GetOption (
   {
     o = &opts->array[i];
     if(o->o && o->o == oc)
+    {
+      if(oc == 'X' && o->value_type == openiccOPTIONTYPE_CHOICE && o->values.choices.list == NULL)
+        openiccOptions_EnrichInbuild(o);
+
       return o;
+    }
     else
       o = NULL;
   }
@@ -608,15 +660,16 @@ const char * openiccOptions_PrintHelpSynopsis (
   int opt_group = 0;
   int gstyle = style;
 
-  if(!text) text = (char*) malloc(128);
-  text[0] = '\000';
+  if(text) text[0] = 0;
 
   if( m || on )
   {
     if(style & openiccOPTIONSTYLE_MAN)
-      sprintf( text, "\\fB%s\\fR ", opts->argv[0] );
+      oyjlStringAdd( &text, malloc, free, "\\fB%s\\fR ", opts->argv[0] );
+    else if(style & openiccOPTIONSTYLE_MARKDOWN)
+      oyjlStringAdd( &text, malloc, free, "**%s** ", opts->argv[0] );
     else
-      sprintf( text, "%s ", opts->argv[0] );
+      oyjlStringAdd( &text, malloc, free, "%s ", opts->argv[0] );
   }
   else
     return text;
@@ -626,13 +679,13 @@ const char * openiccOptions_PrintHelpSynopsis (
     char oc = g->mandatory[i];
     openiccOption_s * o = openiccOptions_GetOption( opts, oc );
     if(oc == '|')
-      sprintf( &text[strlen(text)], "| " );
+      oyjlStringAdd( &text, malloc, free, "| " );
     else if(!o)
     {
-      printf("\n%s: option not declared: %c\n", g->name, oc);
+      fprintf(stderr, "\n%s: option not declared: %c\n", g->name, oc);
       exit(1);
     }
-    sprintf( &text[strlen(text)], "%s", openiccOption_PrintArg(o, style) );
+    oyjlStringAdd( &text, malloc, free, "%s", openiccOption_PrintArg(o, style) );
   }
   for(i = 0; i < on; ++i)
   {
@@ -649,7 +702,7 @@ const char * openiccOptions_PrintHelpSynopsis (
     }
     else if(oc == '|')
     {
-      sprintf( &text[strlen(text)], "|" );
+      oyjlStringAdd( &text, malloc, free, "|" );
       continue;
     }
     else if(opt_group)
@@ -659,11 +712,11 @@ const char * openiccOptions_PrintHelpSynopsis (
     }
     else if(!o)
     {
-      printf("\n%s: option not declared: %c\n", g->name, oc);
+      fprintf(stderr, "\n%s: option not declared: %c\n", g->name, oc);
       exit(1);
     }
 
-    sprintf( &text[strlen(text)], "%s%s", gstyle & openiccOPTIONSTYLE_OPTIONAL_START ? " ":"", openiccOption_PrintArg(o, gstyle) );
+    oyjlStringAdd( &text, malloc, free, "%s%s", gstyle & openiccOPTIONSTYLE_OPTIONAL_START ? " ":"", openiccOption_PrintArg(o, gstyle) );
   }
   return text;
 }
@@ -772,7 +825,7 @@ void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
       openiccOption_s * o = openiccOptions_GetOption( opts, oc );
       if(!o)
       {
-        printf("\n%s: option not declared: %c\n", g->name, oc);
+        fprintf(stderr, "\n%s: option not declared: %c\n", g->name, oc);
         exit(1);
       }
       for(k = 0; k < indent; ++k) fprintf( stderr, " " );
@@ -790,7 +843,12 @@ void  openiccOptions_PrintHelp       ( openiccOptions_s  * opts,
             while(o->values.choices.list[n].nick[0] != '\000')
               ++n;
             for(l = 0; l < n; ++l)
-              fprintf( stderr, "\t  -%c %s\t\t# %s\n", o->o, o->values.choices.list[l].nick, o->values.choices.list[l].name && o->values.choices.list[l].nick[0] ? o->values.choices.list[l].name : o->values.choices.list[l].description );
+              fprintf( stderr, "\t  -%c %s\t\t# %s%s%s\n",
+                  o->o,
+                  o->values.choices.list[l].nick,
+                  o->values.choices.list[l].name && o->values.choices.list[l].nick[0] ? o->values.choices.list[l].name : o->values.choices.list[l].description,
+                  o->values.choices.list[l].help?" - ":"",
+                  o->values.choices.list[l].help?o->values.choices.list[l].help:"" );
           }
           break;
         case openiccOPTIONTYPE_FUNCTION:
@@ -903,12 +961,13 @@ openiccUi_s* openiccUi_New           ( int                 argc,
  *                 dependencies of options and provides a UI layout
  *  @param[out]    state               inform about processing
  *                                     - openiccUI_STATE_HELP : help was detected, printed and openiccUi_s was released
+ *                                     - openiccUI_STATE_EXPORT : export of json, man or markdown was detected, printed and openiccUi_s was released
  *                                     - openiccUI_STATE_VERBOSE : verbose was detected
  *                                     - openiccUI_STATE_OPTION+ : error occured in option parser, message printed, openiccOPTIONSTATE_e is placed in >> openiccUI_STATE_OPTION and openiccUi_s was released
  *  @return                            UI object for later use
  *
  *  @version OpenICC: 0.1.1
- *  @date    2018/08/20
+ *  @date    2018/11/09
  *  @since   2018/08/20 (OpenICC: 0.1.1)
  */
 openiccUi_s *  openiccUi_Create      ( int                 argc,
@@ -923,7 +982,8 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
                                        int               * status )
 {
   int help = 0, verbose = 0;
-  openiccOption_s * h, * v;
+  const char * export = NULL;
+  openiccOption_s * h, * v, * X;
   openiccOPTIONSTATE_e opt_state = openiccOPTION_NONE;
   openiccInit();
 
@@ -956,6 +1016,9 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
     return NULL;
   }
 
+  X = openiccOptions_GetOption( ui->opts, 'X' );
+  if(X && X->variable_type == openiccSTRING && X->variable.s)
+    export = *X->variable.s;
   h = openiccOptions_GetOption( ui->opts, 'h' );
   if(h && h->variable_type == openiccINT && h->variable.i)
     help = *h->variable.i;
@@ -963,7 +1026,7 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
   if(v && v->variable_type == openiccINT && v->variable.i)
   {
     verbose = *v->variable.i;
-    if(status)
+    if(status && verbose)
       *status |= openiccUI_STATE_VERBOSE;
   }
   if(help)
@@ -977,7 +1040,31 @@ openiccUi_s *  openiccUi_Create      ( int                 argc,
     if(status)
       *status |= openiccUI_STATE_HELP;
     return NULL;
-  } /* done with options handling */
+  }
+  if(export)
+  {
+    if(status)
+      *status |= openiccUI_STATE_EXPORT;
+    if(strcmp(export, "json") == 0)
+    {
+      puts( openiccUi_ToJson( ui, 0 ) );
+      openiccUi_Release( &ui);
+      return NULL;
+    }
+    if(strcmp(export, "man") == 0)
+    {
+      puts( openiccUi_ToMan( ui, 0 ) );
+      openiccUi_Release( &ui);
+      return NULL;
+    }
+    if(strcmp(export, "markdown") == 0)
+    {
+      puts( openiccUi_ToMarkdown( ui, 0 ) );
+      openiccUi_Release( &ui);
+      return NULL;
+    }
+  }
+  /* done with options handling */
 
   return ui;
 }
@@ -1261,7 +1348,8 @@ char *       openiccStringToUpper    ( const char        * t )
 
 static
 char *       openiccExtraManSection  ( openiccOptions_s  * opts,
-                                       const char        * opt_name )
+                                       const char        * opt_name,
+                                       int                 flags )
 {
   openiccOption_s * o = openiccOptions_GetOptionL( opts, opt_name );
   char * text = NULL;
@@ -1289,9 +1377,15 @@ char *       openiccExtraManSection  ( openiccOptions_s  * opts,
           section = _("FILES");
         else if(strcmp(section,"SEE AS WELL") == 0)
           section = _("SEE AS WELL");
-        oyjlStringAdd( &text, malloc, free, ".SH %s\n", _(section) );
+        if(flags & openiccOPTIONSTYLE_MARKDOWN)
+          oyjlStringAdd( &text, malloc, free, "# %s\n", _(section) );
+        else
+          oyjlStringAdd( &text, malloc, free, ".SH %s\n", _(section) );
         for(l = 0; l < n; ++l)
-          oyjlStringAdd( &text, malloc, free, ".TP\n%s\n.br\n%s %s %s\n", list[l].nick, list[l].name, list[l].description, list[l].help );
+          if(flags & openiccOPTIONSTYLE_MARKDOWN)
+            oyjlStringAdd( &text, malloc, free, "## %s\n%s %s %s\n", list[l].nick, list[l].name, list[l].description, list[l].help );
+          else
+            oyjlStringAdd( &text, malloc, free, ".TP\n%s\n.br\n%s %s %s\n", list[l].nick, list[l].name, list[l].description, list[l].help );
         free(sect);
         free(up);
       }
@@ -1301,7 +1395,7 @@ char *       openiccExtraManSection  ( openiccOptions_s  * opts,
 }
 
 static
-char *       openiccExtraManSections ( openiccOptions_s  * opts )
+char *       openiccExtraManSections ( openiccOptions_s  * opts, int flags )
 {
   char * text = NULL;
   int nopts = openiccOptions_Count( opts );
@@ -1313,7 +1407,7 @@ char *       openiccExtraManSections ( openiccOptions_s  * opts )
     int olen = option ? strlen(option) : 0;
     if(olen > 7 && option[0] == 'm' && option[1] == 'a' && option[2] == 'n' && option[3] == '-')
     {
-      char * tmp = openiccExtraManSection(opts, option);
+      char * tmp = openiccExtraManSection(opts, option, flags);
       if(tmp)
       {
         oyjlStringAdd( &text, malloc, free, tmp );
@@ -1424,7 +1518,7 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
       openiccOption_s * o = openiccOptions_GetOption( opts, oc );
       if(!o)
       {
-        printf("\n%s: option not declared: %c\n", g->name, oc);
+        fprintf(stderr, "\n%s: option not declared: %c\n", g->name, oc);
         exit(1);
       }
       switch(o->value_type)
@@ -1437,7 +1531,12 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
             while(o->values.choices.list[n].nick[0] != '\000')
               ++n;
             for(l = 0; l < n; ++l)
-              oyjlStringAdd( &text, malloc, free, "\t\\-%c %s\t\t# %s\n.br\n", o->o, o->values.choices.list[l].nick, o->values.choices.list[l].name && o->values.choices.list[l].nick[0] ? o->values.choices.list[l].name : o->values.choices.list[l].description );
+              oyjlStringAdd( &text, malloc, free, "\t\\-%c %s\t\t# %s %s %s\n.br\n",
+                  o->o,
+                  o->values.choices.list[l].nick,
+                  o->values.choices.list[l].name && o->values.choices.list[l].nick[0] ? o->values.choices.list[l].name : o->values.choices.list[l].description,
+                  o->values.choices.list[l].help?" - ":"",
+                  o->values.choices.list[l].help?o->values.choices.list[l].help:"" );
           }
           break;
         case openiccOPTIONTYPE_FUNCTION:
@@ -1472,7 +1571,7 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
     }
   }
 
-  tmp = openiccExtraManSections( opts );
+  tmp = openiccExtraManSections( opts, openiccOPTIONSTYLE_MAN );
   if(tmp)
   {
     oyjlStringAdd( &text, malloc, free, "%s", tmp );
@@ -1494,8 +1593,180 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
 
   return text;
 }
+
+/** @brief    Return markdown formated text from options
+ *  @memberof openiccUi_s
+ *
+ *  @see openiccUi_ToMan()
+ *
+ *  @version OpenICC: 0.1.1
+ *  @date    2018/11/07
+ *  @since   2018/11/07 (OpenICC: 0.1.1)
+ */
+char *       openiccUi_ToMarkdown    ( openiccUi_s       * ui,
+                                       int                 flags OYJL_UNUSED )
+{
+  char * text = NULL, * tmp;
+  const char * date = NULL,
+             * desc = NULL,
+             * mnft = NULL, * mnft_url = NULL,
+             * copy = NULL, * lice = NULL,
+             * bugs = NULL, * bugs_url = NULL,
+             * vers = NULL;
+  int i,n,ng;
+  openiccOptions_s * opts = ui->opts;
+
+  n = openiccUi_CountHeaderSections( ui );
+  for(i = 0; i < n; ++i)
+  {
+    openiccUiHeaderSection_s * s = &ui->sections[i];
+    if(strcmp(s->nick, "manufacturer") == 0) { mnft = s->name; mnft_url = s->description; }
+    else if(strcmp(s->nick, "copyright") == 0) copy = s->name;
+    else if(strcmp(s->nick, "license") == 0) lice = s->name;
+    else if(strcmp(s->nick, "url") == 0) continue;
+    else if(strcmp(s->nick, "support") == 0) { bugs = s->name; bugs_url = s->description; }
+    else if(strcmp(s->nick, "download") == 0) continue;
+    else if(strcmp(s->nick, "sources") == 0) continue;
+    else if(strcmp(s->nick, "development") == 0) continue;
+    else if(strcmp(s->nick, "openicc_module_author") == 0) continue;
+    else if(strcmp(s->nick, "documentation") == 0) desc = s->description ? s->description : s->name;
+    else if(strcmp(s->nick, "version") == 0) vers = s->name;
+    else if(strcmp(s->nick, "date") == 0) date = s->description ? s->description : s->name;
+  }
+
+  ng = openiccOptions_CountGroups(opts);
+  if(!ng) return NULL;
+
+  oyjlStringAdd( &text, malloc, free, "# %s %s%s\n", ui->nick, vers?"v":"", vers?vers:"" );
+
+  if(ui->app_type && ui->app_type[0])
+  {
+    int tool = strcmp( ui->app_type, "tool" ) == 0;
+    oyjlStringAdd( &text, malloc, free, "*\"%s\"* *%d* *\"%s\"* \"%s\"\n", ui->nick,
+                   tool?1:7, date?date:"", tool?"User Commands":"Misc" );
+  }
+
+  if( ui )
+    oyjlStringAdd( &text, malloc, free, "## NAME\n%s %s%s - %s\n", ui->nick, vers?"v":"", vers?vers:"", ui->name );
+
+  oyjlStringAdd( &text, malloc, free, "## %s\n", _("SYNOPSIS") );
+  for(i = 0; i < ng; ++i)
+  {
+    openiccOptionGroup_s * g = &opts->groups[i];
+    const char * syn = openiccOptions_PrintHelpSynopsis( opts, g,
+                         openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_MARKDOWN );
+    if(syn[0])
+      oyjlStringAdd( &text, malloc, free, "%s\n%s", syn, (i < (ng-1)) ? "<br />\n" : "" );
+  }
+
+  if(desc)
+    oyjlStringAdd( &text, malloc, free, "## %s\n%s\n", _("DESCRIPTION"), desc );
+
+  oyjlStringAdd( &text, malloc, free, "## %s\n", _("OPTIONS") );
+  for(i = 0; i < ng; ++i)
+  {
+    openiccOptionGroup_s * g = &opts->groups[i];
+    int d = g->detail ? strlen(g->detail) : 0,
+        j;
+    oyjlStringAdd( &text, malloc, free, "### %s\n", g->description  );
+    if(g->mandatory && g->mandatory[0])
+    {
+      oyjlStringAdd( &text, malloc, free, "%s\n", openiccOptions_PrintHelpSynopsis( opts, g, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_MARKDOWN ) );
+    }
+    oyjlStringAdd( &text, malloc, free, "\n"  );
+    if(g->help)
+    {
+      oyjlStringAdd( &text, malloc, free, "%s\n\n", g->help );
+    }
+    for(j = 0; j < d; ++j)
+    {
+      char oc = g->detail[j];
+      openiccOption_s * o = openiccOptions_GetOption( opts, oc );
+      if(!o)
+      {
+        fprintf(stderr, "\n%s: option not declared: %c\n", g->name, oc);
+        exit(1);
+      }
+      switch(o->value_type)
+      {
+        case openiccOPTIONTYPE_CHOICE:
+          {
+            int n = 0,l;
+            oyjlStringAdd( &text, malloc, free, "* %s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING | openiccOPTIONSTYLE_MARKDOWN) );
+            oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
+            while(o->values.choices.list[n].nick[0] != '\000')
+              ++n;
+            for(l = 0; l < n; ++l)
+              oyjlStringAdd( &text, malloc, free, "\t- \\-%c %s\t\t# %s\n", o->o, o->values.choices.list[l].nick, o->values.choices.list[l].name && o->values.choices.list[l].nick[0] ? o->values.choices.list[l].name : o->values.choices.list[l].description );
+          }
+          break;
+        case openiccOPTIONTYPE_FUNCTION:
+          {
+            int n = 0,l;
+            openiccOptionChoice_s * list = openiccOption_GetChoices_(o, NULL, opts );
+            oyjlStringAdd( &text, malloc, free, "* %s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING | openiccOPTIONSTYLE_MARKDOWN) );
+            oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
+            if(list)
+              while(list[n].nick[0] != '\000')
+                ++n;
+            for(l = 0; l < n; ++l)
+              oyjlStringAdd( &text, malloc, free, "\t* \\-%c %s\t\t# %s\n", o->o, list[l].nick, list[l].name && list[l].nick[0] ? list[l].name : list[l].description );
+            /* not possible, as the result of openiccOption_GetChoices_() is cached - openiccOptionChoice_Release( &list ); */
+          }
+          break;
+        case openiccOPTIONTYPE_DOUBLE:
+          oyjlStringAdd( &text, malloc, free, "* %s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING | openiccOPTIONSTYLE_MARKDOWN) );
+          oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
+          break;
+        case openiccOPTIONTYPE_STRING:
+          oyjlStringAdd( &text, malloc, free, "* %s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING | openiccOPTIONSTYLE_MARKDOWN) );
+          oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
+          break;
+        case openiccOPTIONTYPE_NONE:
+          oyjlStringAdd( &text, malloc, free, "* %s", openiccOption_PrintArg(o, openiccOPTIONSTYLE_ONELETTER | openiccOPTIONSTYLE_STRING | openiccOPTIONSTYLE_MARKDOWN) );
+          oyjlStringAdd( &text, malloc, free, "\t%s%s%s\n", o->description ? o->description:"", o->help?": ":"", o->help?o->help :"" );
+        break;
+        case openiccOPTIONTYPE_START: break;
+        case openiccOPTIONTYPE_END: break;
+      }
+    }
+    oyjlStringAdd( &text, malloc, free, "\n"  );
+  }
+
+  tmp = openiccExtraManSections( opts, openiccOPTIONSTYLE_MARKDOWN );
+  if(tmp)
+  {
+    oyjlStringAdd( &text, malloc, free, "%s", tmp );
+    free(tmp);
+  }
+
+  if(mnft)
+    oyjlStringAdd( &text, malloc, free, "## %s\n%s %s\n", _("AUTHOR"), mnft, mnft_url?mnft_url:"" );
+
+  if(lice || copy)
+  {
+    oyjlStringAdd( &text, malloc, free, "## %s\n*%s*\n", _("COPYRIGHT"), copy?copy:"" );
+    if(lice)
+      oyjlStringAdd( &text, malloc, free, "\n\n###%s\n%s\n", _("License"), lice?lice:"" );
+  }
+
+  if(bugs && bugs_url)
+    oyjlStringAdd( &text, malloc, free, "## %s\n[%s](%s)\n", _("BUGS"), bugs, bugs_url?bugs_url:"" );
+  else if(bugs)
+    oyjlStringAdd( &text, malloc, free, "## %s\n[%s](%s)\n", _("BUGS"), bugs, bugs );
+
+  {
+    char * tmp = oyjlStringReplace( text, "`", "\\`", malloc, free );
+    text = oyjlStringReplace( tmp, "-", "\\-", malloc, free );
+    tmp = oyjlStringReplace( text, "_", "\\_", malloc, free );
+    free(text);
+    text = tmp;
+  }
+
+  return text;
+}
 // TODO: explicite allow for non option bound arguments, for syntax checking - use '-' as special option inside openiccOptionGroup_s::mandatory
-// TODO: implement mandatory checks and support group::flags 0x01 - skip mandatory checks
+// TODO: implement mandatory checks and support group::flags 0x01 - call group options independently
 // TODO: make the qml renderer aware of mandatory options as part of sending a call to the tool; add action button to all manatory options except bool options; render mandatory switch as a button
 // TODO: the renderer keeps as simple as possible like the command line
 // TODO: MAN page synopsis logic ...
@@ -1524,7 +1795,7 @@ openiccUiHeaderSection_s * oiUiInfo  ( const char          * documentation )
     { "oihs", "development", NULL, "https://github.com/OpenICC/config", NULL },
     { "oihs", "openicc_module_author", NULL, "Kai-Uwe Behrmann", "http://www.behrmann.name" },
     { "oihs", "documentation", NULL, "http://www.openicc.info", documentation },
-    { "oihs", "date", NULL, "1970-01-01T12:00:00", NULL },
+    { "oihs", "date", NULL, "1970-01-01T12:00:00", "" },
     { "", NULL, NULL, NULL, NULL }
   };
   return openiccMemDup( s, sizeof(s) );
