@@ -1747,7 +1747,7 @@ char *       openiccUi_ToMarkdown    ( openiccUi_s       * ui,
   {
     oyjlStringAdd( &text, malloc, free, "## %s\n*%s*\n", _("COPYRIGHT"), copy?copy:"" );
     if(lice)
-      oyjlStringAdd( &text, malloc, free, "\n\n###%s\n%s\n", _("License"), lice?lice:"" );
+      oyjlStringAdd( &text, malloc, free, "\n\n### %s\n%s\n", _("License"), lice?lice:"" );
   }
 
   if(bugs && bugs_url)

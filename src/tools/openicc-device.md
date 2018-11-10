@@ -59,7 +59,7 @@ Kai\-Uwe Behrmann http://www.openicc.org
 *Copyright 2018 Kai\-Uwe Behrmann*
 
 
-###License
+### License
 newBSD
 ## BUGS
 [https://www.github.com/OpenICC/config/issues](https://www.github.com/OpenICC/config/issues)
