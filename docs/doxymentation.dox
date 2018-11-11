@@ -32,6 +32,11 @@
     - @ref args - Argument API handles structured options and arguments for more than the command line.
     - @ref misc
 
+    @section tools Tools Documentation
+    OpenICC comes with a few tools, which use the OpenICC API's.
+    - @ref openiccdevice - color device configuration
+    - oi-json - localisation helper tool
+
     @subsection api_tutorial Programming Tutorial
     Frist you have to put a
     @code

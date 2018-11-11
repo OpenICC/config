@@ -139,9 +139,9 @@ SET_TARGET_PROPERTIES(   OpenICC
                SOVERSION ${${PROJECT_NAME}_MAJOR_VERSION}
                      )
 
-
 SET( DOC_SOURCES
 	doxymentation.dox
+  openicc*.md
 	${CFILES_OBJECT_CONFIG_PUBLIC}
 	${CHEADERS_OBJECT_CONFIG_PUBLIC}
         PARENT_SCOPE
