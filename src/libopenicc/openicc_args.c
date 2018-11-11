@@ -19,6 +19,9 @@
 
 #include <stddef.h>
 #include <ctype.h> /* toupper() */
+#ifdef HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif
 
 /** \addtogroup args Options Handling
  *  @brief   Structured Options and Arguments for more than the command line
@@ -1606,13 +1609,14 @@ char *       openiccUi_ToMan         ( openiccUi_s       * ui,
 char *       openiccUi_ToMarkdown    ( openiccUi_s       * ui,
                                        int                 flags OYJL_UNUSED )
 {
-  char * text = NULL, * tmp;
+  char * text = NULL, * tmp, * doxy_link = NULL;
   const char * date = NULL,
              * desc = NULL,
              * mnft = NULL, * mnft_url = NULL,
              * copy = NULL, * lice = NULL,
              * bugs = NULL, * bugs_url = NULL,
-             * vers = NULL;
+             * vers = NULL,
+             * country = NULL;
   int i,n,ng;
   openiccOptions_s * opts = ui->opts;
 
@@ -1637,7 +1641,15 @@ char *       openiccUi_ToMarkdown    ( openiccUi_s       * ui,
   ng = openiccOptions_CountGroups(opts);
   if(!ng) return NULL;
 
-  oyjlStringAdd( &text, malloc, free, "# %s %s%s\n", ui->nick, vers?"v":"", vers?vers:"" );
+#ifdef HAVE_LANGINFO_H
+  country = nl_langinfo( _NL_ADDRESS_LANG_AB );
+#endif
+
+  oyjlStringAdd( &doxy_link, malloc, free, "{#%s%s}", ui->nick, country?country:"" );
+  tmp = oyjlStringReplace( doxy_link, "-", "", malloc, free );
+  free(doxy_link); doxy_link = tmp; tmp = NULL;
+
+  oyjlStringAdd( &text, malloc, free, "# %s %s%s %s\n", ui->nick, vers?"v":"", vers?vers:"", doxy_link );
 
   if(ui->app_type && ui->app_type[0])
   {

@@ -1,4 +1,4 @@
-# openicc\-device v0.1.1
+# openicc\-device v0.1.1 {#openiccdevice}
 *"openicc\-device"* *1* *""* "User Commands"
 ## NAME
 openicc\-device v0.1.1 \- OpenICC Device
