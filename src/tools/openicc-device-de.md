@@ -27,7 +27,7 @@ Bearbeitung von Geräteeinträgen in der Datenbank für OpenICC Farbmanagement
 
 * \-a|\-\-add	Trage Gerät in die DB ein
 * \-f|\-\-file\-name *DATEINAME*	Dateiname
-   * \-f device\-file\-name.json		# Device File
+   * \-f device\-file\-name.json		# Gerätedatei
 
 ### Lösche Gerät von der DB
 **openicc\-device** \-e \-d *NUMMER* [\-b *DATEINAME*] [\-v]
@@ -43,8 +43,8 @@ Bearbeitung von Geräteeinträgen in der Datenbank für OpenICC Farbmanagement
 
 ### Allgemeine Optionen
 
-* \-b|\-\-db\-file *DATEINAME*	DB File Name
-   * \-b DB\-file\-name.json		# DB File
+* \-b|\-\-db\-file *DATEINAME*	DB Dateiname
+   * \-b DB\-file\-name.json		# DB Datei
 * \-X|\-\-export *json|json+command|man|markdown*	Exportiere formatierten Text: Hole Benutzerschnittstelle als Text
    * \-X json		# Json
    * \-X json+command		# Json + Kommando
