@@ -3,55 +3,55 @@
 ## NAME
 openicc\-device v0.1.1 \- OpenICC Device
 ## ÜBERSICHT
-**openicc\-device** \-l [\-d *NUMBER*] [\-j] [\-n] [\-b *FILENAME*] [\-v]
+**openicc\-device** \-l [\-d *NUMMER*] [\-j] [\-n] [\-b *DATEINAME*] [\-v]
 <br />
-**openicc\-device** \-a \-f *FILENAME* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-a \-f *DATEINAME* [\-b *DATEINAME*] [\-v]
 <br />
-**openicc\-device** \-e \-d *NUMBER* [\-b *FILENAME*] [\-v]
+**openicc\-device** \-e \-d *NUMMER* [\-b *DATEINAME*] [\-v]
 <br />
 **openicc\-device** \-p [\-s] [\-v]
 <br />
 ## BESCHREIBUNG
-Manipulation of OpenICC color management data base device entries.
+Bearbeitung von Geräteeinträgen in der Datenbank für OpenICC Farbmanagement
 ## OPTIONEN
-### Print the Devices in the DB
-**openicc\-device** \-l [\-d *NUMBER*] [\-j] [\-n] [\-b *FILENAME*] [\-v]
+### Zeige die Geräte aus der DB
+**openicc\-device** \-l [\-d *NUMMER*] [\-j] [\-n] [\-b *DATEINAME*] [\-v]
 
-* \-l|\-\-list\-devices	List Devices
-* \-d|\-\-device *NUMBER*	Device position
-* \-j|\-\-dump\-json	Dump JSON
-* \-n|\-\-long	List all key/values pairs
+* \-l|\-\-list\-devices	Zeige Geräte
+* \-d|\-\-device *NUMMER*	Gerätebeposition
+* \-j|\-\-dump\-json	Schreibe Json
+* \-n|\-\-long	Zeige alle Schlüssel/Wertepaare
 
-### Add a Devices to the DB
-**openicc\-device** \-a \-f *FILENAME* [\-b *FILENAME*] [\-v]
+### Trage Gerät in die DB ein
+**openicc\-device** \-a \-f *DATEINAME* [\-b *DATEINAME*] [\-v]
 
-* \-a|\-\-add	Add Device to DB
-* \-f|\-\-file\-name *FILENAME*	File Name
+* \-a|\-\-add	Trage Gerät in die DB ein
+* \-f|\-\-file\-name *DATEINAME*	Dateiname
    * \-f device\-file\-name.json		# Device File
 
-### Erase a Devices from the DB
-**openicc\-device** \-e \-d *NUMBER* [\-b *FILENAME*] [\-v]
+### Lösche Gerät von der DB
+**openicc\-device** \-e \-d *NUMMER* [\-b *DATEINAME*] [\-v]
 
-* \-e|\-\-erase\-device	Erase Devices
-* \-d|\-\-device *NUMBER*	Device position
+* \-e|\-\-erase\-device	Lösche Geräte
+* \-d|\-\-device *NUMMER*	Gerätebeposition
 
-### Show Filepath to the DB
+### Zeige den Dateipfad zur DB
 **openicc\-device** \-p [\-s] [\-v]
 
-* \-p|\-\-show\-path	Show Path
+* \-p|\-\-show\-path	Zeige Pfad
 * \-s|\-\-scope	System
 
-### General options
+### Allgemeine Optionen
 
-* \-b|\-\-db\-file *FILENAME*	DB File Name
+* \-b|\-\-db\-file *DATEINAME*	DB File Name
    * \-b DB\-file\-name.json		# DB File
-* \-X|\-\-export *json|json+command|man|markdown*	Export formated text: Get UI converted into text formats
+* \-X|\-\-export *json|json+command|man|markdown*	Exportiere formatierten Text: Hole Benutzerschnittstelle als Text
    * \-X json		# Json
-   * \-X json+command		# Json + Command
-   * \-X man		# Man
+   * \-X json+command		# Json + Kommando
+   * \-X man		# Handbuch
    * \-X markdown		# Markdown
 * \-v|\-\-verbose	plaudernd
-* \-h|\-\-help	Help
+* \-h|\-\-help	Hilfe
 
 ## AUTOR
 Kai\-Uwe Behrmann http://www.openicc.org

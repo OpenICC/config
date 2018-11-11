@@ -156,6 +156,7 @@ IF( GETTEXT_FOUND )
   SET( XGETTEXT_CMD xgettext )
   FILE( GLOB SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
         libopenicc/*.c
+        tools/openicc_device.c
         tools/openicc_json.c
       )
 

@@ -22,7 +22,7 @@ Manipulation of OpenICC color management data base device entries.
 * \-j|\-\-dump\-json	Dump JSON
 * \-n|\-\-long	List all key/values pairs
 
-### Add a Devices to the DB
+### Add Device to DB
 **openicc\-device** \-a \-f *FILENAME* [\-b *FILENAME*] [\-v]
 
 * \-a|\-\-add	Add Device to DB

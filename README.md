@@ -16,7 +16,7 @@ according library for easy access.
 
 ### Features
 * Access to OpenICC device JSON DB
-* [Command Line Tools](src/tools/README.md))
+* [Command Line Tools](src/tools/README.md)
 
 ### Links
 * [Copyright](docs/COPYING.md) - MIT

@@ -131,7 +131,7 @@ int main(int argc, char ** argv)
   openiccOptionGroup_s groups[] = {
   /* type,   flags, name,              description,                          help, mandatory, optional, detail */
     {"oiwg", 0,     _("List Devices"), _("Print the Devices in the DB"),     NULL, "l",       "djnbv",  "ldjn" },
-    {"oiwg", 0,     _("Add Device"),   _("Add a Devices to the DB"),         NULL, "af",      "bv",     "af" },
+    {"oiwg", 0,     _("Add Device"),   _("Add Device to DB"),                NULL, "af",      "bv",     "af" },
     {"oiwg", 0,     _("Erase Device"), _("Erase a Devices from the DB"),     NULL, "ed",      "bv",     "ed" },
     {"oiwg", 0,     _("Show DB Path"), _("Show Filepath to the DB"),         NULL, "p",       "sv",     "ps" },
     {"oiwg", 0,     _("Misc"),         _("General options"),                 NULL, "",        "",       "bXvh" },
