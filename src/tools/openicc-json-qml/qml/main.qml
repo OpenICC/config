@@ -107,9 +107,10 @@ AppWindow {
                 else
                     arg = "-" + key
             }
-            if(value.length)
+            var v = JSON.stringify(value);
+            if(v.length)
                 if(typeof command_set_delimiter !== "undefined")
-                    arg += command_set_delimiter + value
+                    arg += command_set_delimiter + v
             var args = []
             args = processSetArgs.slice()
             var count = args.length
