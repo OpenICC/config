@@ -16,7 +16,7 @@ IF( ENABLE_INSTALL_${PROJECT_UP_NAME} )
     COMMENT "Extract markdown formated manual page from tool"
   )
   ADD_CUSTOM_TARGET( openicc-device-de.md ALL
-    COMMAND PATH=. LANG=de_DE.UTF8 openicc-device -X markdown > ${CMAKE_CURRENT_SOURCE_DIR}/openicc-device-de.md
+    COMMAND PATH=. LANG=de_DE.UTF8 OI_LOCALEDIR=${CMAKE_BINARY_DIR}/locale openicc-device -X markdown > ${CMAKE_CURRENT_SOURCE_DIR}/openicc-device-de.md
     DEPENDS openicc-device
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Extrahiere markdown formatiertes Handbuch von Werkzeug"
