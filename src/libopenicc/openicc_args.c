@@ -1810,6 +1810,6 @@ openiccUiHeaderSection_s * oiUiInfo  ( const char          * documentation )
     { "oihs", "date", NULL, "1970-01-01T12:00:00", "" },
     { "", NULL, NULL, NULL, NULL }
   };
-  return openiccMemDup( s, sizeof(s) );
+  return (openiccUiHeaderSection_s*) oyjlStringAppendN( NULL, (const char*)s, sizeof(s), malloc );
 }
 
