@@ -1,4 +1,4 @@
-/** openicc_macros.h
+/** oyjl_macros.h
  *
  *  @par License: 
  *             MIT <http://www.opensource.org/licenses/mit-license.php>
@@ -67,6 +67,7 @@
 
 #define verbose oy_debug
 
+/** convert ( const char * format, ... ) function args into a string */
 #define OYJL_CREATE_VA_STRING(format_, text_, alloc_, error_action) \
 { \
   va_list list; \

@@ -44,8 +44,7 @@
 extern "C" {
 #endif
 
-/** \addtogroup oyjl_tree Tree
- *  @brief Tree data structure manipulation and I/O
+/** \addtogroup oyjl_tree
  *  @{ *//* oyjl_tree */
 
 /**
@@ -262,9 +261,8 @@ int        oyjlPathMatch             ( const char        * path,
 /** @} *//* oyjl_tree */
 
 /* --- Core --- */
-/** \addtogroup misc
- *  @{ *//* misc */
-/** \addtogroup oyjl
+/** \addtogroup oyjl Oyranos JSON Library
+ *  Basic low level API's
  *  @{ *//* oyjl */
 /** \addtogroup oyjl_core
  *  @{ */
@@ -276,7 +274,6 @@ int        oyjlPathMatch             ( const char        * path,
 
 int        oyjlVersion               ( int                 type );
 /** @} *//* oyjl */
-/** @} *//* misc */
 
 /* --- string helpers --- */
 /** \addtogroup oyjl_core Core
