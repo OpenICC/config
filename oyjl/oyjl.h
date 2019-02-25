@@ -40,6 +40,8 @@
 #define OYJL_API
 #endif
 
+#include "oyjl_version.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -245,6 +247,11 @@ int        oyjlTreeSetStringF        ( oyjl_val            root,
                                        const char        * value_text,
                                        const char        * format,
                                                            ... );
+int        oyjlTreeSetDoubleF        ( oyjl_val            root,
+                                       int                 flags,
+                                       double              value,
+                                       const char        * format,
+                                                           ... );
 char *     oyjlValueText             ( oyjl_val            v,
                                        void*             (*alloc)(size_t));
 int        oyjlValueCount            ( oyjl_val            v );
@@ -258,6 +265,8 @@ void       oyjlValueClear            ( oyjl_val            v );
 int        oyjlPathMatch             ( const char        * path,
                                        const char        * xpath,
                                        int                 flags );
+
+int        oyjlDataFormat            ( const char        * text );
 /** @} *//* oyjl_tree */
 
 /* --- Core --- */
@@ -307,8 +316,7 @@ void       oyjlDebugVariableSet      ( int               * debug );
 /** @} *//* oyjl */
 
 /* --- string helpers --- */
-/** \addtogroup oyjl_core Core
- *  @brief Messaging, I/O and String Handling
+/** \addtogroup oyjl_core
  *  @{ *//* oyjl_core */
 char **    oyjlStringSplit           ( const char        * text,
                                        const char          delimiter,
@@ -330,7 +338,7 @@ void       oyjlStringAddN            ( char             ** text,
                                        int                 append_len,
                                        void*            (* alloc)(size_t),
                                        void             (* deAlloc)(void*) );
-char*      oyjlStringReplace         ( const char        * text,
+int        oyjlStringReplace         ( char             ** text,
                                        const char        * search,
                                        const char        * replacement,
                                        void*            (* alloc)(size_t),
@@ -347,7 +355,7 @@ void       oyjlStringListAddList     ( char            *** list,
                                        int                 n_app,
                                        void*            (* alloc)(size_t),
                                        void             (* deAlloc)(void*) );
-char **    oyjlStringListCatList ( const char       ** list,
+char **    oyjlStringListCatList     ( const char       ** list,
                                        int                 n_alt,
                                        const char       ** append,
                                        int                 n_app,
@@ -363,6 +371,28 @@ int        oyjlStringToLong          ( const char        * text,
                                        long              * value );
 int        oyjlStringToDouble        ( const char        * text,
                                        double            * value );
+int        oyjlStringsToDoubles      ( const char        * text,
+                                       char                delimiter,
+                                       int               * count,
+                                       void*            (* alloc)(size_t),
+                                       double           ** value );
+typedef struct oyjl_string_s * oyjl_str;
+oyjl_str   oyjlStrNew                ( size_t              length,
+                                       void*            (* alloc)(size_t),
+                                       void             (* deAlloc)(void*) );
+oyjl_str   oyjlStrNewFrom            ( char             ** text,
+                                       size_t              length,
+                                       void*            (* alloc)(size_t),
+                                       void             (* deAlloc)(void*) );
+void       oyjlStrRelease            ( oyjl_str          * string_ptr );
+const char*oyjlStr                   ( oyjl_str            string );
+char *     oyjlStrPull               ( oyjl_str            str );
+int        oyjlStrAppendN            ( oyjl_str            string,
+                                       const char        * append,
+                                       int                 append_len );
+int        oyjlStrReplace            ( oyjl_str            text,
+                                       const char        * search,
+                                       const char        * replacement );
 
 /* --- I/O helpers --- */
 char *     oyjlReadFileStreamToMem   ( FILE              * fp,

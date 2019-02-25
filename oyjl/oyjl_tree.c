@@ -47,6 +47,40 @@
 
 /** \addtogroup oyjl_tree
  *  @{ *//* oyjl_tree */
+
+/** @brief   detect data type
+ *
+ *  @param         text                string
+ *  @return                            format
+ *                                     - 7 : JSON
+ *                                     - 8 : XML
+ *                                     - 9 : YAML
+ *                                     - 0 : not detected
+ *                                     - -1 : no input
+ *                                     - -2 : no data
+ */
+int          oyjlDataFormat          ( const char        * text )
+{
+  int c,i = 0;
+  if(!text)
+    return -1;
+  /* first simple check */
+  while( (c = text[i]) != 0 && (c == ' ' || c == '\t' || c == '\n' || c == '\r' ))
+    i++;
+  if(strlen(&text[i]) > 5 &&
+      ( memcmp( &text[i], "<?xml", 5 ) == 0 ||
+        ( text[i] == '<' && text[i+1] != '<' ) ) )
+    return 8;
+  if(c == '[' || c == '{')
+    return 7;
+  if((i == 0 || text[i-1] == '\n') && strlen(&text[i]) > 4 && memcmp( &text[i], "---\n", 4 ) == 0)
+    return 9;
+  if(!c)
+    return -2;
+  else
+    return 0;
+}
+
 static oyjl_val oyjlValueAlloc (oyjl_type type)
 {
     oyjl_val v;
@@ -152,7 +186,7 @@ char * oyjlValueText (oyjl_val v, void*(*alloc)(size_t size))
     case oyjl_t_object:
          break;
     default:
-         oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "unknown type: %d", OYJL_DBG_ARGS_, v->type );
+         oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "unknown type: %d", OYJL_DBG_ARGS, v->type );
          break;
   }
 
@@ -249,7 +283,7 @@ static void  oyjlTreeFind_           ( oyjl_val            root,
          }
          break;
     default:
-         oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "unknown type: %d", OYJL_DBG_ARGS_, root->type );
+         oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "unknown type: %d", OYJL_DBG_ARGS, root->type );
          break;
   }
 }
@@ -335,11 +369,119 @@ static void oyjlJsonIndent ( char ** json, const char * before, int level, const
   *json = njson;
 }
 
+int  oyjlTreeToJson21 (oyjl_val v, int * level, oyjl_str json)
+{
+  int error = 0;
+  if(v)
+  switch(v->type)
+  {
+    case oyjl_t_null:
+         break;
+    case oyjl_t_number:
+         oyjlStrAppendN (json, v->u.number.r, strlen(v->u.number.r));
+         break;
+    case oyjl_t_true:
+         oyjlStrAppendN (json, "1", 1); break;
+    case oyjl_t_false:
+         oyjlStrAppendN (json, "0", 1); break;
+    case oyjl_t_string:
+         {
+          const char * t = v->u.string;
+          oyjl_str tmp = oyjlStrNew(10,0,0);
+          oyjlStrAppendN( tmp, t, strlen(t) );
+          oyjlStrReplace( tmp, "\\", "\\\\");
+          oyjlStrReplace( tmp, "\"", "\\\"");
+          oyjlStrReplace( tmp, "\b", "\\b");
+          oyjlStrReplace( tmp, "\f", "\\f");
+          oyjlStrReplace( tmp, "\n", "\\n");
+          oyjlStrReplace( tmp, "\r", "\\r");
+          oyjlStrReplace( tmp, "\t", "\\t");
+          t = oyjlStr(tmp); 
+          oyjlStrAppendN( json, "\"", 1 );
+          oyjlStrAppendN( json, t, strlen(t) );
+          oyjlStrAppendN( json, "\"", 1 );
+          oyjlStrRelease( &tmp );
+         }
+         break;
+    case oyjl_t_array:
+         {
+           int i,
+               count = v->u.array.len;
+
+           oyjlStrAppendN( json, "[", 1 );
+
+           *level += 2;
+           for(i = 0; i < count; ++i)
+           {
+             oyjlTreeToJson21( v->u.array.values[i], level, json );
+             if(count > 1)
+             {
+               if(i < count - 1)
+                 oyjlStrAppendN( json, ",", 1 );
+             }
+           }
+           *level -= 2;
+
+           oyjlStrAppendN( json, "]", 1 );
+         } break;
+    case oyjl_t_object:
+         {
+           int i,j,
+               count = v->u.object.len;
+
+           oyjlStrAppendN( json, "{", 1 );
+
+           *level += 2;
+           for(i = 0; i < count; ++i)
+           {
+             oyjlStrAppendN( json, "\n", 1 );
+             for(j = 0; j < *level; ++j) oyjlStrAppendN( json, " ", 1 );
+             if(!v->u.object.keys || !v->u.object.keys[i])
+             {
+               oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "missing key", OYJL_DBG_ARGS );
+               return 1;
+             }
+             oyjlStrAppendN( json, "\"", 1 );
+             oyjlStrAppendN( json, v->u.object.keys[i], strlen(v->u.object.keys[i]) );
+             oyjlStrAppendN( json, "\": ", 3 );
+             error = oyjlTreeToJson21( v->u.object.values[i], level, json );
+             if(error) return error;
+             if(count > 1)
+             {
+               if(i < count - 1)
+                 oyjlStrAppendN( json, ",", 1 );
+             }
+           }
+           *level -= 2;
+
+           oyjlStrAppendN( json, "\n", 1 );
+           for(j = 0; j < *level; ++j) oyjlStrAppendN( json, " ", 1 );
+           oyjlStrAppendN( json, "}", 1 );
+         }
+         break;
+    default:
+         oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "unknown type: %d", OYJL_DBG_ARGS, v->type );
+         break;
+  }
+  return 0;
+}
+void oyjlTreeToJson (oyjl_val v, int * level, char ** json)
+{
+  oyjl_str string = oyjlStrNew(10, 0,0);
+  oyjlTreeToJson21( v, level, string );
+  const char * result = oyjlStr(string);
+  char * text = NULL;
+  if(result && result[0])
+    text = oyjlStringCopy(result,0);
+  oyjlStrRelease( &string );
+  *json = text;;
+}
+
 /** @brief convert a C tree into a JSON string
  *
  *  @see oyjlTreeParse()
  */
-void oyjlTreeToJson (oyjl_val v, int * level, char ** json)
+void oyjlTreeToJson2 (oyjl_val v, int * level, char ** json)
 {
   if(v)
   switch(v->type)
@@ -356,15 +498,15 @@ void oyjlTreeToJson (oyjl_val v, int * level, char ** json)
     case oyjl_t_string:
          {
           const char * t = v->u.string;
-          char * tmp = NULL;
-          if(t && strstr(t, "\\")) t = tmp = oyjlStringReplace( t, "\\", "\\\\", 0, 0);
-          if(t && strstr(t, "\"")) t = tmp = oyjlStringReplace( t, "\"", "\\\"", 0, 0);
-          if(t && strstr(t, "\b")) t = tmp = oyjlStringReplace( t, "\b", "\\b", 0, 0);
-          if(t && strstr(t, "\f")) t = tmp = oyjlStringReplace( t, "\f", "\\f", 0, 0);
-          if(t && strstr(t, "\n")) t = tmp = oyjlStringReplace( t, "\n", "\\n", 0, 0);
-          if(t && strstr(t, "\r")) t = tmp = oyjlStringReplace( t, "\r", "\\r", 0, 0);
-          if(t && strstr(t, "\t")) t = tmp = oyjlStringReplace( t, "\t", "\\t", 0, 0);
-          oyjlStringAdd (json, 0,0, "\"%s\"", t);
+          char * tmp = oyjlStringCopy(t,malloc);
+          oyjlStringReplace( &tmp, "\\", "\\\\", 0, 0);
+          oyjlStringReplace( &tmp, "\"", "\\\"", 0, 0);
+          oyjlStringReplace( &tmp, "\b", "\\b", 0, 0);
+          oyjlStringReplace( &tmp, "\f", "\\f", 0, 0);
+          oyjlStringReplace( &tmp, "\n", "\\n", 0, 0);
+          oyjlStringReplace( &tmp, "\r", "\\r", 0, 0);
+          oyjlStringReplace( &tmp, "\t", "\\t", 0, 0);
+          oyjlStringAdd (json, 0,0, "\"%s\"", tmp);
           if(tmp) free(tmp);
          }
          break;
@@ -378,7 +520,7 @@ void oyjlTreeToJson (oyjl_val v, int * level, char ** json)
            *level += 2;
            for(i = 0; i < count; ++i)
            {
-             oyjlTreeToJson( v->u.array.values[i], level, json );
+             oyjlTreeToJson2( v->u.array.values[i], level, json );
              if(count > 1)
              {
                if(i < count - 1)
@@ -402,7 +544,7 @@ void oyjlTreeToJson (oyjl_val v, int * level, char ** json)
              oyjlJsonIndent( json, "\n", *level, NULL );
              if(!v->u.object.keys || !v->u.object.keys[i])
              {
-               oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "missing key", OYJL_DBG_ARGS_ );
+               oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "missing key", OYJL_DBG_ARGS );
                if(json && *json)
                {
                  free(*json);
@@ -411,7 +553,7 @@ void oyjlTreeToJson (oyjl_val v, int * level, char ** json)
                return;
              }
              oyjlStringAdd( json, 0,0, "\"%s\": ", v->u.object.keys[i] );
-             oyjlTreeToJson( v->u.object.values[i], level, json );
+             oyjlTreeToJson2( v->u.object.values[i], level, json );
              if(count > 1)
              {
                if(i < count - 1)
@@ -424,7 +566,7 @@ void oyjlTreeToJson (oyjl_val v, int * level, char ** json)
          }
          break;
     default:
-         oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "unknown type: %d", OYJL_DBG_ARGS_, v->type );
+         oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "unknown type: %d", OYJL_DBG_ARGS, v->type );
          break;
   }
   return;
@@ -473,12 +615,10 @@ void               oyjlTreeToYaml    ( oyjl_val            v,
     case oyjl_t_string:
          {
           const char * t = v->u.string;
-          char * tmp = NULL;
-          if(t && strstr(t, "\""))
-            t = tmp = oyjlStringReplace( t, "\"", "\\\"", 0, 0);
-          if(t && strstr(t, ": "))
-            t = tmp = oyjlStringReplace( t, ": ", ":\\ ", 0, 0);
-          oyjlStringAdd (text, 0,0, YAML_INDENT "%s", t);
+          char * tmp = oyjlStringCopy(t,malloc);
+          oyjlStringReplace( &tmp, "\"", "\\\"", 0, 0);
+          oyjlStringReplace( &tmp, ": ", ":\\ ", 0, 0);
+          oyjlStringAdd (text, 0,0, YAML_INDENT "%s", tmp);
           if(tmp) free(tmp);
          }
          break;
@@ -506,7 +646,7 @@ void               oyjlTreeToYaml    ( oyjl_val            v,
              oyjlJsonIndent( text, "\n", *level, NULL );
              if(!v->u.object.keys || !v->u.object.keys[i])
              {
-               oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "missing key", OYJL_DBG_ARGS_ );
+               oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "missing key", OYJL_DBG_ARGS );
                if(text && *text)
                {
                  free(*text);
@@ -522,7 +662,7 @@ void               oyjlTreeToYaml    ( oyjl_val            v,
          }
          break;
     default:
-         oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "unknown type: %d", OYJL_DBG_ARGS_, v->type );
+         oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "unknown type: %d", OYJL_DBG_ARGS, v->type );
          break;
   }
   return;
@@ -547,15 +687,15 @@ void oyjlTreeToXml2 (oyjl_val v, const char * parent_key, int * level, char ** t
     case oyjl_t_string:
          {
           const char * t = v->u.string;
-          char * tmp = NULL;
-          if(t && strstr(t, "\\")) t = tmp = oyjlStringReplace( t, "\\", "\\\\", 0, 0);
-          if(t && strstr(t, "\"")) t = tmp = oyjlStringReplace( t, "\"", "\\\"", 0, 0);
-          if(t && strstr(t, "\b")) t = tmp = oyjlStringReplace( t, "\b", "\\b", 0, 0);
-          if(t && strstr(t, "\f")) t = tmp = oyjlStringReplace( t, "\f", "\\f", 0, 0);
-          if(t && strstr(t, "\n")) t = tmp = oyjlStringReplace( t, "\n", "\\n", 0, 0);
-          if(t && strstr(t, "\r")) t = tmp = oyjlStringReplace( t, "\r", "\\r", 0, 0);
-          if(t && strstr(t, "\t")) t = tmp = oyjlStringReplace( t, "\t", "\\t", 0, 0);
-          oyjlStringAdd (text, 0,0, "%s", t);
+          char * tmp = oyjlStringCopy(t,malloc);
+          oyjlStringReplace( &tmp, "\\", "\\\\", 0, 0);
+          oyjlStringReplace( &tmp, "\"", "\\\"", 0, 0);
+          oyjlStringReplace( &tmp, "\b", "\\b", 0, 0);
+          oyjlStringReplace( &tmp, "\f", "\\f", 0, 0);
+          oyjlStringReplace( &tmp, "\n", "\\n", 0, 0);
+          oyjlStringReplace( &tmp, "\r", "\\r", 0, 0);
+          oyjlStringReplace( &tmp, "\t", "\\t", 0, 0);
+          oyjlStringAdd (text, 0,0, "%s", tmp);
           if(tmp) free(tmp);
          }
          break;
@@ -600,7 +740,7 @@ void oyjlTreeToXml2 (oyjl_val v, const char * parent_key, int * level, char ** t
           {
             if(!v->u.object.keys || !v->u.object.keys[i])
             {
-              oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "missing key", OYJL_DBG_ARGS_ );
+              oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "missing key", OYJL_DBG_ARGS );
               if(text && *text)
               {
                 free(*text);
@@ -709,7 +849,7 @@ void oyjlTreeToXml2 (oyjl_val v, const char * parent_key, int * level, char ** t
          }
          break;
     default:
-          oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "unknown type: %d", OYJL_DBG_ARGS_, v->type );
+          oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "unknown type: %d", OYJL_DBG_ARGS, v->type );
          break;
   }
 }
@@ -746,7 +886,7 @@ void               oyjlTreeToXml     ( oyjl_val            v,
     case oyjl_t_false:
     case oyjl_t_string:
     case oyjl_t_array:
-          oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "Need one key as root element! This object has no key. type: %d", OYJL_DBG_ARGS_, v->type );
+          oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "Need one key as root element! This object has no key. type: %d", OYJL_DBG_ARGS, v->type );
          break;
     case oyjl_t_object:
          {
@@ -754,12 +894,12 @@ void               oyjlTreeToXml     ( oyjl_val            v,
 
           if(count != 1)
           {
-            oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "Need one single object as root element! count: %d", OYJL_DBG_ARGS_, count );
+            oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "Need one single object as root element! count: %d", OYJL_DBG_ARGS, count );
             break;
           }
           if(!v->u.object.keys || !v->u.object.keys[0])
           {
-            oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "missing key", OYJL_DBG_ARGS_ );
+            oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "missing key", OYJL_DBG_ARGS );
             if(text && *text)
             {
               free(*text);
@@ -771,7 +911,7 @@ void               oyjlTreeToXml     ( oyjl_val            v,
          }
          break;
     default:
-          oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "unknown type: %d", OYJL_DBG_ARGS_, v->type );
+          oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "unknown type: %d", OYJL_DBG_ARGS, v->type );
          break;
   }
   return;
@@ -982,7 +1122,7 @@ static oyjl_val  oyjlTreeGetValue_   ( oyjl_val            v,
                     sizeof(*(parent->u.array.values)) * (parent->u.array.len + 1));
             if (tmp == NULL)
             {
-              oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "could not allocate memory", OYJL_DBG_ARGS_ );
+              oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "could not allocate memory", OYJL_DBG_ARGS );
               oyjlTreeFree( level );
               goto  clean;
             }
@@ -1033,7 +1173,7 @@ static oyjl_val  oyjlTreeGetValue_   ( oyjl_val            v,
                     sizeof(*(parent->u.object.values)) * (parent->u.object.len + 1));
             if (tmp == NULL)
             {
-              oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "could not allocate memory", OYJL_DBG_ARGS_ );
+              oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "could not allocate memory", OYJL_DBG_ARGS );
               oyjlTreeFree( level );
               goto clean;
             }
@@ -1043,7 +1183,7 @@ static oyjl_val  oyjlTreeGetValue_   ( oyjl_val            v,
                     sizeof(*(parent->u.object.keys)) * (parent->u.object.len + 1));
             if (keys == NULL)
             {
-              oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT_ "could not allocate memory", OYJL_DBG_ARGS_ );
+              oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "could not allocate memory", OYJL_DBG_ARGS );
               oyjlTreeFree( level );
               goto clean;
             }
@@ -1157,7 +1297,7 @@ oyjl_val   oyjlTreeGetValueF         ( oyjl_val            v,
   return value;
 }
 
-/** Function oyjlTreeSetValuef
+/** Function oyjlTreeSetStringF
  *  @brief   set a child node to a string value
  *
  *  @param[in,out] root                the oyjl node
@@ -1194,6 +1334,69 @@ int        oyjlTreeSetStringF        ( oyjl_val            root,
 
   if(value_node)
     oyjlValueSetString( value_node, value_text );
+  else
+    error = -1;
+
+  return error;
+}
+
+/** Function oyjlTreeSetDoubleF
+ *  @brief   set a child node to a string value
+ *
+ *  @param[in,out] root                the oyjl node
+ *  @param[in]     flags               ::OYJL_CREATE_NEW - allocates nodes even
+ *                                     if they did not yet exist
+ *  @param[in]     value               IEEE floating point number with double precission
+ *  @param[in]     format              the format for the slashed xpath string
+ *  @param[in]     ...                 the variable argument list; optional
+ *  @return                            error
+ *                                     - -1 - if not found
+ *                                     - 0 on success
+ *                                     - else error
+ *
+ *  @version Oyranos: 0.9.7
+ *  @date    2019/01/26
+ *  @since   2019/01/26 (Oyranos: 0.9.7)
+ */
+int        oyjlTreeSetDoubleF        ( oyjl_val            root,
+                                       int                 flags,
+                                       double              value,
+                                       const char        * format,
+                                                           ... )
+{
+  oyjl_val value_node = NULL;
+
+  char * text = NULL;
+  int error = 0;
+
+  OYJL_CREATE_VA_STRING(format, text, malloc, return 1)
+
+  value_node = oyjlTreeGetValue( root, flags, text );
+
+  if(text) { free(text); text = NULL; }
+
+  if(value_node)
+  {
+    oyjl_val v = value_node;
+    oyjlValueClear( v );
+    v->type = oyjl_t_number;
+    v->u.number.d = value;
+#ifdef OYJL_HAVE_LOCALE_H
+    char * save_locale = oyjlStringCopy( setlocale(LC_NUMERIC, 0 ), malloc );
+    setlocale(LC_NUMERIC, "C");
+#endif
+    error = oyjlStringAdd( &v->u.number.r, 0,0, "%g", value );
+#ifdef OYJL_HAVE_LOCALE_H
+    setlocale(LC_NUMERIC, save_locale);
+    if(save_locale)
+      free( save_locale );
+#endif
+    v->u.number.flags |= OYJL_NUMBER_DOUBLE_VALID;
+    errno = 0;
+    v->u.number.i = strtol(v->u.number.r, 0, 10);
+    if(errno == 0)
+      v->u.number.flags |= OYJL_NUMBER_INT_VALID;
+  }
   else
     error = -1;
 

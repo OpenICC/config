@@ -19,7 +19,9 @@
   TEST_RUN( testArgs, "Options handling", 1 ); \
   TEST_RUN( testTree, "Tree handling", 1 );
 
-#include "oyjl_test.h"
+#define OYJL_TEST_MAIN_SETUP  printf("\n    OyjlCore Test Program\n");
+#define OYJL_TEST_MAIN_FINISH printf("\n    OyjlCore Test Program finished\n\n");
+#include "oyjl_test_main.h"
 #include "oyjl.h"
 #include "oyjl_version.h"
 #ifdef OYJL_HAVE_LOCALE_H
@@ -128,44 +130,99 @@ oyjlTESTRESULT_e testStringRun ()
 
   int i;
 
-  const char * test = TEST_DOMAIN "/display.oydi/display_name_long";
+  const char * test;
   
 
-  test = "//openicc/display.oydi/";
-  fprintf(zout, "\"%s\"\n", test );
-
   test = TEST_DOMAIN "/display.oydi/display_name";
-  char * test_out = oyjlStringReplace( test, TEST_DOMAIN, TEST_DOMAIN2, 0,0 );
-  //fprintf(zout, "test %s \"%s\"\n", test, test_out);
-  if( strstr(test_out, TEST_DOMAIN2 ) != NULL )
+  fprintf(zout, "test \"%s\" %d\n", test, (int)strlen(test));
+  char * test_out = oyjlStringCopy(test,malloc);
+  int n = oyjlStringReplace( &test_out, TEST_DOMAIN, TEST_DOMAIN2, 0,0 );
+  if(verbose)
+    fprintf(zout, "test %s \"%s\"\n", test, test_out);
+  if( strstr(test_out, TEST_DOMAIN2 ) != NULL &&
+      strlen(test_out) == 59 )
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
-    "oyjlStringReplace(start)                             " );
+    "oyjlStringReplace(start) %d 59 == %d                  ", n, (int)strlen(test_out) );
   } else
   { PRINT_SUB( oyjlTESTRESULT_FAIL,
-    "oyjlStringReplace(start)                             " );
+    "oyjlStringReplace(start) %d 59 == %d                  ", n, (int)strlen(test_out) );
   }
   myDeAllocFunc(test_out);
 
-  test_out = oyjlStringReplace( test, "display.", "foo.", 0,0 );
-  //fprintf(zout, "test %s \"%s\"\n", test, test_out);
-  if( strstr(test_out, "foo" ) != NULL )
+  test_out = oyjlStringCopy(test,malloc);
+  n = oyjlStringReplace( &test_out, "display.", "foo.", 0,0 );
+  if(verbose)
+    fprintf(zout, "test %s \"%s\"\n", test, test_out);
+  if( strstr(test_out, "foo" ) != NULL &&
+      strlen(test_out) == 51 &&
+      n == 1 )
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
-    "oyjlStringReplace(middle)                            " );
+    "oyjlStringReplace(middle) 51 == %d                   ", (int)strlen(test_out) );
   } else
   { PRINT_SUB( oyjlTESTRESULT_FAIL,
-    "oyjlStringReplace(middle)                            " );
+    "oyjlStringReplace(middle) 51 == %d                   ", (int)strlen(test_out) );
   }
   myDeAllocFunc(test_out);
 
-  test_out = oyjlStringReplace( test, "display_name", "bar", 0,0 );
-  //fprintf(zout, "test %s \"%s\"\n", test, test_out);
+  test_out = oyjlStringCopy(test,malloc);
+  n = oyjlStringReplace( &test_out, "display_name", "bar", 0,0 );
+  if(verbose)
+    fprintf(zout, "test %s \"%s\"\n", test, test_out);
   if( strstr(test_out, "bar" ) != NULL &&
-      strstr(test_out, "barbar" ) == NULL)
+      strstr(test_out, "barbar" ) == NULL &&
+      strlen(test_out) == 46 &&
+      n == 1 )
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
-    "oyjlStringReplace(end)                               " );
+    "oyjlStringReplace(end)    46 == %d                   ", (int)strlen(test_out) );
   } else
   { PRINT_SUB( oyjlTESTRESULT_FAIL,
-    "oyjlStringReplace(end)                               " );
+    "oyjlStringReplace(end)    46 == %d                   ", (int)strlen(test_out) );
+  }
+  myDeAllocFunc(test_out);
+
+  char * compare;
+  compare = test_out = oyjlStringCopy(test,malloc);
+  n = oyjlStringReplace( &test_out, "not_inside", "bar", 0,0 );
+  if(verbose)
+    fprintf(zout, "test %s \"%s\"\n", test, test_out);
+  if( compare && compare == test_out &&
+      n == 0 &&
+      strcmp(compare,test) == 0 )
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+    "oyjlStringReplace(none)                              " );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL,
+    "oyjlStringReplace(none)                              " );
+  }
+  myDeAllocFunc(test_out);
+
+  test_out = oyjlStringCopy(test,malloc);
+  n = oyjlStringReplace( &test_out, "display", "moni", 0,0 );
+  if(verbose)
+    fprintf(zout, "test %s \"%s\"\n", test, test_out);
+  if( strlen(test) > strlen(test_out) &&
+      strlen(test_out) == 49 &&
+      n == 2 )
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+    "oyjlStringReplace(shorter) 49 == %d                  ", (int)strlen(test_out) );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL,
+    "oyjlStringReplace(shorter) 49 == %d                  ", (int)strlen(test_out) );
+  }
+  myDeAllocFunc(test_out);
+
+  test_out = oyjlStringCopy(test,malloc);
+  n = oyjlStringReplace( &test_out, "display", "monitorXYZ", 0,0 );
+  if(verbose)
+    fprintf(zout, "test %s \"%s\"\n", test, test_out);
+  if( strlen(test) < strlen(test_out) &&
+      strlen(test_out) == 61 &&
+      n == 2 )
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+    "oyjlStringReplace(longer) 61 == %d                   ", (int)strlen(test_out) );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL,
+    "oyjlStringReplace(longer) 61 == %d                   ", (int)strlen(test_out) );
   }
   myDeAllocFunc(test_out);
 
@@ -194,6 +251,135 @@ oyjlTESTRESULT_e testStringRun ()
   { PRINT_SUB( oyjlTESTRESULT_FAIL,
     "oyjlStringToDouble(\"0.2\") = %g  error = %d            ", d, error );
   }
+
+  double * doubles = NULL;
+  int count = 0;
+  error = oyjlStringsToDoubles( "0.2 1 3.5", ' ', &count, malloc, &doubles );
+  if( !error &&
+      doubles[0] == 0.2 &&
+      doubles[1] == 1.0 &&
+      doubles[2] == 3.5 &&
+      count == 3)
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+    "oyjlStringsToDoubles(\"0.2 1 3.5\") error = %d          ", error );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL,
+    "oyjlStringsToDoubles(\"0.2 1 3.5\") error = %d          ", error );
+  }
+  if(doubles) { free(doubles); } doubles = NULL;
+
+  error = oyjlStringsToDoubles( "0.2", ' ', &count, malloc, &doubles );
+  if( !error &&
+      doubles[0] == 0.2 &&
+      count == 1)
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+    "oyjlStringsToDoubles(\"0.2\") error = %d                ", error );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL,
+    "oyjlStringsToDoubles(\"0.2\") error = %d                ", error );
+  }
+  if(doubles) { free(doubles); } doubles = NULL;
+
+  error = oyjlStringsToDoubles( "0.2;1;3.5", ';', &count, malloc, &doubles );
+  if( !error &&
+      doubles[0] == 0.2 &&
+      doubles[1] == 1.0 &&
+      doubles[2] == 3.5 &&
+      count == 3)
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+    "oyjlStringsToDoubles(\"0.2;1;3.5\") error = %d          ", error );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL,
+    "oyjlStringsToDoubles(\"0.2;1;3.5\") error = %d          ", error );
+  }
+  if(doubles) { free(doubles); } doubles = NULL;
+
+  error = oyjlStringsToDoubles( "0.2 ; 1; 3.5 cm", ';', &count, malloc, &doubles );
+  if( doubles[0] == 0.2 &&
+      doubles[1] == 1.0 &&
+      doubles[2] == 3.5 &&
+      count == 3)
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+    "oyjlStringsToDoubles(\"0.2 ; 1; 3.5 cm\") error = %d   ", error );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL,
+    "oyjlStringsToDoubles(\"0.2 ; 1; 3.5 cm\") error = %d   ", error );
+  }
+  if(doubles) { free(doubles); } doubles = NULL;
+
+  error = oyjlStringsToDoubles( "0.2,1,3.5", ',', &count, malloc, &doubles );
+  if( !error &&
+      doubles[0] == 0.2 &&
+      doubles[1] == 1.0 &&
+      doubles[2] == 3.5 &&
+      count == 3)
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+    "oyjlStringsToDoubles(\"0.2,1,3.5\") error = %d          ", error );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL,
+    "oyjlStringsToDoubles(\"0.2,1,3.5\") error = %d          ", error );
+  }
+  if(doubles) { free(doubles); } doubles = NULL;
+
+  error = oyjlStringsToDoubles( "x=0.2,one dot five,", ',', &count, malloc, &doubles );
+  if( error > 0 &&
+      count == 3)
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+    "oyjlStringsToDoubles(\"x=0.2:,one dot five,\") error = %d ", error );
+  } else
+  { PRINT_SUB( oyjlTESTRESULT_FAIL,
+    "oyjlStringsToDoubles(\"x=0.2:,one dot five,\") error = %d ", error );
+  }
+  if(doubles) { free(doubles); } doubles = NULL;
+
+  double clck = oyjlClock();
+  char * t = NULL;
+  n = 10000;
+  for(i = 0; i < n; ++i)
+    oyjlStringAdd( &t, 0,0, "/%s/%s", "more", "and" );
+  clck = oyjlClock() - clck;
+  fprintf( zout, "oyjlStringAdd()\t%dx9  %d               \t\%s\n", n, (int)strlen(t),
+                 oyjlProfilingToString(n,clck/(double)CLOCKS_PER_SEC,"ops"));
+  if(t) { free(t); t = NULL; }
+
+  clck = oyjlClock();
+  for(i = 0; i < n; ++i)
+    oyjlStringAddN( &t, "/more/and", 9, malloc,free );
+  clck = oyjlClock() - clck;
+  fprintf( zout, "oyjlStringAddN()\t%dx9  %d       \t\%s\n", n, (int)strlen(t),
+                 oyjlProfilingToString(n,clck/(double)CLOCKS_PER_SEC,"ops"));
+
+  n = 1000;
+  clck = oyjlClock();
+  int len OYJL_UNUSED;
+  for(i = 0; i < n; ++i)
+    len = strlen( t );
+  clck = oyjlClock() - clck;
+  fprintf( zout, "strlen()\t%dx  %d             \t\%s\n", n, (int)strlen(t),
+                 oyjlProfilingToString(n,clck/(double)CLOCKS_PER_SEC,"ops"));
+
+  if(t) { free(t); t = NULL; }
+
+  n = 1000000;
+  t = calloc(10*n,sizeof(char));
+  clck = oyjlClock();
+  for(i = 0; i < n; ++i)
+    memcpy( &t[9*i], "/more/and", 9 );
+  clck = oyjlClock() - clck;
+  fprintf( zout, "memcpy()\t%dx9  %d           \t\%s\n", n, (int)strlen(t),
+                 oyjlProfilingToString(n,clck/(double)CLOCKS_PER_SEC,"ops"));
+  if(t) { free(t); t = NULL; }
+
+  oyjl_str string = oyjlStrNew(10, 0,0);
+  clck = oyjlClock();
+  n = 1000000;
+  for(i = 0; i < n; ++i)
+    oyjlStrAppendN( string, "/more/and", 9 );
+  clck = oyjlClock() - clck;
+  fprintf( zout, "oyjlStrAppendN()\t%dx9  %d    \t\%s\n", n, (int)strlen(oyjlStr(string)),
+                 oyjlProfilingToString(n,clck/(double)CLOCKS_PER_SEC,"ops"));
+  oyjlStrRelease( &string );
+
   return result;
 }
 
@@ -251,7 +437,7 @@ oyjlTESTRESULT_e testArgs()
 
   /* tell about the tool */
   oyjlUi_s * ui = oyjlUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
-                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "oi-logo",
+                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "logo",
                                        sections, oarray, groups, NULL );
 
   if(ui)
@@ -265,7 +451,7 @@ oyjlTESTRESULT_e testArgs()
 
   argc = 2;
   ui = oyjlUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
-                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "oi-logo",
+                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "logo",
                                        sections, oarray, groups, NULL );
 
   if(ui)
@@ -279,7 +465,7 @@ oyjlTESTRESULT_e testArgs()
 
   argc = 3;
   ui = oyjlUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
-                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "oi-logo",
+                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "logo",
                                        sections, oarray, groups, &state );
   if(!ui)
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
@@ -292,7 +478,7 @@ oyjlTESTRESULT_e testArgs()
 
   argc = 4;
   ui = oyjlUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
-                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "oi-logo",
+                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "logo",
                                        sections, oarray, groups, NULL );
   if(ui && strcmp(file,"file-name.json") == 0)
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
@@ -305,7 +491,7 @@ oyjlTESTRESULT_e testArgs()
 
   argc = 5;
   ui = oyjlUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
-                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "oi-logo",
+                                       "oiCR", "oyjl-config-read", _("Short example tool using libOyjl"), "logo",
                                        sections, oarray, groups, &state );
   if(!ui)
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
@@ -319,7 +505,7 @@ oyjlTESTRESULT_e testArgs()
 
   argc = 4;
   ui = oyjlUi_Create( argc, argv, /* argc+argv are required for parsing the command line options */
-                                       "oyjl-config-read", "Oyjl Config Reader", _("Short example tool using libOyjl"), "oi-logo",
+                                       "oyjl-config-read", "Oyjl Config Reader", _("Short example tool using libOyjl"), "logo",
                                        sections, oarray, groups, NULL );
   int size = 0;
   char * text = oyjlUi_ToJson( ui, 0 );
@@ -374,7 +560,7 @@ oyjlTESTRESULT_e testArgs()
 
   oyjlUi_Release( &ui);
   char * wrong = "test";
-  fprintf(stdout, "oyjlUi_Release(&\"test\")\n" );
+  fprintf(stdout, "oyjlUi_Release(&\"test\") - should give a warning message:\n" );
   oyjlUi_Release( (oyjlUi_s **)&wrong);
 
   free(oarray[0].values.choices.list);
@@ -383,6 +569,8 @@ oyjlTESTRESULT_e testArgs()
   return result;
 }
 
+
+void oyjlTreeToJson2 (oyjl_val v, int * level, char ** json);
 
 oyjlTESTRESULT_e testTree ()
 {
@@ -425,7 +613,8 @@ oyjlTESTRESULT_e testTree ()
   { PRINT_SUB( oyjlTESTRESULT_FAIL,
     "oyjlTreeNew( \"new/tree/key\" )       %d", (int)len );
   }
-  fprintf( zout, "%s\n", rjson );
+  if(verbose)
+    fprintf( zout, "%s\n", rjson );
   myDeAllocFunc( rjson ); rjson = NULL;
 
   value = oyjlTreeGetValue( root, 0, "new/[0]" );
@@ -470,7 +659,8 @@ oyjlTESTRESULT_e testTree ()
   { PRINT_SUB( oyjlTESTRESULT_FAIL,
     "oyjlValueSetString( %s )         %d", VALUE, (int)strlen(rjson) );
   }
-  fprintf( zout, "%s\n", rjson );
+  if(verbose)
+    fprintf( zout, "%s\n", rjson );
   len = strlen(rjson);
   myDeAllocFunc( rjson ); rjson = NULL;
 
@@ -496,11 +686,34 @@ oyjlTESTRESULT_e testTree ()
   }
   oyjlTreeFree( root );
 
+  double clck = oyjlClock();
+  root = oyjlTreeNew("");
+  int n = 10000;
+  for(i = 0; i < n; ++i)
+    oyjlTreeSetStringF( root, OYJL_CREATE_NEW, "value", "data/key-%d", i );
+  clck = oyjlClock() - clck;
+  fprintf( zout, "oyjTreeSetStringF()\t%dx              \t\%s\n", n,
+                 oyjlProfilingToString(n,clck/(double)CLOCKS_PER_SEC,"node"));
+  i = 0;
+
+  clck = oyjlClock();
+  oyjlTreeToJson2( root, &i, &rjson ); i = 0;
+  clck = oyjlClock() - clck;
+  fprintf( zout, "oyjTreeToJson2()       \t1x %d            \t\%s\n", (int)strlen(rjson),
+                 oyjlProfilingToString(1,clck/(double)CLOCKS_PER_SEC,"dump"));
+  myDeAllocFunc( rjson ); rjson = NULL;
+
+  clck = oyjlClock();
+  oyjlTreeToJson( root, &i, &rjson ); i = 0;
+  clck = oyjlClock() - clck;
+  fprintf( zout, "oyjTreeToJson()        \t1x %d            \t\%s\n", (int)strlen(rjson),
+                 oyjlProfilingToString(1,clck/(double)CLOCKS_PER_SEC,"dump"));
+  myDeAllocFunc( rjson ); rjson = NULL;
+
   return result;
 }
 
 
 /* --- end actual tests --- */
 
-#include "oyjl_test_main.h"
 

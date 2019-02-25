@@ -16,29 +16,58 @@
 
 #include "oyjl_test.h"
 
-/** \addtogroup oyjl_test
- *
- *  Define somewhere in your test.c file a TESTS_RUN
- *  with your test functions like:
- *  @code
-#define TESTS_RUN \
-  TEST_RUN( testVersion, "Version matching", 1 ); \
-  TEST_RUN( testJson, "JSON handling", 1 ); \
-  TEST_RUN( testFromJson, "Data Writers", 1 ); \
-  TEST_RUN( testJsonRoundtrip, "Data Readers", 1 );
-    @endcode
- *  Then include simply the oyjl_test_main.h header and it defines
- *  a main() function for you to handle command line parsing, statistics
- *  and summary printing after test program finish.
- *
- *  @example test.c
+/** \addtogroup oyjl
  *  @{ *//* oyjl */
+
+/** \addtogroup oyjl_test
+ *  @{ *//* oyjl_test */
+
+/** @brief print more results, when the -v argument is passed to the test program. */
+int verbose = 0;
+
+extern int * oyjl_debug;
+
+#ifndef OYJL_TEST_MAIN_SETUP
+/** @brief setup Oyjl to your needs by defining this macro
+ *
+ *  The macro is called as first entry inside oyjl_test_main.h defined main().
+ *  @code
+    #include <oyjl.h> // declare oyjlDebugVariableSet()
+    int my_debug_variable = 0;
+
+    #define OYJL_TEST_MAIN_SETUP oyjlDebugVariableSet( &my_debug_variable ); printf("\n    My Test Program\n");
+    #include <oyjl_test_main.h> // inject code from OYJL_TEST_MAIN_SETUP into main() start
+    @endcode
+ *
+ *  The above example let your code set your own debug variable. So you can
+ *  see if the -v -v option was set, as that increases *oyjl_debug += 1.
+ *  Or you can e.g. redefine zout to default to a FILE pointer instead of
+ *  stdout.
+ */
+#define OYJL_TEST_MAIN_SETUP
+#endif
+
+#ifndef OYJL_TEST_MAIN_FINISH
+/** @brief end your test program as you need by defining this macro
+ *
+ *  Place this macro in front of your #include oyjl_test_main.h.
+ *  The macro is called as last entry inside oyjl_test_main.h defined main().
+ *  @code
+    #define OYJL_TEST_MAIN_FINISH printf("\n    My Test Program finished\n\n");
+    @endcode
+ */
+#define OYJL_TEST_MAIN_FINISH
+#endif
+
 /** @brief simple start function for testing program */
 int main(int argc, char** argv)
 {
   int i, error = 0,
       argpos = 1,
       list = 0;
+
+  /** The ::OYJL_TEST_MAIN_SETUP macro can be used to do something initially. */
+  OYJL_TEST_MAIN_SETUP
 
   zout = stdout;  /* printed inbetween results */
 
@@ -53,14 +82,31 @@ int main(int argc, char** argv)
   }
 
   colorterm = getenv("COLORTERM");
+  if(!colorterm) colorterm = getenv("TERM");
 
   i = 1; while(i < argc) if( strcmp(argv[i++],"--silent") == 0 )
   { ++argpos;
     zout = stderr;
   }
 
-  fprintf( zout, "\nTests"
-           "\n\n" );
+  /** Use the verbose variable in your test code to enable additional result printing.
+   *  The test command argument '-v' will set the verbose variable to 1, default is 0.
+   */
+  i = 1; while(i < argc) if( strcmp(argv[i++],"-v") == 0 )
+  { ++argpos;
+    if(verbose)
+      *oyjl_debug += 1;
+    verbose = 1;
+  }
+
+  i = 1; while(i < argc) if( strcmp(argv[i++],"-h") == 0 )
+  { ++argpos;
+    fprintf( stdout, "    Hint: the '-l' option will list all test names\n" );
+    fprintf( stdout, "    Hint: the '-v' option enables the 'verbose' variable\n" );
+    fprintf( stdout, "    Hint: the '--silent' option sends all zout printing to stderr\n" );
+    fprintf( stdout, "    Hint: the '-h' option prints this help text\n" );
+    return 0;
+  }
 
   memset(tests_xfailed, 0, sizeof(char*) * tn);
   memset(tests_failed, 0, sizeof(char*) * tn);
@@ -81,7 +127,7 @@ int main(int argc, char** argv)
     {
       if(!results[i]) colorterm = NULL;
       fprintf( stdout, "    Tests with status %s:\t%d\n",
-                       oyTestResultToString( (oyjlTESTRESULT_e)i ), results[i] );
+                       oyjlTestResultToString( (oyjlTESTRESULT_e)i ), results[i] );
       colorterm = colorterm_;
     }
 
@@ -93,22 +139,26 @@ int main(int argc, char** argv)
     for(i = 0; i < tn; ++i)
       if(tests_xfailed[i])
         fprintf( stdout, "    %s: [%d] \"%s\"\n",
-                 oyTestResultToString( oyjlTESTRESULT_XFAIL), i, tests_xfailed[i] );
+                 oyjlTestResultToString( oyjlTESTRESULT_XFAIL), i, tests_xfailed[i] );
     for(i = 0; i < tn; ++i)
       if(tests_failed[i])
         fprintf( stdout, "    %s: [%d] \"%s\"\n",
-                 oyTestResultToString( oyjlTESTRESULT_FAIL), i, tests_failed[i] );
+                 oyjlTestResultToString( oyjlTESTRESULT_FAIL), i, tests_failed[i] );
 
     if(error)
-      fprintf( stdout, "    Tests %s\n", oyjlTermColor_( oyRED, "FAILED" ) );
+      fprintf( stdout, "    Tests %s\n", oyjlTermColor_( oyjlRED, "FAILED" ) );
     else
-      fprintf( stdout, "    Tests %s\n", oyjlTermColor_( oyGREEN, "SUCCEEDED" ) );
+      fprintf( stdout, "    Tests %s\n", oyjlTermColor_( oyjlGREEN, "SUCCEEDED" ) );
 
     fprintf( stdout, "\n    Hint: the '-l' option will list all test names\n" );
   }
 
+  /** The ::OYJL_TEST_MAIN_FINISH macro can be used to do something after all tests. */
+  OYJL_TEST_MAIN_FINISH
+
   return error;
 }
-/*  @} *//* oyjl */
+/*  @} *//* oyjl_test */
+/** @} *//* oyjl */
 
 #endif /* OYJL_TEST_MAIN_H */

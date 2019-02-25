@@ -37,8 +37,22 @@
  *  @brief API testing for prototyping and regression checking in CI
  *
  *  The API is designed to be easily useable without much boilerplate.
+ *  The implementation is declared and defined in header only. No
+ *  extra linking is needed, except of libm and libc where required.
  *
- *  \b Example @ref test.c
+ *  Define somewhere in your test.c file a TESTS_RUN
+ *  with your test functions like:
+ *  @code
+#define TESTS_RUN \
+  TEST_RUN( testVersion, "Version matching", 1 ); \
+  TEST_RUN( testJson, "JSON handling", 1 ); \
+  TEST_RUN( testFromJson, "Data Writers", 1 ); \
+  TEST_RUN( testJsonRoundtrip, "Data Readers", 1 );
+    @endcode
+ *  Then include simply the oyjl_test_main.h header and it defines
+ *  a main() function for you to handle command line parsing, statistics
+ *  and summary printing after test program finish.
+ *
  *  @{ *//* oyjl_test */
 
 
@@ -63,22 +77,22 @@ typedef enum {
 } oyjlTESTRESULT_e;
 
 /* true color codes */
-#define RED_TC "\033[38;2;240;0;0m"
-#define GREEN_TC "\033[38;2;0;250;100m"
-#define BLUE_TC "\033[38;2;0;150;255m"
+#define OYJL_RED_TC "\033[38;2;240;0;0m"
+#define OYJL_GREEN_TC "\033[38;2;0;250;100m"
+#define OYJL_BLUE_TC "\033[38;2;0;150;255m"
 /* basic color codes */
-#define RED_B "\033[0;31m"
-#define GREEN_B "\033[0;32m"
-#define BLUE_B "\033[0;34m"
+#define OYJL_RED_B "\033[0;31m"
+#define OYJL_GREEN_B "\033[0;32m"
+#define OYJL_BLUE_B "\033[0;34m"
 /* switch back */
-#define CTEND "\033[0m"
+#define OYJL_CTEND "\033[0m"
 typedef enum {
-  oyRED,
-  oyGREEN,
-  oyBLUE
-} oyCOLORTERM_e;
+  oyjlRED,
+  oyjlGREEN,
+  oyjlBLUE
+} oyjlCOLORTERM_e;
 const char * colorterm = NULL;
-static const char * oyjlTermColor_( oyCOLORTERM_e rgb, const char * text) {
+static const char * oyjlTermColor_( oyjlCOLORTERM_e rgb, const char * text) {
   int len = strlen(text);
   static char t[256];
   int truecolor = colorterm && strcmp(colorterm,"truecolor") == 0;
@@ -87,33 +101,44 @@ static const char * oyjlTermColor_( oyCOLORTERM_e rgb, const char * text) {
   {
     switch(rgb)
     {
-      case oyRED: sprintf( t, "%s%s%s", truecolor ? RED_TC : color ? RED_B : "", text, CTEND ); break;
-      case oyGREEN: sprintf( t, "%s%s%s", truecolor ? GREEN_TC : color ? GREEN_B : "", text, CTEND ); break;
-      case oyBLUE: sprintf( t, "%s%s%s", truecolor ? BLUE_TC : color ? BLUE_B : "", text, CTEND ); break;
+      case oyjlRED: sprintf( t, "%s%s%s", truecolor ? OYJL_RED_TC : color ? OYJL_RED_B : "", text, OYJL_CTEND ); break;
+      case oyjlGREEN: sprintf( t, "%s%s%s", truecolor ? OYJL_GREEN_TC : color ? OYJL_GREEN_B : "", text, OYJL_CTEND ); break;
+      case oyjlBLUE: sprintf( t, "%s%s%s", truecolor ? OYJL_BLUE_TC : color ? OYJL_BLUE_B : "", text, OYJL_CTEND ); break;
     }
     return t;
   } else
     return text;
 }
 
-const char * oyTestResultToString    ( oyjlTESTRESULT_e      error )
+const char * oyjlTestResultToString  ( oyjlTESTRESULT_e      error )
 {
   const char * text = "";
   switch(error)
   {
-    case oyjlTESTRESULT_SYSERROR:text = oyjlTermColor_(oyRED,"SYSERROR"); break;
-    case oyjlTESTRESULT_FAIL:    text = oyjlTermColor_(oyRED,"FAIL"); break;
-    case oyjlTESTRESULT_XFAIL:   text = oyjlTermColor_(oyBLUE,"XFAIL"); break;
-    case oyjlTESTRESULT_SUCCESS: text = oyjlTermColor_(oyGREEN,"SUCCESS"); break;
-    case oyjlTESTRESULT_UNKNOWN: text = oyjlTermColor_(oyBLUE,"UNKNOWN"); break;
-    default:                   text = oyjlTermColor_(oyBLUE,"Huuch, what's that?"); break;
+    case oyjlTESTRESULT_SYSERROR:text = oyjlTermColor_(oyjlRED,"SYSERROR"); break;
+    case oyjlTESTRESULT_FAIL:    text = oyjlTermColor_(oyjlRED,"FAIL"); break;
+    case oyjlTESTRESULT_XFAIL:   text = oyjlTermColor_(oyjlBLUE,"XFAIL"); break;
+    case oyjlTESTRESULT_SUCCESS: text = oyjlTermColor_(oyjlGREEN,"SUCCESS"); break;
+    case oyjlTESTRESULT_UNKNOWN: text = oyjlTermColor_(oyjlBLUE,"UNKNOWN"); break;
+    default:                   text = oyjlTermColor_(oyjlBLUE,"Huuch, what's that?"); break;
   }
   return text;
 }
 
-/** printed inbetween results */
+/** FILE descriptor for printed inbetween results
+ *
+ *  A good default might be stdout for a CLI program.
+ */
 FILE * zout;
 static int test_number = 0;
+const char * oyjl_test_file = NULL;
+int oyjl_test_file_line = -1;
+void oyjlSetDbgPosition( const char * file, int line )
+{
+  oyjl_test_file = file;
+  oyjl_test_file_line = line;
+}
+#define OYJL_TEST_START oyjlSetDbgPosition(__FILE__,__LINE__-1);
 /** macro to register a test
  *  @see TESTS_RUN
  *  @param         prog                test function: oyjlTESTRESULT_e  (*test)(void)
@@ -140,6 +165,11 @@ int results[oyjlTESTRESULT_UNKNOWN+1];
 char * tests_failed[tn];
 char * tests_xfailed[tn];
 
+#ifndef MAX_PATH
+/* maximal path lenght, if not allready defined elsewhere */
+#define MAX_PATH 1024
+#endif
+
 /** run a test and print results on end
  *  @param         test                test function
  *  @param         test_name           short string for status line
@@ -150,18 +180,26 @@ oyjlTESTRESULT_e oyTestRun           ( oyjlTESTRESULT_e  (*test)(void),
                                        int                 number )
 {
   oyjlTESTRESULT_e error = oyjlTESTRESULT_UNKNOWN;
+  char * text = (char*) malloc(strlen(test_name) + (MAX_PATH) + 80);
+
+  oyjl_test_file = NULL;
+  oyjl_test_file_line = -1;
 
   fprintf( stdout, "\n________________________________________________________________\n" );
   fprintf(stdout, "Test[%d]: %s ... ", test_number, test_name );
 
   error = test();
 
-  fprintf(stdout, "\t%s", oyTestResultToString(error));
+  fprintf(stdout, "\t%s", oyjlTestResultToString(error));
 
+  if(oyjl_test_file && oyjl_test_file_line)
+    sprintf( text, "%s (%s:%d)", test_name, strchr(oyjl_test_file,'/')?strrchr(oyjl_test_file,'/') + 1 : oyjl_test_file, oyjl_test_file_line );
+  else
+    sprintf( text, "%s", test_name );
   if(error == oyjlTESTRESULT_FAIL)
-    tests_failed[number] = (char*)test_name;
+    tests_failed[number] = text;
   if(error == oyjlTESTRESULT_XFAIL)
-    tests_xfailed[number] = (char*)test_name;
+    tests_xfailed[number] = text;
   results[error] += 1;
 
   /* print */
@@ -174,15 +212,42 @@ oyjlTESTRESULT_e oyTestRun           ( oyjlTESTRESULT_e  (*test)(void),
 
 
 int oy_test_sub_count = 0;
-/** Print a custom line to stdout followed by the status and count state.
+/** @brief register status and print info of sub test
+ *
+ *  Print a custom line to stdout followed by the status. Register state.
+ *
+ *  The PRINT_SUB macro remembers the first file position of similar strongly
+ *  failed sub tests. As macros count the last closing brace ')', the
+ *  line number is set to (\_\_LINE\_\_ - 1). So it is suggested to place
+ *  the status macro in one line to let the position fall in front or use
+ *  a two line macro with falling the debug position in the start of the
+ *  macro. Here two examples:
+ *  @code
+    int i = 4; // debugging hint will show this line
+    if(i != 2) PRINT_SUB(oyjlTESTRESULT_FAIL, "i = %d", i);
+
+    if(i == 2)
+    {
+      PRINT_SUB( oyjlTESTRESULT_SUCCESS,
+      "i = %d", i );
+    }
+    else
+    {
+      // debugging hint will point to line below
+      PRINT_SUB( oyjlTESTRESULT_XFAIL,
+      "i = %d", i );
+    }
+    @endcode
+ *
  *  @param         result_             use oyjlTESTRESULT_e for
  *  @param         ...                 the argument list to fprint(stdout, ...)
  */
 #define PRINT_SUB( result_, ... ) { \
+  if((result_) < oyjlTESTRESULT_SUCCESS && (result_) < result) OYJL_TEST_START \
   if((result_) < result) \
     result = result_; \
   fprintf(stdout, ## __VA_ARGS__ ); \
-  fprintf(stdout, " ..\t%s", oyTestResultToString(result_)); \
+  fprintf(stdout, " ..\t%s", oyjlTestResultToString(result_)); \
   if((result_) <= oyjlTESTRESULT_FAIL) \
     fprintf(stdout, " !!! ERROR !!!" ); \
   fprintf(stdout, "\n" ); \
@@ -190,7 +255,7 @@ int oy_test_sub_count = 0;
 }
 
 /** helper to print a number inside ::PRINT_SUB(...) */
-const char  *  oyIntToString         ( int                 integer )
+const char  *  oyjlIntToString      ( int                 integer )
 {
   static char texts[3][255];
   static int a = 0;
@@ -207,7 +272,7 @@ const char  *  oyIntToString         ( int                 integer )
 }
 
 /** helper to print tempo in ::PRINT_SUB(...) */
-const char  *  oyProfilingToString   ( int                 integer,
+const char  *  oyjlProfilingToString ( int                 integer,
                                        double              duration,
                                        const char        * term )
 {

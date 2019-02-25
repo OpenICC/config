@@ -95,7 +95,26 @@ int            oyjlMessageFuncSet    ( oyjlMessage_f       message_func )
   return 0;
 }
 
-/** \addtogroup oyjl_core
+/** \addtogroup oyjl_core Core
+ *  @brief I/O and String Handling
+ *
+ *  Basic C FILE input and outpit is provided by oyjlWriteFile(), oyjlReadFile()
+ *  and oyjlReadFileStreamToMem().
+ *
+ *  A convinient set of string API's is available in the oyjlStringXXX family.
+ *  Those API's handle plain string arrays. oyjlStringAdd() uses variable args
+*   to format and append to a existing string. oyjlStringListXXX
+ *  API's handle plain arrays of strings.
+ *
+ *  The oyjl_str based oyStrXXX API's use a more carful memory
+ *  management and thus perform way faster on larger memory arrays as they
+ *  need fewer allocations and copies. oyjlStrNew() allocates a new object,
+ *  or oyjlStrNewFrom() wrappes a existing string array into a new object.
+ *  oyjlStr() lets you see the contained char array. oyjlStrAppendN()
+ *  performs fast concatenation. oyjlStrReplace() uses the object advantages.
+ *  oyjlStrPull() directly takes the char array out of control of the oyjl_str
+ *  object and oyjlStrRelease() frees the object and all memory.
+ *
  *  @{ *//* oyjl_core */
 
 /** @brief   convert a string into list
@@ -301,49 +320,33 @@ void       oyjlStringAddN            ( char             ** text,
 
 /** @brief   substitute pattern in a string
  *
- *  @param[in]     text                source string
+ *  @param[in,out] text                source string for in place manipulation
  *  @param[in]     search              pattern to be tested in text
  *  @param[in]     replacement         string to be put in place of search sub string
  *  @param[in]     alloc               custom allocator; optional, default is malloc
  *  @param[in]     deAlloc             custom deallocator matching alloc; optional, default is free
- *  @return                            manipulated result
+ *  @return                            number of occurences
  */
-char*      oyjlStringReplace         ( const char        * text,
+int        oyjlStringReplace         ( char             ** text,
                                        const char        * search,
                                        const char        * replacement,
                                        void*            (* alloc)(size_t),
                                        void             (* deAlloc)(void*) )
 {
   char * t = 0;
-  const char * start = text,
-             * end = text;
+  oyjl_str str;
+  int n = 0;
 
-  void*(* allocate)(size_t size) = alloc?alloc:malloc;
-  void (* deAllocate)(void * data ) = deAlloc?deAlloc:free;
+  if(!text || !*text || !(*text)[0])
+    return 0;
 
-  if(text && search && replacement)
-  {
-    int s_len = strlen(search);
-    while((end = strstr(start,search)) != 0)
-    {
-      oyjlStringAddN( &t, start, end-start, allocate, deAllocate );
-      oyjlStringAddN( &t, replacement, strlen(replacement), allocate, deAllocate );
-      if(strlen(end) >= (size_t)s_len)
-        start = end + s_len;
-      else
-      {
-        if(strstr(start,search) != 0)
-          oyjlStringAddN( &t, replacement, strlen(replacement), allocate, deAllocate );
-        start = end = end + s_len;
-        break;
-      }
-    }
-  }
+  str = oyjlStrNewFrom(text, 10, alloc,deAlloc);
+  n = oyjlStrReplace( str, search, replacement );
+  t = oyjlStrPull(str);
+  *text = t;
+  oyjlStrRelease( &str );
 
-  if(start && strlen(start))
-    oyjlStringAddN( &t, start, strlen(start), allocate, deAllocate );
-
-  return t;
+  return n;
 }
 
 
@@ -420,6 +423,7 @@ void       oyjlStringListAddStaticString (
 
   if(!list || !n) return;
 
+  if(!deAlloc) deAlloc = free;
   n_alt = *n;
 
   oyjlAllocHelper_m(nlist, char*, n_alt + 2, alloc, return);
@@ -521,7 +525,13 @@ int      oyjlStringToLong            ( const char        * text,
 
 /** @brief   text to double conversion
  *
+ *  @param[in]     text                string
+ *  @param[out]    value               resulting number
  *  @return                            error
+ *                                     - 0 : text input was completely read as number
+ *                                     - -1 : text input was read as number with white space or other text after
+ *                                     - 1 : missed text input
+ *                                     - 2 : no number detected
  *
  *  @version Oyranos: 0.9.7
  *  @date    2018/03/18
@@ -561,12 +571,322 @@ int          oyjlStringToDouble      ( const char        * text,
   if(save_locale) free( save_locale );
 #endif
 
-  if(p && p != text && p[0] == '\000')
+  if(p && p != t && p[0] == '\000')
     error = 0;
+  else if(p && p == t)
+  {
+    *value = NAN;
+    error = 2;
+  }
 
   free( t );
 
   return error;
+}
+
+/** @brief   text to double list
+ *
+ *  @param[in]     text                source string
+ *  @param[in]     delimiter           the char which marks the split; e.g. comma ','
+ *  @param[out]    count               number of detected string segments; optional
+ *  @param[in]     alloc               custom allocator; optional, default is malloc
+ *  @return                            error
+ *                                     - 0 : text input was completely read as number
+ *                                     - -1 : text input was read as number with white space or other text after
+ *                                     - 1 : missed text input
+ *                                     - 2 : no number detected
+ *
+ *  @version Oyranos: 0.9.7
+ *  @date    2019/01/23
+ *  @since   2019/01/23 (Oyranos: 0.9.7)
+ */
+int          oyjlStringsToDoubles    ( const char        * text,
+                                       char                delimiter,
+                                       int               * count,
+                                       void*            (* alloc)(size_t),
+                                       double           ** value )
+{
+  int error = 0, l_error = 0;
+  char ** list = NULL;
+  int n = 0, i;
+  double d;
+  char * val;
+  list = oyjlStringSplit( text, delimiter, &n, alloc );
+  if(n)
+    oyjlAllocHelper_m( *value, double, n + 1, alloc, return 1);
+  for( i = 0; i < n; ++i )
+  {
+    val = list[i];
+    l_error = oyjlStringToDouble( val, &d );
+    (*value)[i] = d;
+    if(!error || l_error > 0) error = l_error;
+    if(l_error > 0) break;
+  }
+  if(count)
+    *count = n;
+
+  return error;
+}
+
+/**
+ *  A string representation with preallocation for faster memory
+ *  work on especially larger strings.
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/02/14
+ *  @since   2019/02/14 (Oyjl: 1.0.0)
+ */
+struct oyjl_string_s
+{
+    char * s;                          /**< @brief UTF-8 text */
+    size_t len;                        /**< @brief string length. */
+    size_t alloc_len;                  /**< @brief last string allocation. */
+    void*(*alloc)(size_t);             /**< @brief custom allocator; optional, default is malloc */
+    void (*deAlloc)(void*);            /**< @brief custom deallocator; optional, default is free */
+    int    alloc_count;
+};
+
+/** @brief   allocate string object
+ *
+ *  @param[in]     length              the preallocation length
+ *  @param[in]     alloc               custom allocator; optional, default is malloc
+ *  @param[in]     deAlloc             custom deallocator; optional, default is free
+ *  @return                            the object
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/02/14
+ *  @since   2019/02/14 (Oyjl: 1.0.0)
+ */
+oyjl_str   oyjlStrNew                ( size_t              length,
+                                       void*            (* alloc)(size_t),
+                                       void             (* deAlloc)(void*) )
+{
+  struct oyjl_string_s * string = NULL;
+  if(!alloc) alloc = malloc;
+  if(!deAlloc) deAlloc = free;
+
+  oyjlAllocHelper_m( string, struct oyjl_string_s, 1, alloc, return NULL );
+  string->len = 0;
+  if(length == 0)
+    length = 8;
+  oyjlAllocHelper_m( string->s, char, length, alloc, return NULL );
+  string->s[0] = '\000';
+  string->alloc_len = length;
+  string->alloc = alloc;
+  string->deAlloc = deAlloc;
+  string->alloc_count = 1;
+
+  return (oyjl_str) string;
+}
+
+/** @brief   allocate string object from chars
+ *
+ *  Use this function to avoid allocation of already in memory char array.
+ *  Be careful, that the memory alloc and deAlloc args match the text storage.
+ *
+ *  @param[in]     text                text to pull into new object
+ *  @param[in]     length              the preallocation size of text or zero if unknown
+ *  @param[in]     alloc               custom allocator; optional, default is malloc
+ *  @param[in]     deAlloc             custom deallocator; optional, default is free
+ *  @return                            the object
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/02/15
+ *  @since   2019/02/15 (Oyjl: 1.0.0)
+ */
+oyjl_str   oyjlStrNewFrom            ( char             ** text,
+                                       size_t              length,
+                                       void*            (* alloc)(size_t),
+                                       void             (* deAlloc)(void*) )
+{
+  struct oyjl_string_s * string = NULL;
+  if(!alloc) alloc = malloc;
+  if(!deAlloc) deAlloc = free;
+
+  oyjlAllocHelper_m( string, struct oyjl_string_s, 1, alloc, return NULL );
+  string->len = strlen(*text);
+  if(length == 0)
+    length = string->len;
+  string->s = *text;
+  *text = NULL;
+  string->alloc_len = length;
+  string->alloc = alloc;
+  string->deAlloc = deAlloc;
+  string->alloc_count = 1;
+
+  return (oyjl_str) string;
+}
+
+/** @brief   fast append to the string end
+ *
+ *  @param[in]     string              string object
+ *  @param[in]     append              to be added text to string
+ *  @param[in]     append_len          length of append
+ *  @return                            error
+ */
+int        oyjlStrAppendN            ( oyjl_str            string,
+                                       const char        * append,
+                                       int                 append_len )
+{
+  struct oyjl_string_s * str = string;
+  int error = 0;
+  if(append && append_len)
+  {
+    if((append_len + str->len) >= str->alloc_len)
+    {
+      int len = (append_len + str->len) * 2;
+      char * edit = str->s;
+      oyjlAllocHelper_m( str->s, char, len, str->alloc, return 1 );
+      str->alloc_len = len;
+      ++str->alloc_count;
+      memcpy(str->s, edit, str->len);
+      str->deAlloc(edit);
+    }
+    memcpy( &str->s[str->len], append, append_len );
+    str->len += append_len;
+    str->s[str->len] = '\000';
+  }
+  return error;
+}
+
+/** @brief   substitute pattern in a string
+ *
+ *  @param[in,out] text                source string for in place manipulation
+ *  @param[in]     search              pattern to be tested in text
+ *  @param[in]     replacement         string to be put in place of search sub string
+ *  @return                            number of occurences
+ */
+int        oyjlStrReplace            ( oyjl_str            text,
+                                       const char        * search,
+                                       const char        * replacement )
+{
+  struct oyjl_string_s * str = text;
+  oyjl_str t = NULL;
+  const char * start, * end;
+  int n = 0;
+
+  if(!text)
+    return 0;
+
+  start = end = oyjlStr(text);
+
+  if(start && search && replacement)
+  {
+    int s_len = strlen(search);
+    while((end = strstr(start,search)) != 0)
+    {
+      if(!t) t = oyjlStrNew(10,0,0);
+      oyjlStrAppendN( t, start, end-start );
+      oyjlStrAppendN( t, replacement, strlen(replacement) );
+      ++n;
+      if(strlen(end) >= (size_t)s_len)
+        start = end + s_len;
+      else
+      {
+        if(strstr(start,search) != 0)
+          oyjlStrAppendN( t, replacement, strlen(replacement) );
+        start = end = end + s_len;
+        break;
+      }
+    }
+    if(n && start && end == NULL)
+      oyjlStrAppendN( t, start, strlen(start) );
+  }
+
+  if(t)
+  {
+    void (* deAlloc)(void*) = str->deAlloc;
+    if(str->s && str->alloc_len) deAlloc(str->s);
+    str->len = str->alloc_len = 0;
+
+    deAlloc = t->deAlloc;
+    if(str->alloc == t->alloc)
+    {
+      str->s = t->s;
+      str->len = t->len;
+      str->alloc_len = t->alloc_len;
+      str->alloc_count = t->alloc_count;
+      deAlloc(t); t = NULL;
+    } else
+    {
+      int length = 8;
+      oyjlAllocHelper_m( str->s, char, length, str->alloc, return 0 );
+      str->s[0] = '\000';
+      str->alloc_len = length;
+      oyjlStrAppendN( str, oyjlStr(t), strlen(oyjlStr(t)) );
+      oyjlStrRelease( &t );
+    }
+  }
+
+  return n;
+}
+
+/** @brief   move the wrapped char array out of the object
+ *
+ *  This function might be usefull if a plain string copy is too
+ *  expensive and the object memory allocation can be further
+ *  handled for the returned char pointer. After the operation
+ *  the objects internal char array will be reset to zero length.
+ *
+ *  @param[in,out] str                 the object, which will be reseted
+ *  @return                            the char array from str
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/02/15
+ *  @since   2019/02/15 (Oyjl: 1.0.0)
+ */
+char *     oyjlStrPull               ( oyjl_str            str )
+{
+  struct oyjl_string_s * string;
+  char * t = NULL;
+  int length = 8;
+
+  if(!str) return t;
+
+  string = str;
+  t = string->s;
+  string->s = NULL;
+
+  string->len = 0;
+  oyjlAllocHelper_m( string->s, char, length, string->alloc, return NULL );
+  string->s[0] = '\000';
+  string->alloc_len = length;
+  string->alloc_count = 1;
+  
+  return t;
+}
+
+/** @brief   release a string object
+ *
+ *  All references from previous oyjlStr() calls will be void.
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/02/14
+ *  @since   2019/02/14 (Oyjl: 1.0.0)
+ */
+void       oyjlStrRelease            ( oyjl_str          * string_ptr )
+{
+  struct oyjl_string_s * str;
+  if(!string_ptr) return;
+  str = *string_ptr;
+  void (* deAlloc)(void*) = str->deAlloc;
+  if(str->s) deAlloc(str->s);
+  deAlloc(str);
+  *string_ptr = NULL;
+}
+
+/** @brief   read only the wrapped char array
+ *
+ *  The returned array might become invalid with each
+ *  further call to the string object.
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/02/14
+ *  @since   2019/02/14 (Oyjl: 1.0.0)
+ */
+const char*oyjlStr                   ( oyjl_str            string )
+{
+  return (const char*)string->s;
 }
 
 /** @brief read FILE into memory
