@@ -1,4 +1,4 @@
-/*  @file oyjl_core.c
+/** @file oyjl_core.c
  *
  *  oyjl - string, file i/o and other basic helpers
  *
@@ -25,6 +25,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <ctype.h>   /* isspace() */
 #include <math.h>    /* NAN */
 #include <stdarg.h>  /* va_list */
 #include <stddef.h>  /* ptrdiff_t size_t */
@@ -32,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <wchar.h>  /* wcslen() */
 
 #include "oyjl.h"
 #include "oyjl_macros.h"
@@ -98,12 +100,12 @@ int            oyjlMessageFuncSet    ( oyjlMessage_f       message_func )
 /** \addtogroup oyjl_core Core
  *  @brief I/O and String Handling
  *
- *  Basic C FILE input and outpit is provided by oyjlWriteFile(), oyjlReadFile()
+ *  Basic C FILE input and output is provided by oyjlWriteFile(), oyjlReadFile()
  *  and oyjlReadFileStreamToMem().
  *
  *  A convinient set of string API's is available in the oyjlStringXXX family.
  *  Those API's handle plain string arrays. oyjlStringAdd() uses variable args
-*   to format and append to a existing string. oyjlStringListXXX
+ *  to format and append to a existing string. oyjlStringListXXX
  *  API's handle plain arrays of strings.
  *
  *  The oyjl_str based oyStrXXX API's use a more carful memory
@@ -117,10 +119,100 @@ int            oyjlMessageFuncSet    ( oyjlMessage_f       message_func )
  *
  *  @{ *//* oyjl_core */
 
+/* return the beginning of the next word */
+const char *   oyjlStringGetNext     ( const char        * text )
+{
+  /* remove leading white space */
+  if(text && text[0] && isspace(text[0]))
+  {
+    while( text && text[0] && isspace(text[0]) ) text++;
+    return text;
+  }
+
+  /* find the end of the word */
+  while( text && text[0] && !isspace(text[0]) ) text++;
+
+  /* find the next word */
+  while( text && text[0] && isspace(text[0]) ) text++;
+
+  return text && text[0] ? text : NULL;
+}
+int            oyjlStringNextSpace   ( const char        * text )
+{
+  int len = 0;
+  while( text && text[len] && !isspace(text[len]) ) len++;
+  return len;
+}
+
+/**
+ *   Assume some text and extract the found words.
+ *   The words can be separated by white space as 
+ *   seen by isspace().
+ */
+char **        oyjlStringSplitSpace  ( const char        * text,
+                                       int               * count,
+                                       void*            (* alloc)(size_t))
+{
+  char ** list = NULL;
+  int n = 0, i;
+
+  /* split the string by empty space */
+  if(text && text[0])
+  {
+    const char * tmp = text;
+
+    if(!alloc) alloc = malloc;
+
+    if(tmp && tmp[0] && !isspace(tmp[0])) ++n;
+    while( tmp && tmp[0] && (tmp = oyjlStringGetNext( tmp )) != NULL ) ++n;
+
+    if((list = alloc( (n+1) * sizeof(char*) )) == 0) return NULL;
+    memset( list, 0, (n+1) * sizeof(char*) );
+
+    {
+      const char * start = text;
+      if(start && isspace(start[0]))
+        start = oyjlStringGetNext( start );
+
+      for(i = 0; i < n; ++i)
+      {
+        int len = oyjlStringNextSpace( start );
+
+        if((list[i] = alloc( len+1 )) == 0) return NULL;
+
+        memcpy( list[i], start, len );
+        list[i][len] = 0;
+        start = oyjlStringGetNext( start );
+      }
+    }
+  }
+
+  if(count)
+    *count = n;
+
+  return list;
+}
+
+const char * oyjlStringDelimiter ( const char * text, const char * delimiter, int * length )
+{
+  int i,j, dn = delimiter ? strlen(delimiter) : 0, len = text?strlen(text):0;
+  for(j = 0; j < len; ++j)
+    for(i = 0; i < dn; ++i)
+      if(text[j] && text[j] == delimiter[i])
+      {
+        if(length)
+          *length = j;
+        return &text[j];
+      }
+  return NULL;
+}
+
 /** @brief   convert a string into list
  *
  *  @param[in]     text                source string
- *  @param[in]     delimiter           the char which marks the split; e.g. comma ','
+ *  @param[in]     delimiter           the char which marks the split;
+ *                                     e.g. comma ','; optional;
+ *                                     default zero: extract white space separated words
  *  @param[out]    count               number of detected string segments; optional
  *  @param[in]     alloc               custom allocator; optional, default is malloc
  *  @return                            array of detected string segments
@@ -130,31 +222,61 @@ char **        oyjlStringSplit       ( const char        * text,
                                        int               * count,
                                        void*            (* alloc)(size_t))
 {
+  char d[2] = { delimiter, '\000' };
+  return oyjlStringSplit2( text, d, count, NULL, alloc );
+}
+
+/** @brief   convert a string into list
+ *
+ *  @param[in]     text                source string
+ *  @param[in]     delimiter           the ASCII char which marks the split;
+ *                                     e.g. comma ","; optional;
+ *                                     default zero: extract white space separated words
+ *  @param[out]    count               number of detected string segments; optional
+ *  @param[out]    index               to be allocated array of detected delimiter indexes; The array will contain the list of indexes in text, which lead to the actual split positional index.; optional
+ *  @param[in]     alloc               custom allocator; optional, default is malloc
+ *  @return                            array of detected string segments
+ */
+char **        oyjlStringSplit2      ( const char        * text,
+                                       const char        * delimiter,
+                                       int               * count,
+                                       int              ** index,
+                                       void*            (* alloc)(size_t))
+{
   char ** list = 0;
   int n = 0, i;
 
   /* split the path search string by a delimiter */
-  if(text && text[0] && delimiter)
+  if(text && text[0])
   {
     const char * tmp = text;
 
     if(!alloc) alloc = malloc;
 
-    if(tmp[0] == delimiter) ++n;
+    if(!delimiter || !delimiter[0])
+      return oyjlStringSplitSpace( text, count, alloc );
+
+    tmp = oyjlStringDelimiter(tmp, delimiter, NULL);
+    if(tmp == text) ++n;
+    tmp = text;
     do { ++n;
-    } while( (tmp = strchr(tmp + 1, delimiter)) );
+    } while( (tmp = oyjlStringDelimiter(tmp + 1, delimiter, NULL)) );
 
     tmp = 0;
 
-    if((list = alloc( (n+1) * sizeof(char*) )) == 0) return NULL;
+    if((list = alloc( (n+1) * sizeof(char*) )) == NULL) return NULL;
     memset( list, 0, (n+1) * sizeof(char*) );
+    if(index && (*index = alloc( n * sizeof(int) )) == NULL) { free(list); return NULL; }
+    if(index) memset( *index, 0, n * sizeof(int) );
 
     {
       const char * start = text;
       for(i = 0; i < n; ++i)
       {
         intptr_t len = 0;
-        char * end = strchr(start, delimiter);
+        int length = 0;
+        const char * end = oyjlStringDelimiter(start, delimiter, &length);
+        if(index && length) (*index)[i] = length + start - text;
 
         if(end > start)
           len = end - start;
@@ -210,7 +332,7 @@ char *     oyjlStringCopy            ( const char        * string,
  *  @param[in]     deAlloc             custom deallocator matching alloc; optional, default is free
  *  @param[in]     format              printf style format string
  *  @param[in]     ...                 argument list for format
- *  @return                            constructed string
+ *  @return                            error
  */
 int        oyjlStringAdd             ( char             ** string,
                                        void*            (* alloc)(size_t size),
@@ -340,8 +462,8 @@ int        oyjlStringReplace         ( char             ** text,
   if(!text || !*text || !(*text)[0])
     return 0;
 
-  str = oyjlStrNewFrom(text, 10, alloc,deAlloc);
-  n = oyjlStrReplace( str, search, replacement );
+  str = oyjlStrNewFrom(text, 0, alloc,deAlloc);
+  n = oyjlStrReplace( str, search, replacement, 0, NULL );
   t = oyjlStrPull(str);
   *text = t;
   oyjlStrRelease( &str );
@@ -511,7 +633,10 @@ void     oyjlStringListAddList       ( char            *** list,
 }
 
 
-/** show better const behaviour and return instant error status */
+/** show better const behaviour and return instant error status over strtol()
+ *
+ *  @return                            error
+ */
 int      oyjlStringToLong            ( const char        * text,
                                        long              * value )
 {
@@ -541,7 +666,7 @@ int          oyjlStringToDouble      ( const char        * text,
                                        double            * value )
 {
   char * p = NULL, * t = NULL;
-  int len;
+  int len, pos = 0;
   int error = -1;
 #ifdef OYJL_HAVE_LOCALE_H
   char * save_locale = oyjlStringCopy( setlocale(LC_NUMERIC, 0 ), malloc );
@@ -562,7 +687,9 @@ int          oyjlStringToDouble      ( const char        * text,
   oyjlAllocHelper_m( t, char, len + 2*sizeof(double) + 1, malloc, return 1);
   memset( t, 0, len + 2*sizeof(double) + 1 );
 
-  memcpy( t, text, len );
+  /* remove leading empty space */
+  while(text[pos] && isspace(text[pos])) pos++;
+  memcpy( t, &text[pos], len );
 
   *value = strtod( t, &p );
 
@@ -587,7 +714,7 @@ int          oyjlStringToDouble      ( const char        * text,
 /** @brief   text to double list
  *
  *  @param[in]     text                source string
- *  @param[in]     delimiter           the char which marks the split; e.g. comma ','
+ *  @param[in]     delimiter           the ASCII char(s) which mark the split; e.g. comma ","
  *  @param[out]    count               number of detected string segments; optional
  *  @param[in]     alloc               custom allocator; optional, default is malloc
  *  @return                            error
@@ -597,11 +724,11 @@ int          oyjlStringToDouble      ( const char        * text,
  *                                     - 2 : no number detected
  *
  *  @version Oyranos: 0.9.7
- *  @date    2019/01/23
+ *  @date    2019/07/30
  *  @since   2019/01/23 (Oyranos: 0.9.7)
  */
 int          oyjlStringsToDoubles    ( const char        * text,
-                                       char                delimiter,
+                                       const char        * delimiter,
                                        int               * count,
                                        void*            (* alloc)(size_t),
                                        double           ** value )
@@ -611,7 +738,11 @@ int          oyjlStringsToDoubles    ( const char        * text,
   int n = 0, i;
   double d;
   char * val;
-  list = oyjlStringSplit( text, delimiter, &n, alloc );
+
+  if(!text || !text[0])
+    return 0;
+
+  list = oyjlStringSplit2( text, delimiter, &n, NULL, alloc );
   if(n)
     oyjlAllocHelper_m( *value, double, n + 1, alloc, return 1);
   for( i = 0; i < n; ++i )
@@ -627,6 +758,31 @@ int          oyjlStringsToDoubles    ( const char        * text,
 
   return error;
 }
+
+/** @brief   number of letters in a UTF-8 string
+ *
+ *  A convinience wrapper for wcslen().
+ *
+ *  @param[in]     text                source string
+ *  @return                            letters
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/08/06
+ *  @since   2019/08/06 (Oyjl: 1.0.0)
+ */
+int        oyjlWStringLen            ( const char        * text )
+{
+  int len = strlen(text), wlen = 0;
+  wchar_t * wcs = (wchar_t*) calloc( len + 1, sizeof(wchar_t) );
+  if(wcs)
+  {
+    mbstowcs( wcs, text, len + 1 );
+    wlen = wcslen(wcs);
+    free(wcs);
+  }
+  return wlen;
+}
+
 
 /**
  *  A string representation with preallocation for faster memory
@@ -690,6 +846,7 @@ oyjl_str   oyjlStrNew                ( size_t              length,
  *  @param[in]     deAlloc             custom deallocator; optional, default is free
  *  @return                            the object
  *
+ *
  *  @version Oyjl: 1.0.0
  *  @date    2019/02/15
  *  @since   2019/02/15 (Oyjl: 1.0.0)
@@ -749,16 +906,61 @@ int        oyjlStrAppendN            ( oyjl_str            string,
   return error;
 }
 
+/** @brief   sprintf for oyjl_str
+ *
+ *  The function adds memory management over standard sprintf().
+ *
+ *  @param[in]     string              source string
+ *  @param[in]     format              printf style format string
+ *  @param[in]     ...                 argument list for format
+ *  @return                            error
+ */
+int        oyjlStrAdd                ( oyjl_str            string,
+                                       const char        * format,
+                                                           ... )
+{
+  struct oyjl_string_s * str = string;
+  char * text = 0;
+
+  void*(* allocate)(size_t size) = str->alloc;
+  void (* deAllocate)(void * data ) = str->deAlloc;
+
+  OYJL_CREATE_VA_STRING(format, text, allocate, return 1)
+
+  if(text)
+  {
+    oyjlStrAppendN( string, text, strlen(text) );
+    deAllocate( text );
+  }
+
+  return 0;
+}
+
+
 /** @brief   substitute pattern in a string
  *
  *  @param[in,out] text                source string for in place manipulation
  *  @param[in]     search              pattern to be tested in text
  *  @param[in]     replacement         string to be put in place of search sub string
+ *  @param[in]     modifyReplacement   hook to dynamically modify the replacement text; optional
+ *                                     - text: the full search text
+ *                                     - start: current start inside text
+ *                                     - end: current end inside text
+ *                                     - search: used term to find actual start
+ *                                     - replace: possibly modified replacement text
+ *                                     - context: user data
+ *  @param[in,out] context             optional user data for modifyReplacement
  *  @return                            number of occurences
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/08/02
+ *  @since   2019/02/15 (Oyjl: 1.0.0)
  */
 int        oyjlStrReplace            ( oyjl_str            text,
                                        const char        * search,
-                                       const char        * replacement )
+                                       const char        * replacement,
+                                       void             (* modifyReplacement)(const char * text, const char * start, const char * end, const char * search, const char ** replace, void * user_data),
+                                       void              * user_data )
 {
   struct oyjl_string_s * str = text;
   oyjl_str t = NULL;
@@ -777,6 +979,7 @@ int        oyjlStrReplace            ( oyjl_str            text,
     {
       if(!t) t = oyjlStrNew(10,0,0);
       oyjlStrAppendN( t, start, end-start );
+      if(modifyReplacement) modifyReplacement( oyjlStr(text), start, end, search, &replacement, user_data );
       oyjlStrAppendN( t, replacement, strlen(replacement) );
       ++n;
       if(strlen(end) >= (size_t)s_len)
@@ -854,6 +1057,20 @@ char *     oyjlStrPull               ( oyjl_str            str )
   string->alloc_count = 1;
   
   return t;
+}
+
+/** @brief   clear text in a string object
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/06/14
+ *  @since   2019/06/14 (Oyjl: 1.0.0)
+ */
+void       oyjlStrClear              ( oyjl_str            string )
+{
+  struct oyjl_string_s * str = string;
+  void (* deAlloc)(void*) = str->deAlloc;
+  char * s = oyjlStrPull( string );
+  if(s) deAlloc(s);
 }
 
 /** @brief   release a string object
@@ -991,7 +1208,8 @@ int oyjlIsFileFull_ (const char* fullFileName, const char * read_mode)
   const char* name = fullFileName;
 
   memset(&status,0,sizeof(struct stat));
-  r = stat (name, &status);
+  if(name && name[0])
+    r = stat(name, &status);
 
   if(r != 0 && *oyjl_debug > 1)
   switch (errno)
@@ -1032,7 +1250,8 @@ int oyjlIsDirFull_ (const char* name)
   if(!name) return 0;
 
   memset(&status,0,sizeof(struct stat));
-  r = stat (name, &status);
+  if(name && name[0])
+    r = stat(name, &status);
 
   if(r != 0 && *oyjl_debug > 1)
   switch (errno)
@@ -1050,6 +1269,37 @@ int oyjlIsDirFull_ (const char* name)
   }
   r = !r &&
        ((status.st_mode & S_IFMT) & S_IFDIR);
+
+  return r;
+}
+
+int   oyjlIsFile                     ( const char        * fullname,
+                                       const char        * mode,
+                                       char              * info,
+                                       int                 info_len )
+{
+  struct stat status;
+  int r;
+  memset(&status,0,sizeof(struct stat));
+  double mod_time = 0.0;
+
+  r = oyjlIsFileFull_( fullname, mode );
+
+  if (r)
+  {
+    stat(fullname, &status);
+#   if defined(__APPLE__) || defined(BSD)
+    mod_time = status.st_mtime ;
+    mod_time += status.st_mtimespec.tv_nsec/1000000. ;
+#   elif defined(WIN32)
+    mod_time = (double)status.st_mtime ;
+#   else
+    mod_time = status.st_mtim.tv_sec ;
+    mod_time += status.st_mtim.tv_nsec/1000000. ;
+#   endif
+    if(info)
+      snprintf( info, info_len, "%.30f", mod_time );
+  }
 
   return r;
 }

@@ -35,8 +35,11 @@ ELSE()
   SET(ENABLE_SHARED_LIBS_${PROJECT_UP_NAME} OFF)
   SET(ENABLE_TESTS_${PROJECT_UP_NAME} OFF)
   SET(ENABLE_TOOLS_${PROJECT_UP_NAME} ON)
-  SET(ENABLE_QT_${PROJECT_UP_NAME} OFF)
   SET(ENABLE_DOCU_${PROJECT_UP_NAME} OFF)
+  MESSAGE( "-- ENABLE_STATIC_LIBS_${PROJECT_UP_NAME}: ${ENABLE_STATIC_LIBS_${PROJECT_UP_NAME}}" )
+  MESSAGE( "-- ENABLE_SHARED_LIBS_${PROJECT_UP_NAME}: ${ENABLE_SHARED_LIBS_${PROJECT_UP_NAME}}" )
+  MESSAGE( "-- ENABLE_TESTS_${PROJECT_UP_NAME}: ${ENABLE_TESTS_${PROJECT_UP_NAME}}" )
+  MESSAGE( "-- ENABLE_TOOLS_${PROJECT_UP_NAME}: ${ENABLE_TOOLS_${PROJECT_UP_NAME}}" )
 ENDIF()
 
 # if our static code lands inside a shared lib, we need -fPIC
@@ -198,10 +201,12 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} )
 ## library 
 
 SET( CFILES_OYJL_CORE_PUBLIC
-	${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DOWN_NAME}_args.c
 	${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DOWN_NAME}_core.c
+	${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DOWN_NAME}_args.c
 	${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DOWN_NAME}_tree.c
+	${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DOWN_NAME}_args_tree.c
    )
+SET_SOURCE_FILES_PROPERTIES( "${CMAKE_CURRENT_SOURCE_DIR}/oyjl_args.c" PROPERTIES COMPILE_DEFINITIONS "OYJL_INTERNAL=1" )
 SET( CFILES_OYJL_YAJL_PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DOWN_NAME}_yajl.c
    )
@@ -306,9 +311,16 @@ IF(ENABLE_TOOLS_${PROJECT_UP_NAME})
   ENDIF(ENABLE_INSTALL_${PROJECT_UP_NAME})
 
   ADD_EXECUTABLE( ${PACKAGE_NAME}-translate "${CMAKE_CURRENT_SOURCE_DIR}/oyjl_translate.c" )
+  ADD_DEPENDENCIES( ${PACKAGE_NAME}-translate ${PROJECT_DOWN_NAME}_gmo )
   TARGET_LINK_LIBRARIES( ${PACKAGE_NAME}-translate ${OYJL_TARGET_LIB} ${EXTRA_LIBS} )
   IF(ENABLE_INSTALL_${PROJECT_UP_NAME})
     INSTALL (TARGETS ${PACKAGE_NAME}-translate DESTINATION ${CMAKE_INSTALL_BINDIR})
+  ENDIF(ENABLE_INSTALL_${PROJECT_UP_NAME})
+
+  ADD_EXECUTABLE( ${PACKAGE_NAME}-args "${CMAKE_CURRENT_SOURCE_DIR}/oyjl-args.c" )
+  TARGET_LINK_LIBRARIES( ${PACKAGE_NAME}-args ${OYJL_TARGET_LIB} ${EXTRA_LIBS} )
+  IF(ENABLE_INSTALL_${PROJECT_UP_NAME})
+    INSTALL (TARGETS ${PACKAGE_NAME}-args DESTINATION ${CMAKE_INSTALL_BINDIR})
   ENDIF(ENABLE_INSTALL_${PROJECT_UP_NAME})
 
   ADD_EXECUTABLE( jsontoyaml "${CMAKE_CURRENT_SOURCE_DIR}/oyjl.c" )
@@ -350,6 +362,8 @@ ENDIF(ENABLE_TOOLS_${PROJECT_UP_NAME})
 IF( ENABLE_TESTS_${PROJECT_UP_NAME} )
   ADD_EXECUTABLE( oyjl-test-test "${CMAKE_CURRENT_SOURCE_DIR}/test-test.c" )
   TARGET_LINK_LIBRARIES( oyjl-test-test ${EXTRA_CORE_LIBS} )
+  ADD_EXECUTABLE( oyjl-test-args "${CMAKE_CURRENT_SOURCE_DIR}/test-args.c" )
+  TARGET_LINK_LIBRARIES( oyjl-test-args ${EXTRA_CORE_LIBS} )
   ADD_EXECUTABLE( oyjl-test-core "${CMAKE_CURRENT_SOURCE_DIR}/test-core.c" )
   TARGET_LINK_LIBRARIES( oyjl-test-core ${OYJL_CORE_LIB} ${EXTRA_CORE_LIBS} )
   ADD_EXECUTABLE( oyjl-test-core-static "${CMAKE_CURRENT_SOURCE_DIR}/test-core.c" )
@@ -362,14 +376,41 @@ IF( ENABLE_TESTS_${PROJECT_UP_NAME} )
         OYJL_LOCALEDIR=${CMAKE_BINARY_DIR}/locale ./oyjl-test-test
         DEPENDS oyjl-test-test
         COMMENT "Test header only test framework" VERBATIM )
+  ADD_CUSTOM_TARGET(check-args
+        OYJL_LOCALEDIR=${CMAKE_BINARY_DIR}/locale ./oyjl-test-args
+        DEPENDS oyjl-test-args check-test
+        COMMENT "Test standalone Args API in oyjl-test-args" VERBATIM )
+  ADD_CUSTOM_COMMAND(
+        OUTPUT  oyjl-args-ui.c
+        COMMAND ./oyjl-args -X export | ./oyjl-args -i - > oyjl-args-ui.c
+        DEPENDS oyjl-args
+        COMMENT "Export UI and generate C code" VERBATIM
+        )
+  INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR} )
+  ADD_EXECUTABLE(oyjl-args-ui oyjl-args-ui.c )
+  TARGET_LINK_LIBRARIES( oyjl-args-ui ${OYJL_TARGET_LIB} ${EXTRA_LIBS} )
+  ADD_CUSTOM_TARGET( check-oyjl-args-ui
+        ./oyjl-args-ui -h
+        DEPENDS oyjl-args-ui check-args
+        COMMENT "Check Generated Program" VERBATIM )
   ADD_CUSTOM_TARGET(check-core
         OYJL_LOCALEDIR=${CMAKE_BINARY_DIR}/locale ./oyjl-test-core-static
-        DEPENDS oyjl-test-core-static check-test
+        DEPENDS oyjl-test-core-static check-oyjl-args-ui
         COMMENT "Test libOyjlCore" VERBATIM )
   ADD_CUSTOM_TARGET(check
         ./oyjl-test-static
         DEPENDS oyjl-test-static check-core
         COMMENT "Test libOyjl" VERBATIM )
+  FILE( GLOB ${PROJECT_UP_NAME}_TEST_EXTRA_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test-extra*.c )
+  MESSAGE( ${PROJECT_UP_NAME}_TEST_EXTRA_SRC_FILES: "${${PROJECT_UP_NAME}_TEST_EXTRA_SRC_FILES}" )
+  IF( ${${PROJECT_UP_NAME}_TEST_EXTRA_SRC_FILES} MATCHES "test-extra" )
+    ADD_EXECUTABLE( oyjl-test-extra-static ${${PROJECT_UP_NAME}_TEST_EXTRA_SRC_FILES} )
+    TARGET_LINK_LIBRARIES( oyjl-test-extra-static ${PACKAGE_NAME}-static ${PACKAGE_NAME}-core-static ${EXTRA_LIBS} )
+    ADD_CUSTOM_TARGET(check-extra
+        OYJL_LOCALEDIR=${CMAKE_BINARY_DIR}/locale ./oyjl-test-extra-static
+        DEPENDS oyjl-test-extra-static check
+        COMMENT "Test Extra" VERBATIM )
+  ENDIF()
 ENDIF( ENABLE_TESTS_${PROJECT_UP_NAME} )
 
 IF(ENABLE_INSTALL_${PROJECT_UP_NAME})
@@ -388,7 +429,7 @@ IF( GETTEXT_FOUND )
   #SET( _xgettext_option_list --language=C --keyword=_ --keyword=N_ --keyword=C_:1c,2 --keyword=NC_:1c,2 -s --package-name=${PROJECT_DOWN_NAME} --package-version=${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION} )
   SET( _xgettext_option_list --add-comments --keyword=gettext --flag=gettext:1:pass-c-format --keyword=_ --flag=_:1:pass-c-format --keyword=N_ --flag=N_:1:pass-c-format  --copyright-holder='Kai-Uwe Behrmann'  --msgid-bugs-address='ku.b@gmx.de' --from-code=utf-8 --package-name=${PROJECT_DOWN_NAME} --package-version=${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION} )
   SET( XGETTEXT_CMD xgettext )
-  FILE( GLOB SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  FILE( GLOB ${PROJECT_UP_NAME}_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
         oyjl*.c
         test*.c
         xml2json.c
@@ -396,14 +437,15 @@ IF( GETTEXT_FOUND )
       )
 
   ADD_CUSTOM_COMMAND(OUTPUT ${_potFile}
-    COMMAND ${XGETTEXT_CMD} ${_xgettext_option_list} -o ${_potFile} ${SRC_FILES}
-    DEPENDS ${SRC_FILES}
+    COMMAND ${XGETTEXT_CMD} ${_xgettext_option_list} -o ${_potFile} ${${PROJECT_UP_NAME}_SRC_FILES}
+    DEPENDS ${${PROJECT_UP_NAME}_SRC_FILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Extract translatable messages to ${_potFile}"
   )
 
   SET( ${PROJECT_UP_NAME}_LINGUAS po/cs.po po/de.po po/eo.po po/eu.po po/fr.po po/ru.po )
   # compile translations always to have them ready for installation
+  SET( GETTEXT_TRANSLATIONS_TARGET_PREFIX ${PROJECT_DOWN_NAME}_ )
   GETTEXT_CREATE_TRANSLATIONS( ${_potFile} ALL ${${PROJECT_UP_NAME}_LINGUAS} )
 
   ADD_CUSTOM_COMMAND( OUTPUT ${PROJECT_DOWN_NAME}_gmo-cp
@@ -411,7 +453,7 @@ IF( GETTEXT_FOUND )
     COMMENT "put ${PROJECT_DOWN_NAME}.mo files into ${CMAKE_BINARY_DIR}/locale/lang/LC_MESSAGES/ path for testing with LOCDIR"
                     )
   ADD_CUSTOM_TARGET( ${PROJECT_DOWN_NAME}_gmo ALL
-                     DEPENDS translations ${PROJECT_DOWN_NAME}_gmo-cp  )
+                     DEPENDS ${GETTEXT_TRANSLATIONS_TARGET_PREFIX}translations ${PROJECT_DOWN_NAME}_gmo-cp  )
 ENDIF()
 
 

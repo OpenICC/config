@@ -12,7 +12,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.4
 
 Rectangle {
     id: all
@@ -21,17 +21,17 @@ Rectangle {
     property string key
     property string defaultValue
     property string currentValue
-    property ListModel model: items
     property real space: textMetrics.font.pixelSize
     property real labelWidth: 20
     property var getLabelWidthMin: function() { return all.labelWidth }
     property var getLabelWidth: function() { return all.labelWidth }
+    property ListModel model: items
 
     property alias combo: combo
 
     width: parent.width
     height: textMetrics.font.pixelSize * 3
-    color: bg
+    color: "transparent"
 
     ListModel { id: items; objectName: "items" }
 
@@ -71,7 +71,7 @@ Rectangle {
             height: combo.height
             ComboBox {
                 id: combo
-                objectName: "Combo"
+                objectName: "combo"
                 width: parent.width
                 height: all.height
                 textRole: "key"

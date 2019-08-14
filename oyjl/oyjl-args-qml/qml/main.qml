@@ -3,7 +3,7 @@
  *  Oyjl JSON QML is a graphical renderer of UI files.
  *
  *  @par Copyright:
- *            2018 (C) Kai-Uwe Behrmann
+ *            2018-2019 (C) Kai-Uwe Behrmann
  *            All Rights reserved.
  *
  *  @par License:
@@ -13,7 +13,7 @@
  *  QML ApplicationWindow mainWindow
  */
 
-// developed with Qt 5.7-5.10
+// developed with Qt 5.7-5.12
 
 import QtQuick 2.7
 //import QtQml.Models 2.2
@@ -34,7 +34,8 @@ AppWindow {
                100*dens
 
     signal fileChanged(var url) // Input
-    onFileChanged: { setDataText( appData.getJSON( url ) ); statusText = qsTr("Loaded") + " " + url
+    onFileChanged: { setDataText( appData.getJSON( url ) ); var fn = "---"; if(url[0] !== '{') fn = url;
+        statusText = qsTr("Loaded") + " " + fn
         if(processSetCommand.length)
             processSet.start( processSetCommand, processSetArgs );
     }
@@ -49,7 +50,12 @@ AppWindow {
         if(url === "+")
           commandsJSON = appDataJsonString
         else
-          commandsJSON = appData.readFile( url );
+        {
+          if(url[0] === '{')
+            commandsJSON = url;
+          else
+            commandsJSON = appData.readFile( url );
+        }
         textArea2.text = commandsJSON
         if( commandsJSON.length )
         {
@@ -88,49 +94,167 @@ AppWindow {
     property string processGetCommand: ""
     property var processGetArgs: [ ]
 
-    Process { id: processSet; onReadChannelFinished: helpText = readAll(); }
+    property string image_data: ""
+    Process { id: processSet;
+        onReadChannelFinished: {
+            var data = readAll();
+            image_data = data
+            if(image_data.substr(0,22) === "data:image/png;base64," ||
+               image_data.substr(0,19) === "data:image/svg+xml;")
+            {
+                helpTextArea.opacity = 0.01
+                helpText = ""
+                image.source = image_data
+                image.opacity = 1.0
+            }
+            else
+                helpText = data;
+        }
+    }
     property string processSetCommand: ""
     property var processSetArgs: [ ]
     property string command_set_delimiter: "="
     property string command_set_option: ""
 
 
-    function interactiveCallback( key, value, setOnly )
+    function interactiveCallback( key, value, type, group, setOnly )
     {
+        // skip "detail" only groups
+        if(group.mandatory.length === 0 && group.optional.length === 0)
+            return
+
+        // skip optional options from groups with mandatory requirement
+        if(group.mandatory.length && !group.mandatory.match(key))
+            return
+
         if(processSetCommand.length && setOnly >= 0)
         {
             var arg = key
             if(command_set_option.length === 0)
             {
-                if(key.length > 1)
+                if(key === "#" || key === "@")
+                    arg = null;
+                else if(key.length > 1)
                     arg = "--" + key
-                else
+                else if(key.length === 1)
                     arg = "-" + key
             }
             var v = JSON.stringify(value);
             if(v.length)
                 if(typeof command_set_delimiter !== "undefined")
                 {
-                    if(typeof value === "string")
+                    if(typeof value === "string" && type !== "bool")
                     {
-                        if(value.length)
-                            arg += command_set_delimiter + value
+                        if(value.length !== 0)
+                        {
+                            if(key === "#" || key === "@")
+                                arg = value
+                            else if(arg.length > 0)
+                                arg += command_set_delimiter + value
+                            else
+                                arg += value
+                        }
                     }
-                    else
-                        arg += command_set_delimiter + v
+                    else if(type === "bool" && value === "false")
+                    {
+                        if(key === "#" || key === "@")
+                            arg = v
+                        else if(arg.length > 0)
+                            arg += command_set_delimiter + v
+                        else
+                            arg += v
+                    }
                 }
             var args = []
             args = processSetArgs.slice()
             var count = args.length
             if(command_set_option.length === 0)
-                args[args.length] = arg
+            {
+                if(arg !== null)
+                    args[args.length] = arg
+            }
             else
             {
                 args[args.length] = command_set_option
-                args[args.length] = arg
+                if(arg !== null)
+                    args[args.length] = arg
             }
             if(app_debug)
                 statusText = "command_set: " + processSetCommand + " " + args
+
+            // create the args from group::optional options and add them to the mandatory arg from above
+            // TODO: detect mandatory exclusion, e.g. a|b
+            var n = optionsModel.count
+            var i
+            for( i = 0; i < n; ++i )
+            {
+                var opt = optionsModel.get(i)
+                arg = opt.key
+                if(arg.match(key))
+                    continue
+
+                if(!(group.mandatory.match(arg) ||
+                     (group.optional !== null && group.optional.match(arg))))
+                    continue
+
+                // activate value using default from JSON
+                var changed = false
+                if(typeof group.changed !== "undefined")
+                    changed = (group.changed.match(arg) !== null)
+                if(changed === true &&
+                   !opt.value.length)
+                    opt.value = opt.default
+
+                if(!(opt.value.length !== 0 &&
+                     !(opt.type === "bool" &&
+                       opt.value === "false")))
+                    continue
+
+                if(command_set_option.length === 0)
+                {
+                    if(opt.key === "#" || opt.key === "@")
+                        ;
+                    else if(opt.key.length > 1)
+                        arg = "--" + opt.key
+                    else if(key.length === 1)
+                        arg = "-" + opt.key
+                }
+                v = JSON.stringify(opt.value);
+                if(v.length &&
+                    !(opt.type === "bool"))
+                    if(typeof command_set_delimiter !== "undefined")
+                    {
+                        if(typeof opt.value === "string")
+                        {
+                            if(opt.value.length &&
+                                !(opt.type === "bool" && opt.value === "false"))
+                            {
+                                if(arg.length > 0)
+                                    arg += command_set_delimiter + opt.value
+                                else
+                                    arg += opt.value
+                            }
+                        }
+                        else
+                        {
+                            if(arg.length > 0)
+                                arg += command_set_delimiter + v
+                            else
+                                arg += v
+                        }
+                    }
+
+                count = args.length
+                if(command_set_option.length === 0)
+                    args[args.length] = arg
+                else
+                {
+                    args[args.length] = command_set_option
+                    args[args.length] = arg
+                }
+            }
+
+            statusText = JSON.stringify(args)
             processSet.start( processSetCommand, args )
             processSet.waitForFinished()
         }
@@ -159,9 +283,32 @@ AppWindow {
         if(helpTextChanging)
             return
         helpTextChanging = true
-        var text = helpText.replace(/\n/g,"<br />")
-        helpText = text
+        if(helpText.charAt(0) === '<') // assume rich text
+            helpTextArea.textFormat = Qt.RichText
+        else
+            helpTextArea.textFormat = Qt.PlainText
+
+        var t = helpText
+        if(t.match(/\033\[/)) // convert ansi color + format codes to HTML markup
+        {
+            t = t.replace(/\033\[1m/g, "<b>")
+            t = t.replace(/\033\[3m/g, "<i>")
+            t = t.replace(/\033\[4m/g, "<u>")
+            t = t.replace(/\033\[0;31m/g, "<b>")
+            t = t.replace(/\033\[0;32m/g, "<b>")
+            t = t.replace(/\033\[0;34m/g, "<b>")
+            t = t.replace(/\033\[0m/g, "</u></b></i>")
+            t = t.replace(/ /g, '&nbsp;')
+            t = t.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')
+            t = t.replace(/\n/g, "<br />")
+            t = "<div style\"word-wrap:nowhere;font-family:monospace;\"" + t + "</div>"
+            helpText = t
+            helpTextArea.textFormat = Qt.RichText
+        }
+
         helpTextChanging = false
+        image.opacity = 0.01
+        helpTextArea.opacity = 1.0
     }
 
     property var groupDescriptions: []
@@ -176,74 +323,91 @@ AppWindow {
 
         HalfPage {
             id: firstPage
+            objectName: "firstPage"
 
-            Column {
-                height: firstPage.height - 2*h
-                padding: dens
+            SplitView {
+                id: split
+                objectName: "split"
+                width: firstPage.width
+                height: firstPage.height
+                orientation: Qt.Vertical
 
-                TextArea {
-                    id: introTextField
-                    objectName: "introTextField"
-                    width: firstPage.width
+                Column {
+                    id: column
+                    objectName: "column"
+                    width: parent.width
+                    height: firstPage.height * 0.67
+                    padding: dens
 
-                    textFormat: Qt.RichText // Html
-                    textMargin: font.pixelSize
-                    readOnly: true // obviously no edits
-                    wrapMode: TextEdit.Wrap
-                    text: "<html><head></head><body> <h3><p align=\"center\">" + introText + "</p></h3></body></html>"
+                    TextArea {
+                        id: introTextField
+                        objectName: "introTextField"
+                        width: firstPage.width - 2*dens
 
-                    color: fg
-                    background: Rectangle { color: bg }
+                        textFormat: Qt.RichText // Html
+                        textMargin: font.pixelSize
+                        readOnly: true // obviously no edits
+                        wrapMode: TextEdit.Wrap
+                        text: "<html><head></head><body> <h3><p align=\"center\">" + introText + "</p></h3></body></html>"
+
+                        color: fg
+                        background: Rectangle { color: bg }
+                    }
+                    OptionsList {
+                        id: optList
+                        objectName: "optList"
+                        anchors.bottomMargin: 0
+                        width: firstPage.width - 2*dens
+                        height: firstPage.height - introTextField.height - helpFlickable.height - 2*dens
+                        model: optionsModel
+                        callback: interactiveCallback
+                        color: bg
+                    }
                 }
-                OptionsList {
-                    id: optList
-                    objectName: "optList"
-                    anchors.bottomMargin: 0
-                    width: firstPage.width - 2*dens
-                    height: Math.min( firstPage.height - introTextField.height - dens - firstPage.height/4,
-                                      optionsModel.count * h + groupCount * h )
-                    model: optionsModel
-                    callback: interactiveCallback
-                    color: bg
-                }
-                Rectangle {
-                    color: fg
-                    width: firstPage.width - 2*dens
-                    height: 1
-                }
+
                 Flickable {
                     id: helpFlickable
+                    objectName: "helpFlickable"
                     width: firstPage.width - dens
-                    height: firstPage.height - introTextField.height - dens - optList.height - dens
 
                     flickableDirection: Flickable.VerticalFlick
 
-                TextArea.flickable: TextArea {
-                    id: helpTextArea
-                    objectName: "helpTextArea"
-                    width: helpFlickable.width
-                    height: helpFlickable.height
+                    Image {
+                        id: image
+                        objectName: "image"
+                        width: firstPage.width
+                        height: helpFlickable.height
+                        horizontalAlignment: Image.AlignHCenter
+                        fillMode: Image.PreserveAspectFit
+                    }
 
-                    Accessible.name: "Text Area Help"
+                    TextArea.flickable: TextArea {
+                        id: helpTextArea
+                        objectName: "helpTextArea"
+                        width: helpFlickable.width
+                        height: helpFlickable.height
 
-                    textFormat: Qt.RichText // Html
-                    wrapMode: TextEdit.Wrap
-                    readOnly: true
-                    text: helpText
+                        Accessible.name: "Text Area Help"
 
-                    color: fg
-                    background: Rectangle { color: bg }
-                }
+                        textFormat: Qt.RichText // Html
+                        wrapMode: TextEdit.Wrap
+                        readOnly: true
+                        text: helpText
+
+                        color: fg
+                        background: Rectangle { color: bg }
+                    }
+                    ScrollBar.vertical: ScrollBar { }
                 }
             }
         }
         HalfPage {
             id: twoPage
+            objectName: "twoPage"
 
             Image {
                 id: logoImage
                 width: parent.width
-                y: 10
                 horizontalAlignment: Image.AlignHCenter
                 fillMode: Image.PreserveAspectFit
                 source: uiLogo
@@ -254,32 +418,34 @@ AppWindow {
                 height: twoPage.height - logoImage.height
                 flickableDirection: Flickable.VerticalFlick
                 clip: true
-            TextArea.flickable: TextArea { // our content
-                id: textArea
+                TextArea.flickable: TextArea { // our content
+                    id: textArea
 
-                Accessible.name: "about text"
-                //backgroundVisible: false // keep the area visually simple
-                //frameVisible: false      // keep the area visually simple
+                    Accessible.name: "about text"
+                    //backgroundVisible: false // keep the area visually simple
+                    //frameVisible: false      // keep the area visually simple
 
-                textFormat: Qt.RichText // Html
-                textMargin: font.pixelSize
-                readOnly: true // obviously no edits
-                wrapMode: TextEdit.Wrap
-                text: cmmText
-                onLinkActivated: {
-                    setBusyTimer.start()
-                    if(Qt.openUrlExternally(link))
-                        statusText = qsTr("Launched app for ") + link
-                    else
-                        statusText = "Launching external app failed"
-                    unsetBusyTimer.start()
+                    textFormat: Qt.RichText // Html
+                    textMargin: font.pixelSize
+                    readOnly: true // obviously no edits
+                    wrapMode: TextEdit.Wrap
+                    text: cmmText
+                    onLinkActivated: {
+                        setBusyTimer.start()
+                        if(Qt.openUrlExternally(link))
+                            statusText = qsTr("Launched app for ") + link
+                        else
+                            statusText = "Launching external app failed"
+                        unsetBusyTimer.start()
+                    }
+                    onLinkHovered: (Qt.platform.os === "android") ? Qt.openUrlExternally(link) : statusText = link
                 }
-                onLinkHovered: (Qt.platform.os === "android") ? Qt.openUrlExternally(link) : statusText = link
-            }
+                ScrollBar.vertical: ScrollBar { }
             }
         }
         Rectangle {
             id: threePage
+            objectName: "threePage"
             width: pages.width
             height: pages.height
             color: "transparent"
@@ -288,30 +454,32 @@ AppWindow {
                 width: threePage.width
                 height: threePage.height
                 flickableDirection: Flickable.VerticalFlick
-            TextArea.flickable: TextArea {
-                id: textArea2
+                TextArea.flickable: TextArea {
+                    id: textArea2
 
-                Accessible.name: "Text Area 2"
-                anchors.fill: parent
-                textFormat: text[0] !== '<' ? Qt.PlainText : Qt.RichText
-                wrapMode: TextEdit.Wrap
-                readOnly: true
-                onLinkActivated: {
-                    setBusyTimer.start()
-                    if(Qt.openUrlExternally(link))
-                        statusText = qsTr("Launched app for ") + link
-                    else
-                        statusText = "Launching external app failed"
-                    unsetBusyTimer.start()
+                    Accessible.name: "Text Area 2"
+                    anchors.fill: parent
+                    textFormat: text[0] !== '<' ? Qt.PlainText : Qt.RichText
+                    wrapMode: TextEdit.Wrap
+                    readOnly: true
+                    onLinkActivated: {
+                        setBusyTimer.start()
+                        if(Qt.openUrlExternally(link))
+                            statusText = qsTr("Launched app for ") + link
+                        else
+                            statusText = "Launching external app failed"
+                        unsetBusyTimer.start()
+                    }
+                    onLinkHovered: (Qt.platform.os === "android") ? Qt.openUrlExternally(link) : statusText = link
                 }
-                onLinkHovered: (Qt.platform.os === "android") ? Qt.openUrlExternally(link) : statusText = link
-            }
+                ScrollBar.vertical: ScrollBar { }
             }
         }
         Rectangle {
             width: pages.width
             height: pages.height
             id: aboutPage
+            objectName: "aboutPage"
             About {
                 objectName: "About";
                 image: logo
@@ -324,11 +492,12 @@ AppWindow {
     property real deviceLabelWidth: 20;
     property string loc: "";
 
-    function setOptions( options, groupName, groupDescription )
+    function setOptions( group, groupName, groupDescription )
     {
         if(typeof groupDescriptions[groupName] === "undefined")
             groupDescriptions[groupName] = groupDescription
 
+        var options = group.options
         for( var index in options )
         {
             var opt = options[index];
@@ -338,6 +507,13 @@ AppWindow {
             var choices = opt.choices
             var type = opt.type
             var dbl = {"start":0,"end":1}
+            var run = 0
+            // see mandatory key
+            if(group.mandatory.length && group.mandatory.match(opt.key))
+                run = 1
+            // detect optonal active role
+            else if(group.mandatory.length === 0 && group.optional.length && group.optional.match(opt.key))
+                run = 2
             if( type === "double" )
                 // try slider
             {
@@ -376,6 +552,11 @@ AppWindow {
             }
 
             name = P.getTranslatedItem( opt, "name", loc );
+            var l = 0;
+            if(typeof name !== "undefined" && name !== null)
+                l = name.length;
+            if( l === 0 )
+              name = opt.key;
             var desc = P.getTranslatedItem( opt, "description", loc );
             var help = P.getTranslatedItem( opt, "help", loc );
             //if(typeof help === "undefined")
@@ -393,13 +574,14 @@ AppWindow {
                 groupName: groupName,
                 description: desc,
                 help: help,
-                default: opt.default
+                default: opt.default,
+                group: group,
+                run: run,
+                value: ""
             }
             var text = JSON.stringify(o);
             o.text = text;
             optionsModel.append(o)
-            var count = optionsModel.count
-            var c = count
         }
     }
 
@@ -467,6 +649,8 @@ AppWindow {
         {
             var group = groups[g1];
             var options= group.options;
+            var mandatory = group.mandatory
+            var optional  = group.optional
             var groupName = P.getTranslatedItem( group, "name", loc );
             var help = P.getTranslatedItem( group, "help", loc );
             if( typeof options === "undefined" )
@@ -481,14 +665,14 @@ AppWindow {
                     var help2 = help
                     if(typeof groupName2 !== "undefined")
                         help2 += " <i>" + P.getTranslatedItem( g, "help", loc ) + "</i>";
-                    setOptions( options, groupName2, help2 )
+                    setOptions( group, groupName2, help2 )
                 }
             else
             {
                 desc = P.getTranslatedItem( group, "description", loc )
                 if(typeof desc !== "undefined")
                     groupName = desc
-                setOptions( options, groupName, help )
+                setOptions( group, groupName, help )
             }
         }
     }

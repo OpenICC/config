@@ -25,7 +25,7 @@ Rectangle {
     property alias count: list.count
     property alias model: list.model
     property alias l: list
-    property var callback: function(key, value, setOnly) { } // do nothing
+    property var callback: function(model, group, setOnly) { } // do nothing
 
     Component {
         id: sectionHeading
@@ -77,7 +77,7 @@ Rectangle {
             x: dens
             width:  parent.width - 2*dens
             height: h
-            color: "transparent"
+            color: run ? (bright ? Qt.lighter("steelblue") : "steelblue") : "transparent"
 
             Combo {
                 id: comboBox
@@ -86,27 +86,32 @@ Rectangle {
                 width:  parent.width - dens
                 getLabelWidth: function() { return comboBox.width / 2 };
                 getLabelWidthMin: function() { return 0 }
-                color: bg
+                color: "transparent"
+                property bool init: true
                 Component.onCompleted: {
                     if(type === "choice")
                     {
-                        setDataText2( this, text )
+                        init = true
+                        setDataText2( this, text, value )
                         visible = true
+                        init = false
                     } else
                         visible = false
                 }
                 combo.onCurrentIndexChanged: {
                     var role = combo.textRole
-                    var i = combo.find(combo.textAt(combo.currentIndex))
+                    var t = combo.textAt(combo.currentIndex)
+                    var i = combo.find(t)
                     var item = combo.model.get(i)
                     var nick = item.nick
-                    if(nick === currentValue)
+                    if(nick === currentValue || init)
                         return;
                     statusText = key + ":" + nick + " " + combo.textAt(combo.currentIndex) + " " + qsTr("selected") + "  " + qsTr("new/old") + ": " + nick + "/" + currentValue
                     currentValue = nick;
                     appData.setOption(key, item.nick)
                     var k = key
-                    callback( k, nick, 0 )
+                    value = nick
+                    callback( key, value, type, group, 0 )
                 }
             }
             LSlider {
@@ -116,11 +121,12 @@ Rectangle {
                 width:  parent.width - dens
                 getLabelWidth: function() { return comboBox.width / 2 };
                 getLabelWidthMin: function() { return 0 }
-                //color: bg
+                color: "transparent"
                 property bool init: true
                 Component.onCompleted: {
                     if(type === "double")
                     {
+                        init = true
                         var j = JSON.parse(text)
                         key = j.key
                         var v = parseFloat(j.current)
@@ -128,7 +134,10 @@ Rectangle {
                         slider.to = parseFloat(j.dbl.end)
                         slider.stepSize = parseFloat(j.dbl.tick)
                         currentValue = v
-                        slider.value = v
+                        if(value !== "")
+                            slider.value = parseFloat(value)
+                        else
+                            slider.value = v
                         if(app_debug)
                             statusText = key + " double " + slider.from + " - " + slider.to + " , " + slider.stepSize
                         visible = true
@@ -145,7 +154,8 @@ Rectangle {
                     currentValue = slider.value;
                     appData.setOption(key, slider.value)
                     var k = key
-                    callback( k, slider.value, 1 )
+                    value = JSON.stringify(slider.value)
+                    callback( key, value, type, group, 1 )
                 }
             }
             LSwitch {
@@ -153,20 +163,22 @@ Rectangle {
                 objectName: "lswitch"
                 label: name
                 width:  parent.width - dens
-                getLabelWidth: function() { return comboBox.width / 2 };
+                getLabelWidth: function() { return comboBox.width / 2 }
                 getLabelWidthMin: function() { return 0 }
-                //color: bg
+                color: "transparent"
                 property bool init: true
                 Component.onCompleted: {
                     if(type === "bool")
                     {
+                        init = true
                         var j = JSON.parse(text)
                         key = j.key
                         var v = parseFloat(j.current)
                         defaultValue = v
-                        //switcher.position = v
+                        switcher.checked = (value === "true")
                         if(app_debug)
                             statusText = key + " bool"
+                        button = run
                         visible = true
                         init = false
                     } else
@@ -181,7 +193,19 @@ Rectangle {
                     currentValue = sv;
                     appData.setOption(key, sv)
                     var k = key
-                    callback( k, "", 1 )
+                    value = JSON.stringify(sv)
+                    var v = value
+                    var ci = list.currentItem
+                    var i = currentIndex
+                    var d = model
+                    if(sv)
+                        callback( key, value, type, group, 1 )
+                }
+                butt.onPressed: {
+                    if(init) return;
+                    statusText = key + ":" + qsTr("selected")
+                    appData.setOption(key, true)
+                    callback( key, JSON.stringify(true), type, group, 1 )
                 }
             }
             LInput {
@@ -191,36 +215,54 @@ Rectangle {
                 width:  parent.width - dens
                 getLabelWidth: function() { return linput.width / 2 };
                 getLabelWidthMin: function() { return 0 }
-                color: bg
+                color: "transparent"
                 property bool init: true
                 Component.onCompleted: {
                     if(type === "string")
                     {
-                        var j = JSON.parse(text)
+                        init = true
+                        var t = text
+                        var j = JSON.parse(t)
                         key = j.key
                         if(typeof j.suggest !== "undefined")
                             defaultValue = j.suggest
                         if(app_debug)
                             statusText = key + " string"
+                        setDataText2( this, text, value )
                         visible = true
                         init = false
                     } else
                         visible = false
                 }
-                input.onCurrentTextChanged: {
+                combo.onCurrentTextChanged: {
                     var cV = currentValue
-                    var sv = value
-                    if(value === currentValue || init)
+                    var sv = combo.currentText
+                    var k = key;
+                    if(sv === cV || sv.length === 0 || init)
                         return;
-                    statusText = key + ":" + currentValue + " " + value + " " + qsTr("selected") + "  " + qsTr("new/old") + ": " + value + "/" + currentValue
-                    currentValue = value;
-                    appData.setOption(key, value)
-                    var k = key
-                    callback( k, currentValue, 1 )
+                    statusText = k + ":" + cV + " " + sv + " " + qsTr("selected")
+                    cV = sv;
+                    appData.setOption(k, cV);
+                    value = cV
+                    callback( key, value, type, group, 1 )
                 }
-                input.onPressedChanged: {
-                    callback( k, value, 1 )
+                combo.onAccepted: {
+                    var i = combo
+                    var t = i.editText
+                    var k = key;
+                    var ind  = combo.find(t)
+                    var model = combo.model
+                    if (ind === -1)
+                    {
+                        if( typeof model !== "undefined")
+                            model.append({key: t})
+                    }
+                    statusText = k + ":" + t
+                    value = t
+                    callback( key, value, type, group, 1 )
                 }
+                //combo.onAcceptableInputChanged:  statusText = "AI: "+combo.currentText
+                //combo.onEditTextChanged: statusText = "ET: "+combo.editText
             }
             MouseArea {
                 width: comboBox.width - comboBox.combo.width
@@ -258,12 +300,36 @@ Rectangle {
         }
     }
 
-    function setDataText2( combo, t )
+    function findListModel( model, type, value )
+    {
+        var n = model.count
+        var i
+        for(i=0; i<n; ++i)
+        {
+            var obj = model.get(i)
+            if(obj[type] !== "undefined")
+            {
+                var v = obj[type]
+                if(v === value)
+                    return i
+            }
+        }
+        return -1
+    }
+
+    function setDataText2( combo, t, value )
     {
         var j = JSON.parse(t);
         var loc = j.loc;
         var def = j.default;
         var name = j.key;
-        P.setComboItems( combo, j.choices, name, def, loc );
+        var choices = j.choices
+        P.setComboItems( combo, choices, name, def, loc );
+        if(value !== "")
+        {
+            var i = findListModel(combo.combo.model, "nick", value)
+            if(i >= 0)
+                combo.combo.currentIndex = i
+        }
     }
 }

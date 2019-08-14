@@ -1,4 +1,4 @@
-/*  @file oyjl_yajl.c
+/** @file oyjl_yajl.c
  *
  *  oyjl - Yajl tree extension
  *
@@ -6,27 +6,12 @@
  *            2016-2019 (C) Kai-Uwe Behrmann
  *
  *  @brief    Oyjl parsing functions
- *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
+ *  @author   Kai-Uwe Behrmann <ku.b@gmx.de> and Florian Forster  <ff at octo.it>
  *  @par License:
  *            MIT <http://www.opensource.org/licenses/mit-license.php>
  *  @since    2016/12/17
  */
 
-/*
- * Copyright (c) 2010-2011  Florian Forster  <ff at octo.it>
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
 
 #include <stdarg.h>  /* va_list */
 #include <stddef.h>  /* ptrdiff_t size_t */
@@ -50,7 +35,58 @@
 #include <locale.h>
 #endif
 
+/** \addtogroup oyjl_tree Oyjl JSON Parsing
+ *  @brief Tree data structure manipulation and I/O
+ *
+ *  The API is designed to be easily useable without much boilerplate.
+ *  It includes a xpath alike syntax to obtain or create nodes inside
+ *  a tree. A path string is constructed of terms and the slash 
+ *  delimiter '/'. Understood terms are object names or the squared 
+ *  brackets index operator [].
+ *
+ *  \b Path \b Example:
+ *
+ *  "foo/[3]/bar" will return the "bar" node with the "found" string.
+ *  @verbatim
+    {
+      "foo": [
+        { "ignore": 0 },
+        { "ignore_too": 0 },
+        { "ignore_it": 0 },
+        { "bar": "found" }
+      ]
+    }
+    @endverbatim
+ *  Some API's accept extended paths expressions. Those can contain empty
+ *  terms, like "//", which matches all keys in the above example. Those
+ *  are oyjlTreeToPaths() and oyjlPathMatch(). oyjlTreeToPaths()
+ *  works on the whole tree to match a extended xpath.
+ *
+ *  \b Programming \b Tutorial
+ *
+ *  The following code examples come from @ref tutorial_json_options.c . 
+ *  @dontinclude tutorial_json_options.c
+ *  @skip testOyjl(void)
+ *  @until oyjlTreeFree(
+ */
 
+
+#define Florian_Forster_SOURCE_GUARD
+/*
+ * Copyright (c) 2010-2011  Florian Forster  <ff at octo.it>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
 #define STATUS_CONTINUE 1
 #define STATUS_ABORT    0
 
@@ -406,50 +442,8 @@ static int handle_null (void *ctx)
  * Public functions
  */
 
-/** \addtogroup oyjl_tree Oyjl JSON Parsing
- *  @brief Tree data structure manipulation and I/O
- *
- *  The API is designed to be easily useable without much boilerplate.
- *  It includes a xpath alike syntax to obtain or create nodes inside
- *  a tree. A path string is constructed of terms and the slash 
- *  delimiter '/'. Understood terms are object names or the squared 
- *  brackets index operator [].
- *
- *  \b Path \b Example:
- *
- *  "foo/[3]/bar" will return the "bar" node with the "found" string.
- *  @verbatim
-    {
-      "foo": [
-        { "ignore": 0 },
-        { "ignore_too": 0 },
-        { "ignore_it": 0 },
-        { "bar": "found" }
-      ]
-    }
-    @endverbatim
- *  Some API's accept extended paths expressions. Those can contain empty
- *  terms, like "//", which matches all keys in the above example. Those
- *  are oyjlTreeToPaths() and oyjlPathMatch(). oyjlTreeToPaths()
- *  works on the whole tree to match a extended xpath.
- *
- *  \b Programming \b Tutorial
- *
- *  The following code examples come from @ref tutorial_json_options.c . 
- *  @dontinclude tutorial_json_options.c
- *  @skip testOyjl(void)
- *  @until oyjlTreeFree(
- *  @{ *//* oyjl_tree */
+/** @{ *//* oyjl_tree */
 
-/** @brief read a json text string into a C data structure
- *
- *  @dontinclude tutorial_json_options.c
- *  @skipline const char * text
- *  @skip error_buffer
- *  @until oyjlTreeParse
- *
- *  @see oyjlTreeToJson()
- */
 oyjl_val oyjlTreeParse   (const char *input,
                           char *error_buffer, size_t error_buffer_size)
 {
@@ -550,6 +544,7 @@ static yajl_callbacks oyjl_tree_callbacks = {
     yajl_free (handle);
     return (ctx.root);
 }
+#undef Florian_Forster_SOURCE_GUARD
 
 /** @brief obtain a new node object possibly in array
  *
@@ -603,6 +598,7 @@ oyjl_val oyjlTreeGetNewValueFromArray( oyjl_val root, const char * name, oyjl_va
 
   return node;
 }
+/** @} *//* oyjl_tree */
 
 #if defined(OYJL_HAVE_LIBXML2) || defined(DOXYGEN)
 #include <libxml/parser.h>
@@ -629,6 +625,12 @@ char *             oyjlXML2NodeName  ( xmlNodePtr          cur )
 int              oyjlXMLNodeIsText   ( xmlNodePtr          cur )
 {
   return cur->type == XML_TEXT_NODE && !(cur->next || cur->prev) &&
+         cur->content ;
+}
+
+int              oyjlXMLNodeIsCData  ( xmlNodePtr          cur )
+{
+  return cur->type == XML_CDATA_SECTION_NODE && !(cur->next || cur->prev) &&
          cur->content ;
 }
 
@@ -708,14 +710,29 @@ void             oyjlParseXMLDoc_    ( xmlDocPtr           doc,
       }
       else
         oyjlValueSetString( root, val );
+    } else
+    if( oyjlXMLNodeIsCData(cur) )
+    {
+      const char * val = (const char *) cur->content;
+      oyjlValueSetString( root, val );
     }
 
     if(cur->xmlChildrenNode)
     {
       oyjl_val text = NULL;
       xmlNodePtr cur_ = cur->xmlChildrenNode;
-      if( oyjlXMLNodeIsText(cur_) && node->type == oyjl_t_object )
+
+      if( oyjlXMLNodeIsText(cur_) && node && node->type == oyjl_t_object )
         text = oyjlTreeGetValue( node, OYJL_CREATE_NEW, "@text" );
+      else
+      if( oyjlXMLNodeIsCData(cur_) && node && (node->type == oyjl_t_object ||
+                                               node->type == oyjl_t_null) )
+        text = oyjlTreeGetValue( node, OYJL_CREATE_NEW, "@cdata" );
+      /*else
+      if( cur->children && cur->children->type == XML_CDATA_SECTION_NODE && !(cur->children->next || cur->children->prev) &&
+         cur->children->content )
+        text = oyjlTreeGetValue( node, OYJL_CREATE_NEW, "@cdata" );*/
+
       oyjlParseXMLDoc_( doc, cur->xmlChildrenNode, flags,
                         text ? text : node );
     }
@@ -727,11 +744,14 @@ void             oyjlParseXMLDoc_    ( xmlDocPtr           doc,
   }
 }
 
-/** @brief read a XML text string into a C data structure
+/** @{ *//* oyjl_tree */
+/** @brief read a XML text string into a C data structure (libOyjl)
  *
  *  XML attributes are prefixed with the at '@' char. Inner strings are placed
  *  as objects with key '\@text'. Repeating XML nodes are placed into a array
  *  below a object with the key name of the nodes.
+ *
+ *  This function needs linking to libOyjl.
  *
  *  @see oyjlTreeToXml()
  *
@@ -773,6 +793,7 @@ oyjl_val   oyjlTreeParseXml          ( const char        * xml,
 
   return jroot;
 }
+/** @} *//* oyjl_tree */
 #endif
 #if defined(OYJL_HAVE_YAML) || defined(DOXYGEN)
 #include <yaml.h>
@@ -871,7 +892,10 @@ static int oyjlYamlReadNode( yaml_document_t * doc, yaml_node_t * node, int flag
   return error;
 }
 
-/** @brief read a YAML text string into a C data structure
+/** @{ *//* oyjl_tree */
+/** @brief read a YAML text string into a C data structure (libOyjl)
+ *
+ *  This function needs linking to libOyjl.
  *
  *  @see oyjlTreeToYaml()
  *
