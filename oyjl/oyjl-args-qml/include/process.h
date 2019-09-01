@@ -82,15 +82,7 @@ public:
             free(tfn);
 
         } else
-        {
-            if(args.count())
-                QProcess::start(program, args);
-            else
-            {
-                QProcess::setProgram(program);
-                QProcess::start();
-            }
-        }
+          QProcess::start(program, args);
     }
 
     Q_INVOKABLE void waitForFinished()
