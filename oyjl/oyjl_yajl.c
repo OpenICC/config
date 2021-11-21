@@ -35,7 +35,7 @@
 #include <locale.h>
 #endif
 
-/** \addtogroup oyjl_tree Oyjl JSON Parsing
+/** \addtogroup oyjl_tree OyjlTree JSON Parsing and Tree Handling
  *  @brief Tree data structure manipulation and I/O
  *
  *  The API is designed to be easily useable without much boilerplate.
@@ -295,7 +295,7 @@ static int context_add_value (context_t *ctx, oyjl_val v)
 static int handle_string (void *ctx,
                           const unsigned char *string, long unsigned int string_length)
 #else
-static int handle_number (void *ctx, const char *string, unsigned int string_length)
+static int handle_string (void *ctx, const char *string, unsigned int string_length)
 #endif
 {
     oyjl_val v;
@@ -442,13 +442,17 @@ static int handle_null (void *ctx)
  * Public functions
  */
 
-/** @{ *//* oyjl_tree */
+/** \addtogroup oyjl_tree
+ *  @{ *//* oyjl_tree */
 
 oyjl_val oyjlTreeParse   (const char *input,
                           char *error_buffer, size_t error_buffer_size)
 {
+  if(input && strlen(input) > 4 && memcmp(input, "oiJS", 4) == 0)
+    return (oyjl_val)input;
+
 #if (YAJL_VERSION) > 20000
-static yajl_callbacks oyjl_tree_callbacks = {
+static yajl_callbacks oyjl_tree_callbacks_ = {
   handle_null,
   handle_boolean,
   NULL, //handle_integer,
@@ -462,7 +466,7 @@ static yajl_callbacks oyjl_tree_callbacks = {
   handle_end_array
 };
 #else
-static yajl_callbacks oyjl_tree_callbacks = {
+static yajl_callbacks oyjl_tree_callbacks_ = {
   handle_null,
   handle_boolean,
   NULL, //handle_integer,
@@ -508,7 +512,7 @@ static yajl_callbacks oyjl_tree_callbacks = {
     if (error_buffer != NULL)
         memset (error_buffer, 0, error_buffer_size);
 
-    handle = yajl_alloc( &oyjl_tree_callbacks,
+    handle = yajl_alloc( &oyjl_tree_callbacks_,
 #if YAJL_VERSION < 20000
                                                 &yconfig,
 #endif
@@ -535,6 +539,20 @@ static yajl_callbacks oyjl_tree_callbacks = {
         yajl_free_error( handle, (unsigned char*)internal_err_str );
         internal_err_str = 0;
         yajl_free (handle);
+        while(ctx.stack)
+        {
+          if(ctx.stack->key)
+            free(ctx.stack->key);
+          ctx.stack->key = NULL;
+          if(ctx.stack->value)
+          {
+            oyjlValueClear(ctx.stack->value);
+            free(ctx.stack->value);
+            ctx.stack->value = NULL;
+          }
+          context_pop(&ctx);
+        }
+        oyjlTreeFree( ctx.root );
         return NULL;
     }
 
@@ -695,6 +713,7 @@ void             oyjlParseXMLDoc_    ( xmlDocPtr           doc,
       const char * val = (const char *) cur->content;
       double d;
       int err = -1;
+
       if(flags & OYJL_NUMBER_DETECTION)
         err = oyjlStringToDouble( val, &d );
       if(err == 0)
@@ -707,9 +726,22 @@ void             oyjlParseXMLDoc_    ( xmlDocPtr           doc,
         root->u.number.i = strtol(root->u.number.r, 0, 10);
         if (errno == 0)
           root->u.number.flags |= OYJL_NUMBER_INT_VALID;
+      } else if(flags & OYJL_NUMBER_DETECTION)
+      {
+        if(strcmp(val,"true") == 0)
+        {
+          err = 0;
+          root->type = oyjl_t_true;
+        } else if(strcmp(val,"false") == 0)
+        {
+          err = 0;
+          root->type = oyjl_t_false;
+        }
       }
-      else
+
+      if(err != 0)
         oyjlValueSetString( root, val );
+
     } else
     if( oyjlXMLNodeIsCData(cur) )
     {
@@ -744,7 +776,8 @@ void             oyjlParseXMLDoc_    ( xmlDocPtr           doc,
   }
 }
 
-/** @{ *//* oyjl_tree */
+/** \addtogroup oyjl_tree
+ *  @{ *//* oyjl_tree */
 /** @brief read a XML text string into a C data structure (libOyjl)
  *
  *  XML attributes are prefixed with the at '@' char. Inner strings are placed
@@ -832,7 +865,7 @@ int oyjlYamlGetId( yaml_node_t * n, int index, int key )
   return id;
 }
 
-static int oyjlYamlReadNode( yaml_document_t * doc, yaml_node_t * node, int flags, int is_key, char ** json )
+static int oyjlYamlReadNode_( yaml_document_t * doc, yaml_node_t * node, int flags, int is_key, char ** json )
 {
   int error = 0;
   int count, i;
@@ -864,7 +897,7 @@ static int oyjlYamlReadNode( yaml_document_t * doc, yaml_node_t * node, int flag
       int id = oyjlYamlGetId( node, i, 0 );
       yaml_node_t * n =
       yaml_document_get_node( doc, id );
-      error = oyjlYamlReadNode(doc, n, flags, 0, json);
+      error = oyjlYamlReadNode_(doc, n, flags, 0, json);
       if(i < count - 1) oyjlStringAdd( json, 0,0, ",");
     }
     oyjlStringAdd( json, 0,0, "]");
@@ -881,21 +914,22 @@ static int oyjlYamlReadNode( yaml_document_t * doc, yaml_node_t * node, int flag
 
       if(i == 0) oyjlStringAdd( json, 0,0, "{");
 
-      error = oyjlYamlReadNode(doc, key, flags, 1, json);
+      error = oyjlYamlReadNode_(doc, key, flags, 1, json);
       if( key->type == YAML_SCALAR_NODE &&
           !error )
       {
         oyjlStringAdd( json, 0,0, ":");
       }
 
-      error = oyjlYamlReadNode(doc, val, flags, 0, json);
+      error = oyjlYamlReadNode_(doc, val, flags, 0, json);
       if(i < count - 1) oyjlStringAdd( json, 0,0, ",");
       else if( i == count - 1 ) oyjlStringAdd( json, 0,0, "}");
     }
   return error;
 }
 
-/** @{ *//* oyjl_tree */
+/** \addtogroup oyjl_tree
+ *  @{ *//* oyjl_tree */
 /** @brief read a YAML text string into a C data structure (libOyjl)
  *
  *  This function needs linking to libOyjl.
@@ -948,7 +982,7 @@ oyjl_val   oyjlTreeParseYaml         ( const char        * yaml,
   }
 
   root = yaml_document_get_root_node(&document);
-  error = oyjlYamlReadNode( &document, root, flags, 1, &json );
+  error = oyjlYamlReadNode_( &document, root, flags, 1, &json );
   if( error )
   {
     if(error_buffer)

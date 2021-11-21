@@ -37,6 +37,7 @@
 
 #if defined(Q_OS_ANDROID)
 #include <android/log.h>
+#include "main2.h"
 #endif
 
 // startup stuff
@@ -59,6 +60,8 @@ void printObjectClassNames( QObject * o )
 
 int main(int argc, char *argv[])
 {
+    setenv("FORCE_COLORTERM", "1", 0); /* show rich text format on non GNU color extension environment */
+
     Q_INIT_RESOURCE(app);
 
     QGuiApplication app(argc, argv);
@@ -76,13 +79,15 @@ int main(int argc, char *argv[])
     else
         app.installTranslator(&translator);
 
+#if QT_VERSION_MAJOR == 5
     foreach (QScreen * screen, QGuiApplication::screens())
         screen->setOrientationUpdateMask(Qt::LandscapeOrientation | Qt::PortraitOrientation |
                                          Qt::InvertedLandscapeOrientation | Qt::InvertedPortraitOrientation);
+#endif
 
     app.setApplicationName(QString("oyjl-args-qml"));
     app.setApplicationDisplayName(QString("Oyjl"));
-    app.setApplicationVersion("0.6");
+    app.setApplicationVersion("0.7");
     app.setOrganizationName(QString("oyranos.org"));
     app.setWindowIcon(QIcon(":/images/logo-sw.svg"));
 
@@ -143,6 +148,9 @@ int main(int argc, char *argv[])
     QString inputJSON = parser.value(inputOption);
     QString outputJSON = parser.value(outputOption);
     QString commandsJSON = parser.value(commandsOption);
+#if defined(Q_OS_ANDROID)
+    inputJSON = QString(oyjl_json);
+#endif
 
 
     qmlRegisterType<AppData>("AppData", 1, 0, "AppData");

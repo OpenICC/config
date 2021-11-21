@@ -2,7 +2,7 @@
  *
  *  Oyranos is an open source Color Management System 
  *
- *  Copyright (C) 2004-2019  Kai-Uwe Behrmann
+ *  Copyright (C) 2004-2021  Kai-Uwe Behrmann
  *
  *  @brief    Oyranos test suite
  *  @internal
@@ -32,11 +32,58 @@
 #include <math.h>
 #endif
 
+#ifndef OYJL_H
+#define OYJL_H_NOT
+# ifndef OYJL_CTEND
+typedef enum {
+  oyjlNO_MARK,
+  oyjlRED,
+  oyjlGREEN,
+  oyjlBLUE,
+  oyjlBOLD,
+  oyjlITALIC,
+  oyjlUNDERLINE
+} oyjlTEXTMARK_e;
+# endif
+#endif
+#ifndef OYJL_CREATE_VA_STRING
+#define OYJL_CREATE_VA_STRING(format_, text_, alloc_, error_action) \
+if(format_ && strchr(format_,'%') != NULL) { \
+  va_list list; \
+  size_t sz = 0; \
+  int len = 0; \
+  void*(* allocate_)(size_t size) = alloc_; \
+  if(!allocate_) allocate_ = malloc; \
+\
+  text_ = NULL; \
+  \
+  va_start( list, format_); \
+  len = vsnprintf( text_, sz, format_, list); \
+  va_end  ( list ); \
+\
+  { \
+    text_ = (char*) allocate_( sizeof(char) * len + 2 ); \
+    if(!text_) \
+    { \
+      fprintf( stderr, "could not allocate memory" ); \
+      error_action; \
+    } \
+    va_start( list, format_); \
+    len = vsnprintf( text, len+1, format_, list); \
+    va_end  ( list ); \
+  } \
+} else if(format_) \
+{ \
+  text_ = strdup( format_ );\
+}
+#endif
+
 extern int * oyjl_debug;
+extern int verbose;
 
 /** \addtogroup oyjl
  *  @{ *//* oyjl */
-/** \addtogroup oyjl_test Testing
+/** \addtogroup oyjl_test OyjlTest Code and Tools Testing
  *  @brief API testing for prototyping and regression checking in CI
  *
  *  The API is designed to be easily useable without much boilerplate.
@@ -55,6 +102,13 @@ extern int * oyjl_debug;
  *  Then include simply the oyjl_test_main.h header and it defines
  *  a main() function for you to handle command line parsing, statistics
  *  and summary printing after test program finish.
+ *
+ *  Include oyjl.h before oyjl_test_main.h, in case you need it.
+ *
+ *  A complete test file is the self test. It includes the
+ *  oyjl_test_main.h and implicitely other oyjl_test.h headers and
+ *  compiles without additional dependencies:
+ *  @include test-test.c
  *
  *  @{ *//* oyjl_test */
 
@@ -92,28 +146,71 @@ typedef enum {
 #define OYJL_BLUE_B "\033[0;34m"
 /* switch back */
 #define OYJL_CTEND "\033[0m"
-typedef enum {
-  oyjlRED,
-  oyjlGREEN,
-  oyjlBLUE,
-  oyjlBOLD,
-  oyjlITALIC,
-  oyjlUNDERLINE
-} oyjlCOLORTERM_e;
-const char * colorterm = NULL;
-static const char * oyjlTermColor_( oyjlCOLORTERM_e rgb, const char * text) {
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+static int oyjlTermColorCheck__()
+{
+  struct stat sout, serr;
+  int color_term = 0;
+
+  if( fstat( fileno(stdout), &sout ) == -1 )
+    return 0;
+
+  if( fstat( fileno(stderr), &serr ) == -1 )
+    return color_term;
+
+  if( S_ISCHR( sout.st_mode ) &&
+      S_ISCHR( serr.st_mode ) )
+    color_term = 1;
+
+  return color_term;
+}
+int oyjlTermColorCheck()
+{
+  int color_env = 0;
+  static int colorterm_init = 0;
+  static const char * oyjl_colorterm = NULL;
+  static int truecolor = 0,
+             color = 0;
+  if(!colorterm_init)
+  {
+    colorterm_init = 1;
+    oyjl_colorterm = getenv("COLORTERM");
+    color = oyjl_colorterm != NULL ? 1 : 0;
+    if(!oyjl_colorterm) oyjl_colorterm = getenv("TERM");
+    truecolor = oyjl_colorterm && strcmp(oyjl_colorterm,"truecolor") == 0;
+    if(!oyjlTermColorCheck__())
+      truecolor = color = 0;
+    if( getenv("FORCE_COLORTERM") )
+      truecolor = color = 1;
+    if( getenv("FORCE_NO_COLORTERM") )
+      truecolor = color = 0;
+    if(verbose)
+      fprintf(stdout, "color: %d truecolor: %d oyjl_colorterm: %s\n", color, truecolor, oyjl_colorterm );
+  }
+  color_env = (color ? 0x01 : 0x00) | (truecolor ? 0x02 : 0x00);
+  return color_env;
+}
+const char * oyjlTermColor_( oyjlTEXTMARK_e rgb, const char * text) {
   int len = strlen(text);
   static char t[256];
-  int truecolor = colorterm && strcmp(colorterm,"truecolor") == 0;
-  int color = colorterm != NULL ? 1 : 0;
+  int color_env = oyjlTermColorCheck(),
+      color = color_env & 0x01,
+      truecolor = color_env & 0x02;
   if(len < 200)
   {
     switch(rgb)
     {
-      case oyjlRED: sprintf( t, "%s%s%s", truecolor ? OYJL_RED_TC : color ? OYJL_RED_B : "", text, OYJL_CTEND ); break;
-      case oyjlGREEN: sprintf( t, "%s%s%s", truecolor ? OYJL_GREEN_TC : color ? OYJL_GREEN_B : "", text, OYJL_CTEND ); break;
-      case oyjlBLUE: sprintf( t, "%s%s%s", truecolor ? OYJL_BLUE_TC : color ? OYJL_BLUE_B : "", text, OYJL_CTEND ); break;
-      default: sprintf( t, "%s", text ); break;
+      case oyjlNO_MARK: sprintf( t, "%s", text ); break;
+      case oyjlRED: sprintf( t, "%s%s%s", truecolor ? OYJL_RED_TC : color ? OYJL_RED_B : "", text, truecolor || color ? OYJL_CTEND : "" ); break;
+      case oyjlGREEN: sprintf( t, "%s%s%s", truecolor ? OYJL_GREEN_TC : color ? OYJL_GREEN_B : "", text, truecolor || color ? OYJL_CTEND : "" ); break;
+      case oyjlBLUE: sprintf( t, "%s%s%s", truecolor ? OYJL_BLUE_TC : color ? OYJL_BLUE_B : "", text, truecolor || color ? OYJL_CTEND : "" ); break;
+      case oyjlBOLD: sprintf( t, "%s%s%s", truecolor || color ? OYJL_BOLD : "", text, truecolor || color ? OYJL_CTEND : "" ); break;
+      case oyjlITALIC: sprintf( t, "%s%s%s", truecolor || color ? OYJL_ITALIC : "", text, truecolor || color ? OYJL_CTEND : "" ); break;
+      case oyjlUNDERLINE: sprintf( t, "%s%s%s", truecolor || color ? OYJL_UNDERLINE : "", text, truecolor || color ? OYJL_CTEND : "" ); break;
     }
     return t;
   } else
@@ -158,17 +255,17 @@ void oyjlSetDbgPosition( const char * file, int line )
  *  @param         do_it               enable the test - usually 1
  */
 #define TEST_RUN( prog, text, do_it ) \
-oyjlTESTRESULT_e prog(); \
+oyjlTESTRESULT_e prog(void); \
 { \
   if(argc > argpos && do_it) { \
       for(i = argpos; i < argc; ++i) \
         if(strstr(text, argv[i]) != 0 || \
            atoi(argv[i]) == oyjl_test_number ) \
-          oyTestRun( prog, text, oyjl_test_number ); \
+          oyjlTestRun( prog, text, oyjl_test_number ); \
   } else if(list) \
     printf( "[%d] %s\n", oyjl_test_number, text); \
   else if(do_it) \
-    oyTestRun( prog, text, oyjl_test_number ); \
+    oyjlTestRun( prog, text, oyjl_test_number ); \
   ++oyjl_test_number; \
 }
 
@@ -181,6 +278,8 @@ oyjlTESTRESULT_e prog(); \
 
 int results[oyjlTESTRESULT_UNKNOWN+1];
 #ifndef OYJL_TEST_MAX_COUNT
+/** Macro to override inbuild default of 64 maximum array length for storing test results.
+ */
 #define OYJL_TEST_MAX_COUNT 64
 #endif
 char * tests_failed[OYJL_TEST_MAX_COUNT];
@@ -191,24 +290,68 @@ char * tests_xfailed[OYJL_TEST_MAX_COUNT];
 #define MAX_PATH 1024
 #endif
 
+#if defined(__linux__)
+#include <sys/ioctl.h>
+#include <unistd.h>
+int oyjlTestTermColumns()
+{
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    return w.ws_col;
+}
+#else
+int oyjlTestTermColumns() {return 0;}
+#endif
+
+#ifndef OYJL_PRINT_SUB_LENGTH
+/** Macro to override te name of the OYJL_PRINT_SUB_LENGTH environment variable.
+ *  The environment variable will be used to detect the desired print width
+ *  inside sub tests. The ::oyjl_print_sub_length is set accordingly.
+ */
+#define OYJL_PRINT_SUB_LENGTH "OYJL_PRINT_SUB_LENGTH"
+#endif
+
 int oy_test_current_sub_count;
+/** @brief default for printed columns
+ *  @see OYJL_PRINT_SUB_LENGTH */
+int oyjl_print_sub_length = 51;
 /** run a test and print results on end
  *  @param         test                test function
  *  @param         test_name           short string for status line
  *  @param         number              internal test number
  */
-oyjlTESTRESULT_e oyTestRun           ( oyjlTESTRESULT_e  (*test)(void),
+oyjlTESTRESULT_e oyjlTestRun         ( oyjlTESTRESULT_e  (*test)(void),
                                        const char        * test_name,
                                        int                 number )
 {
   oyjlTESTRESULT_e error = oyjlTESTRESULT_UNKNOWN;
   char * text = NULL;
+  /** Handle columns width by checking ::OYJL_PRINT_SUB_LENGTH envar or
+   *  using terminal window size by asking linux ioctl or
+   *  use inbuild default. */
+  int i = 0, columns = oyjlTestTermColumns();
+  const char * oyjl_print_sub_length_env = getenv(OYJL_PRINT_SUB_LENGTH);
+  if(oyjl_print_sub_length_env)
+    oyjl_print_sub_length = atoi(oyjl_print_sub_length_env);
+  else if(columns)
+  {
+    oyjl_print_sub_length = columns;
+    if(oyjl_print_sub_length >= 12)
+      oyjl_print_sub_length -= 4 + 9 + oyjl_print_sub_length%8;
+  }
 
   oyjl_test_file = NULL;
   oyjl_test_file_line = -1;
   oy_test_current_sub_count = 0;
 
-  fprintf( stdout, "\n________________________________________________________________\n" );
+  /** Print header line and title. */
+  text = (char*) malloc(80 + oyjl_print_sub_length);
+  sprintf( text, "\n" );
+  i = oyjl_print_sub_length + 12;
+  while(i--) sprintf( &text[strlen(text)], "_" );
+  sprintf( &text[strlen(text)], "\n" );
+  fprintf( stdout, text );
+  free(text);
   fprintf(stdout, "Test[%d]: %s ... ", number, test_name );
 
   error = test();
@@ -231,7 +374,7 @@ oyjlTESTRESULT_e oyTestRun           ( oyjlTESTRESULT_e  (*test)(void),
 
   results[error] += 1;
 
-  /* print */
+  /** Print sumarisation of sub test. */
   if(error <= oyjlTESTRESULT_FAIL)
     fprintf(stdout, " !!! ERROR !!!" );
   fprintf(stdout, "\n" );
@@ -241,12 +384,13 @@ oyjlTESTRESULT_e oyTestRun           ( oyjlTESTRESULT_e  (*test)(void),
 
 
 int oy_test_sub_count = 0;
+/** @brief Result of last sub test */
 oyjlTESTRESULT_e oy_test_last_result = oyjlTESTRESULT_UNKNOWN;
-/** @brief register status and print info of sub test
+/** @brief Register status and print info of sub test
  *
  *  Print a custom line to stdout followed by the status. Register state.
  *
- *  The PRINT_SUB macro remembers the first file position of similar strongly
+ *  The PRINT_SUB_BASIC macro remembers the first file position of similar strongly
  *  failed sub tests. As macros count the last closing brace ')', the
  *  line number is set to (\_\_LINE\_\_ - 1). So it is suggested to place
  *  the status macro in one line to let the position fall in front or use
@@ -258,8 +402,8 @@ oyjlTESTRESULT_e oy_test_last_result = oyjlTESTRESULT_UNKNOWN;
 
     if(i == 2)
     {
-      PRINT_SUB( oyjlTESTRESULT_SUCCESS,
-      "i = %d", i );
+      PRINT_SUB_INT( oyjlTESTRESULT_SUCCESS, i,
+      "i =" );
     }
     else
     {
@@ -271,20 +415,42 @@ oyjlTESTRESULT_e oy_test_last_result = oyjlTESTRESULT_UNKNOWN;
  *
  *  @param         result_             use oyjlTESTRESULT_e for
  *  @param         ...                 the argument list to fprint(stdout, ...)
+ *
+ *  @see PRINT_SUB PRINT_SUB_INT PRINT_SUB_PROFILING
  */
-#define PRINT_SUB( result_, ... ) { \
-  oy_test_last_result = result_; \
+#define PRINT_SUB_BASIC( result_, ... ) \
+{ oy_test_last_result = result_; \
   if((result_) < oyjlTESTRESULT_SUCCESS && (result_) < result) OYJL_TEST_START \
   if((result_) < result) \
     result = result_; \
   fprintf(stdout, ## __VA_ARGS__ ); \
-  fprintf(stdout, " ..\t%s", oyjlTestResultToString(result_,1)); \
+  fprintf(stdout, " .. %s", oyjlTestResultToString(result_,1)); \
   if((result_) <= oyjlTESTRESULT_FAIL) \
     fprintf(stdout, " !!! ERROR !!!" ); \
   fprintf(stdout, "\n" ); \
   ++oy_test_sub_count; \
   ++oy_test_current_sub_count; \
 }
+
+/** Like ::PRINT_SUB_BASIC but with variable columns size. */
+#define PRINT_SUB( result_, ... ) \
+{ PRINT_SUB_BASIC( result_, \
+    oyjlPrintSub(-1,-1, ## __VA_ARGS__ ) ); \
+}
+
+/** Like ::PRINT_SUB_BASIC but with variable columns size and right side integer print. */
+#define PRINT_SUB_INT( result_, count_, ... ) \
+{ PRINT_SUB_BASIC( result_, \
+    oyjlPrintSub(-1, count_, ## __VA_ARGS__ ) ); \
+}
+
+/** Like ::PRINT_SUB_BASIC but with variable columns size and right side profiling print. */
+#define PRINT_SUB_PROFILING( result_, integer_, duration_, term_, ... ) \
+{ PRINT_SUB_BASIC( result_, \
+    oyjlPrintSubProfiling(-1, integer_, duration_, term_, ## __VA_ARGS__ ) ); \
+}
+
+
 int  oyjlWriteTestFile               ( const char        * filename,
                                        const void        * mem,
                                        int                 size )
@@ -345,7 +511,7 @@ int  oyjlWriteTestFile               ( const char        * filename,
  *  @code
     char * text = myApiTesting(); // shall return "good result"
     if(strcmp(text,"good result") == 0) // good
-      PRINT_SUB( oyjlTESTRESULT_SUCCESS, "myApiTesting()" );
+      PRINT_SUB_INT( oyjlTESTRESULT_SUCCESS, strlen(text), "myApiTesting()" );
     else // fail
       PRINT_SUB( oyjlTESTRESULT_FAIL, "myApiTesting()" );
     OYJL_TEST_WRITE_RESULT( data, strlen(text), "myApiTesting", "txt" )
@@ -357,26 +523,27 @@ int  oyjlWriteTestFile               ( const char        * filename,
  *  @param         suffix              file name suffix
  */
 #define OYJL_TEST_WRITE_RESULT( mem, size, hint, suffix ) if(mem) { \
-  char * fn = malloc(64); \
+  char * fn = (char*)malloc((hint?strlen(hint):0)+64); \
   sprintf( fn, "%s-%d-%d-%s-%s.%s", OYJL_TEST_NAME, oyjl_test_number, oy_test_current_sub_count, hint?hint:"", oyjlTestResultToString(oy_test_last_result,0), suffix ); \
   oyjlWriteTestFile( fn, mem, size ); \
   if(verbose) fprintf(zout, "%s\n", fn); \
-  if(oy_test_last_result == oyjlTESTRESULT_FAIL) { \
-    char * fns = malloc(64); \
+  if(oy_test_last_result == oyjlTESTRESULT_FAIL || oy_test_last_result == oyjlTESTRESULT_XFAIL) { \
+    char * fns = (char*)malloc((hint?strlen(hint):0)+64); \
     sprintf( fns, "%s-%d-%d-%s-%s.%s", OYJL_TEST_NAME, oyjl_test_number, oy_test_current_sub_count, hint?hint:"", oyjlTestResultToString(oyjlTESTRESULT_SUCCESS,0), suffix ); \
     FILE * fp = fopen(fns, "r"); \
-    if(fp && strcmp(suffix, "txt") == 0) { \
-      char * diff = malloc(128); \
+    if(fp && strcmp(suffix, suffix) == 0) { \
+      char * diff = (char*)malloc((hint?strlen(hint)*2:0)+128); \
       sprintf( diff, "diff -aur %s %s", fns, fn ); \
       system(diff); \
       free(diff); \
       fclose(fp); \
     } \
+    free(fns); \
   } \
   free(fn); \
 }
 
-/** helper to print a number inside ::PRINT_SUB(...) */
+/** helper to print a number */
 const char  *  oyjlIntToString      ( int                 integer )
 {
   static char texts[3][255];
@@ -393,7 +560,7 @@ const char  *  oyjlIntToString      ( int                 integer )
   return texts[a++];
 }
 
-/** helper to print tempo in ::PRINT_SUB(...) */
+/** helper to print tempo */
 const char  *  oyjlProfilingToString ( int                 integer,
                                        double              duration,
                                        const char        * term )
@@ -407,7 +574,7 @@ const char  *  oyjlProfilingToString ( int                 integer,
   if(integer/duration >= 1000000.0)
     sprintf( &texts[a][0], "%.02f M%s/s", integer/duration/1000000.0, term );
   else
-    sprintf( &texts[a][0], "%.00f %s/s", integer/duration, term );
+    sprintf( &texts[a][0], "%.00f  %s/s", integer/duration, term );
 
   len = strlen(&texts[a][0]);
 
@@ -417,9 +584,166 @@ const char  *  oyjlProfilingToString ( int                 integer,
   if(integer/duration >= 1000000.0)
     sprintf( &texts[a][i], "%.02f M%s/s", integer/duration/1000000.0, term );
   else
-    sprintf( &texts[a][i], "%.00f %s/s", integer/duration, term );
+    sprintf( &texts[a][i], "%.00f  %s/s", integer/duration, term );
 
   return texts[a++];
+}
+
+/** Storage location of last return from oyjlPrintSub() and inside the
+ *  PRINT_SUB() family respectively. */
+char * oyjl_print_sub = 0;
+/** @brief print test results in a canonical way
+ *
+ *  The funktion is not reentrant. You need to copy the result if
+ *  calling repeatedly.
+ *
+ *  @param[in]     space               number line width: use -1 for default of 51
+ *  @param[in]     right               number for right alignment: use -1 to omit
+ *  @param[in]     format              printf format
+ *  @param[in]     ...                 variable argument list for format
+ *  @return                            return static string in oyjl_print_sub
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2021/09/29
+ *  @since   2021/09/29 (Oyjl: 1.0.0)
+ */
+const char * oyjlPrintSub            ( int                 space,
+                                       int                 right,
+                                       const char        * format,
+                                                           ... )
+{
+  char * text = NULL, * num = NULL, * visual, * tmp;
+  int len, vlen, i;
+
+  if(oyjl_print_sub)
+  { free(oyjl_print_sub); oyjl_print_sub = NULL; }
+
+  OYJL_CREATE_VA_STRING(format, text, malloc, return NULL)
+
+  visual = strdup( text );
+#ifndef OYJL_ARGS_C
+# ifndef OYJL_H_NOT
+  oyjlRegExpReplace( &visual, "\033[[0-9;]*[a-zA-Z]", "" );
+# endif
+#endif
+  vlen = strlen(visual);
+  len = strlen(text);
+  if(space == -1)
+    space = oyjl_print_sub_length;
+
+  if(vlen-1 < space)
+  {
+    tmp = (char*) realloc( text, (len<space?space:len) + space - vlen + 2 );
+    text = tmp;
+    for( i = vlen - 1; i < space; ++i ) sprintf( &text[strlen(text)], " " );
+  }
+  free(visual); visual = NULL;
+
+  if(right != -1)
+  {
+    num = (char*) malloc(64);
+    sprintf( num, "%d", right );
+    i = strlen(num);
+    len = strlen(text);
+    tmp = (char*) realloc( text, len + strlen(num) + 2 );
+    text = tmp;
+    if(vlen + i -1 < space)
+      text[len-i-1] = '\000';
+    sprintf( &text[strlen(text)], " %d", right );
+    free(num);
+  }
+
+  oyjl_print_sub = text;
+
+  return text;
+}
+
+/** @brief print test results with profiling in a canonical way
+ *
+ *  The funktion is not reentrant. You need to copy the result if
+ *  calling repeatedly.
+ *
+ *  @param[in]     space               number line width: use -1 for default
+ *                                     columns or 51
+ *  @param[in]     integer             arg like for oyjlProfilingToString()
+ *  @param[in]     duration            arg like for oyjlProfilingToString()
+ *  @param[in]     term                arg like for oyjlProfilingToString()
+ *  @param[in]     format              printf format
+ *  @param[in]     ...                 variable argument list for format
+ *  @return                            return static string in oyjl_print_sub
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2021/10/08
+ *  @since   2021/10/08 (Oyjl: 1.0.0)
+ */
+const char * oyjlPrintSubProfiling   ( int                 space,
+                                       int                 integer,
+                                       double              duration,
+                                       const char        * term,
+                                       const char        * format,
+                                                           ... )
+{
+  char * text = NULL, * visual, * tmp, * prof = NULL;
+  int len, vlen, i;
+  static int even = 1;
+
+  if(oyjl_print_sub)
+  { free(oyjl_print_sub); oyjl_print_sub = NULL; }
+
+  OYJL_CREATE_VA_STRING(format, text, malloc, return NULL)
+
+  prof = (char*) malloc(256);
+  if(integer/duration >= 1000000.0)
+    sprintf( prof, " %.02f M%s/s", integer/duration/1000000.0, term );
+  else if(integer/duration < 10.0)
+    sprintf( prof, " %.04f  %s/s", integer/duration, term );
+  else
+    sprintf( prof, " %.00f  %s/s", integer/duration, term );
+
+  visual = strdup( text );
+#ifndef OYJL_ARGS_C
+# ifndef OYJL_H_NOT
+  oyjlRegExpReplace( &visual, "\033[[0-9;]*[a-zA-Z]", "" );
+# endif
+#endif
+  vlen = strlen(visual);
+  len = strlen(text);
+  if(space == -1)
+    space = oyjl_print_sub_length;
+
+  if(vlen-1 < space)
+  {
+    const char * mark = ".";
+    int odd = 1;
+    even = !even;
+    tmp = (char*) realloc( text, (len<space?space:len) + space - len + 20 );
+    text = tmp;
+    for( i = vlen - 1; i < space; ++i ) sprintf( &text[strlen(text)], i < space - 16&&i>vlen+5 ? even?((odd = !odd) == 0)?mark:" ":mark : " " );
+  }
+  free(visual); visual = NULL;
+
+  if(prof)
+  {
+    i = strlen(prof);
+    if(integer/duration < 10.0)
+    {
+      sprintf( prof, " %.04f", integer/duration );
+      sprintf( prof, "%s  %s/s", oyjlTermColor_(oyjlITALIC,prof), term );
+    }
+    len = strlen(text);
+    tmp = (char*) realloc( text, len + strlen(prof) + 2 );
+    text = tmp;
+    if(vlen + i < space)
+      text[len-i] = '\000';
+    else
+      text[vlen + 1] = '\000';
+    sprintf( &text[strlen(text)], "%s", prof );
+    free(prof);
+  }
+
+  oyjl_print_sub = text;
+
+  return text;
 }
 
 /** helper to check for availablity of display environment for test status */

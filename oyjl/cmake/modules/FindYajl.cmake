@@ -13,23 +13,19 @@
 # This file is based on cmake-2.6/Modules/FindBZip2.cmake
 # Copyright (c) 2010, Yiannis Belias, <jonnyb@hol.gr>
 # modify for YAJL
-# Copyright (c) 2012, Kai-Uwe Behrmann, <ku.b@gmx.de>
+# Copyright (c) 2012-2020, Kai-Uwe Behrmann, <ku.b@gmx.de>
 
 # use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
 
-FIND_PACKAGE(PkgConfig)
-pkg_check_modules(YAJL yajl)
-SET(YAJL_DEFINITIONS ${YAJL_CFLAGS_OTHER})
+FIND_PACKAGE(PkgConfig QUIET)
+pkg_check_modules(PC_YAJL QUIET yajl)
+SET(YAJL_DEFINITIONS ${PC_YAJL_CFLAGS_OTHER})
 
-IF( YAJL_INCLUDE_DIR AND YAJL_LIBRARIES )
-    SET(YAJL_FIND_QUIETLY TRUE)
-ENDIF( YAJL_INCLUDE_DIR AND YAJL_LIBRARIES )
+FIND_PATH(YAJL_INCLUDE_DIR NAMES yajl/yajl_common.h HINTS ${PC_YAJL_INCLUDEDIR} ${PC_YAJL_INCLUDE_DIRS} PATH_SUFFIXES yajl)
 
-FIND_PATH(YAJL_INCLUDE_DIR yajl/yajl_common.h)
-
-SET(YAJL_NAMES ${YAJL_NAMES} yajl libyajl)
-FIND_LIBRARY(YAJL_LIBRARIES NAMES ${YAJL_NAMES} PATH)
+SET(YAJL_NAMES ${YAJL_NAMES} yajl libyajl yajl-static)
+FIND_LIBRARY(YAJL_LIBRARIES NAMES ${YAJL_NAMES} HINTS ${PC_YAJL_LIBDIR} ${PC_YAJL_LIBRARY_DIRS})
 
 
 # handle the QUIETLY and REQUIRED arguments and set YAJL_FOUND to TRUE if 

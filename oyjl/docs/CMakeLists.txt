@@ -7,6 +7,7 @@ IF(ENABLE_DOCU_${PROJECT_UP_NAME})
         ${CMAKE_SOURCE_DIR}/oyjl_tree.c
         ${CMAKE_SOURCE_DIR}/oyjl_yajl.c
         ${CMAKE_CURRENT_SOURCE_DIR}/doxymentation.dox
+        ${CMAKE_CURRENT_SOURCE_DIR}/md/*.md
      )
 ENDIF(ENABLE_DOCU_${PROJECT_UP_NAME})
 
@@ -21,11 +22,18 @@ CONFIGURE_FILE(
                 @ONLY
        )
 
+FILE( GLOB MAN1_PAGES_${PROJECT_UP_NAME} man/*.1 )
+FILE( GLOB MAN1DE_PAGES_${PROJECT_UP_NAME} man/de/*.1 )
+FILE( GLOB MAN3_PAGES_${PROJECT_UP_NAME} man/*.3 )
+INSTALL( FILES ${MAN1_PAGES_${PROJECT_UP_NAME}} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 )
+INSTALL( FILES ${MAN1DE_PAGES_${PROJECT_UP_NAME}} DESTINATION ${CMAKE_INSTALL_MANDIR}/de/man1 )
+INSTALL( FILES ${MAN3_PAGES_${PROJECT_UP_NAME}} DESTINATION ${CMAKE_INSTALL_MANDIR}/man3 )
+
 FIND_PACKAGE( Doxygen )
 IF( DOXYGEN_FOUND )
 
   ADD_CUSTOM_COMMAND( OUTPUT html
-	  COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.files | grep ^FILE_PATTERNS | sed 's%\;% %g' >> Doxyfile.dox \; doxygen Doxyfile.dox \; cp ${CMAKE_SOURCE_DIR}/oyjl-args-qml/images/logo-sw.svg html/ \; cp ${CMAKE_CURRENT_SOURCE_DIR}/customdoxygen.css html/
+	  COMMAND cat ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.files | grep ^FILE_PATTERNS | sed 's%\;% %g' >> Doxyfile.dox \; doxygen Doxyfile.dox \; cp ${CMAKE_SOURCE_DIR}/oyjl-args-qml/images/logo-sw.svg html/ \; cp ${CMAKE_CURRENT_SOURCE_DIR}/customdoxygen.css html/\; cp ${CMAKE_CURRENT_SOURCE_DIR}/layout.css html/
                     )
 
   ADD_CUSTOM_TARGET( docu ALL

@@ -25,6 +25,9 @@
 #include <QJsonDocument>
 #include <oyjl_version.h>
 #include <oyjl.h>
+#if defined(Q_OS_ANDROID)
+# include <QtAndroidExtras/QtAndroid>
+#endif
 
 /* Function pointer hook for Process class. If set, this function replaces shell out. */
 int (*processCallback_p)(int argc, const char ** argv) = NULL;
@@ -74,6 +77,24 @@ QString AppData::getJSON(QString url)
     if(jdoc.isNull())
     {
         LOG(QString("%1: %2\n%3").arg(tr("Json is invalid")).arg(url).arg(jui));
+        int size = 0;
+        const char * fn = url.toLocal8Bit().data();
+        char * json = oyjlReadFile(fn, &size);
+        if(!size)
+        {
+          char * error = NULL;
+          oyjlStringAdd( &error, 0,0, "{\"error\": \"%s\"}", oyjlJsonEscape(fn,0) );
+          LOG(QString("No size of: %1").arg(fn));
+          return QString(error);
+        }
+        else
+        {
+          char * error_buffer = (char*) calloc( 256, sizeof(char) );
+          oyjl_val root = oyjlTreeParse( json, error_buffer, 256 );
+          if(error_buffer[0])
+            LOG(QString(error_buffer));
+          oyjlTreeFree( root );
+        }
     }
     QJsonObject json;
     json = jdoc.object();
@@ -189,6 +210,13 @@ QString AppData::findLogo(QString pattern)
         fn = findFile(pattern, oyjlSCOPE_SYSTEM);
     if(fn.length() == 0)
         fn = findFile(pattern, oyjlSCOPE_OYJL);
+    if(fn.length() == 0)
+    {
+        QString f = pattern;
+        QIcon i( f );
+        if(!i.isNull())
+            fn = f;
+    }
     return fn;
 }
 
@@ -226,7 +254,7 @@ QString AppData::getLibDescription(int type)
     return QString("no description found for type ") + QString::number(type);
 }
 
-/** @brief modify the JSON model
+/** @brief modify the internal JSON model
  *
  *  @param key    object name levels separated by slash '/';
  *                e.g.: "org/freedesktop/oyjl/keyA" ;
@@ -236,7 +264,7 @@ QString AppData::getLibDescription(int type)
  */
 void AppData::setOption(QString key, QString value)
 {
-    LOG(tr("%1:%2").arg(key).arg(value));
+    LOG(key + ":" + value );
     oyjl_val o;
     char * k = oyjlStringCopy(key.toLocal8Bit().constData(), malloc);
     char * v = oyjlStringCopy(value.toLocal8Bit().constData(), malloc);
@@ -256,7 +284,52 @@ void AppData::setOption(QString key, QString value)
     if(v) free(v);
 #endif
 }
+/** @brief obtain the internal JSON model
+ *
+ *  @param key    object name levels separated by slash '/';
+ *                e.g.: "org/freedesktop/oyjl/keyA" ;
+ *                The key can contain as well array indices:
+ *                e.g.: "org/freedesktop/oyjl/[0]/firstKey"
+ *  @return       the actual string for the object
+ *
+ * @see setOption()
+ */
+QString AppData::getOption(QString key)
+{
+    oyjl_val o;
+    char * k = oyjlStringCopy(key.toLocal8Bit().constData(), malloc);
+    const char * v;
+    if(!m_model)
+        m_model = oyjlTreeNew(k);
 
+    o = oyjlTreeGetValue(m_model, 0, k);
+    v = OYJL_GET_STRING(o);
+
+#if 0 // debuging
+    char * json = NULL;
+    int levels = 0;
+    oyjlTreeToJson(m_model, &levels, &json);
+    LOG(QString(json) + " \n" + k + ":" + v);
+    if(json) free(json);
+    if(k) free(k);
+    if(v) free(v);
+#endif
+
+    return QString(v);
+}
+QString AppData::dumpOptions()
+{
+    QString qstring;
+    if(m_model)
+    {
+        int level = 0;
+        char * t = NULL;
+        oyjlTreeToJson( m_model, &level, &t );
+        qstring = t;
+        if(t) free(t);
+    }
+    return qstring;
+}
 /** @brief obtain status on Linux
  */
 void AppData::readBattery()
@@ -273,4 +346,56 @@ void AppData::readBattery()
         state = 1;
     emit batteryDischarging(QVariant::fromValue(state));
     free(buf);
+}
+
+/** @brief dynamically register app permissions
+ */
+QString AppData::requestPermission( QString name )
+{
+    QString msg = "";
+#if defined(Q_OS_ANDROID)
+    // e.g. name = "android.permission.WRITE_EXTERNAL_STORAGE"
+    if(name.startsWith("android"))
+    {
+        auto  result = QtAndroid::checkPermission(name);
+        if(result == QtAndroid::PermissionResult::Denied)
+        {
+            QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(QStringList({"android.permission.WRITE_EXTERNAL_STORAGE"}));
+            if(resultHash[name] == QtAndroid::PermissionResult::Denied)
+            {
+                msg = tr("Permission not granted: ") + name;
+                LOG(msg);
+            }
+        }
+    }
+#else
+    if(name.startsWith("android"))
+    {
+        msg = "Can not apply Android permission on this platform " + name;
+        LOG(msg);
+    }
+#endif
+
+    return msg;
+}
+
+int AppData::hasPermission( QString name OYJL_UNUSED )
+{
+    int has = 1;
+#if defined(Q_OS_ANDROID)
+    // e.g. name = "android.permission.WRITE_EXTERNAL_STORAGE"
+    if(name.startsWith("android"))
+    {
+        auto  result = QtAndroid::checkPermission(name);
+        if(result == QtAndroid::PermissionResult::Denied)
+        {
+            has = 0;
+            bool should = QtAndroid::shouldShowRequestPermissionRationale(name);
+            if(should == false) // Do not show again
+                has = -1;
+        }
+    }
+#endif
+
+    return has;
 }

@@ -3,7 +3,7 @@
  *  oyjl - Basic helper C API's
  *
  *  @par Copyright:
- *            2010-2019 (C) Kai-Uwe Behrmann
+ *            2010-2021 (C) Kai-Uwe Behrmann
  *
  *  @brief    Oyjl API provides a platformindependent C interface for JSON I/O, conversion to and from
  *            XML + YAML, string helpers, file reading, testing and argument handling.
@@ -72,8 +72,8 @@ typedef enum {
     oyjl_t_any = 8
 } oyjl_type;
 
-#define OYJL_NUMBER_INT_VALID    0x01
-#define OYJL_NUMBER_DOUBLE_VALID 0x02
+#define OYJL_NUMBER_INT_VALID          0x01
+#define OYJL_NUMBER_DOUBLE_VALID       0x02
 
 /** A pointer to a node in the parse tree */
 typedef struct oyjl_val_s * oyjl_val;
@@ -85,15 +85,15 @@ typedef struct oyjl_val_s * oyjl_val;
  * and "OYJL_GET_*" macros below allow type checking and convenient
  * value extraction.
  */
-struct oyjl_val_s
+typedef struct oyjl_val_s
 {
     /**
      *  Type of the value contained. Use the "OYJL_IS_*" macros to check for a
-     * specific type. */
+     *  specific type. */
     oyjl_type type;
     /**
      *  Type-specific data. You may use the "OYJL_GET_*" macros to access these
-     * members. */
+     *  members. */
     union
     {
         char * string;   /**< @brief UTF-8 text */
@@ -116,7 +116,7 @@ struct oyjl_val_s
             size_t len; /**< @brief Number of elements. */
         } array;         /**< @brief series of values */
     } u;
-};
+} oyjl_val_s;
 
 /**
  * @brief Parse a string. (libOyjl)
@@ -241,11 +241,14 @@ void       oyjlTreeToXml             ( oyjl_val            v,
                                        char             ** xml );
 #define    OYJL_PATH                   0x08   /**< @brief  flag to obtain only path */
 #define    OYJL_KEY                    0x10   /**< @brief  flat to obtain only keys */
-void       oyjlTreeToPaths           ( oyjl_val            v,
+#define    OYJL_NO_ALLOC               0x800  /**< @brief  avoid malloc for oyjlOBJECT_JSON */
+char **    oyjlTreeToPaths           ( oyjl_val            v,
                                        int                 child_levels,
                                        const char        * xpath,
                                        int                 flags,
-                                       char            *** paths );
+                                       int               * count );
+char *     oyjlTreeGetPath           ( oyjl_val            v,
+                                       oyjl_val            node );
 #define    OYJL_CREATE_NEW             0x02   /**< @brief  flag to allocate a new tree node, in case it is not inside */
 oyjl_val   oyjlTreeGetValue          ( oyjl_val            v,
                                        int                 flags,
@@ -264,6 +267,12 @@ int        oyjlTreeSetDoubleF        ( oyjl_val            root,
                                        double              value,
                                        const char        * format,
                                                            ... );
+oyjl_val   oyjlTreeSerialise         ( oyjl_val            v,
+                                       int                 flags,
+                                       int               * size );
+oyjl_val   oyjlTreeDeSerialise       ( oyjl_val            v,
+                                       int                 flags,
+                                       int                 size );
 char *     oyjlValueText             ( oyjl_val            v,
                                        void*             (*alloc)(size_t));
 int        oyjlValueCount            ( oyjl_val            v );
@@ -271,6 +280,10 @@ oyjl_val   oyjlValuePosGet           ( oyjl_val            v,
                                        int                 pos );
 int        oyjlValueSetString        ( oyjl_val            v,
                                        const char        * string );
+int        oyjlValueSetDouble        ( oyjl_val            v,
+                                       double              value );
+void       oyjlValueCopy             ( oyjl_val            v,
+                                       oyjl_val            src );
 void       oyjlValueClear            ( oyjl_val            v );
 #define    OYJL_PATH_MATCH_LEN         0x20   /**< @brief  flag to test if the specified path match with the full length. */
 #define    OYJL_PATH_MATCH_LAST_ITEMS  0x40   /**< @brief  flag to test only the last path segments, which are separated by slash '/'. */
@@ -279,6 +292,19 @@ int        oyjlPathMatch             ( const char        * path,
                                        int                 flags );
 
 int        oyjlDataFormat            ( const char        * text );
+const char * oyjlDataFormatToString  ( int                 format );
+#define    OYJL_NO_INDEX               0x20 /**< @brief omit index resolving by squared brackets [] */
+#define    OYJL_QUOTE                  0x40 /**< @brief quotation marks '"' */
+#define    OYJL_NO_BACKSLASH           0x80 /**< @brief skip back slash '\' */
+#define    OYJL_REVERSE                0x100/**< @brief undo */
+#define    OYJL_REGEXP                 0x200/**< @brief handle regexp sequences */
+char *     oyjlJsonEscape            ( const char        * in,
+                                       int                 flags );
+
+#define OYJL_OBSERVE                   0x200000 /**< @brief be verbose on change */
+#define OYJL_IS_OBSERVED(v) (((v)!= NULL) && ((v)->u.number.flags & OYJL_OBSERVE))
+#define OYJL_SET_OBSERVE(v) if((v)!= NULL) (v)->u.number.flags |= OYJL_OBSERVE;
+#define OYJL_UNSET_OBSERVE(v) if((v)!= NULL) (v)->u.number.flags &= (~OYJL_OBSERVE);
 /** @} *//* oyjl_tree */
 
 /* --- Core --- */
@@ -311,17 +337,52 @@ typedef int (* oyjlMessage_f)        ( int/*oyjlMSG_e*/    error_code,
                                        const void        * context,
                                        const char        * format,
                                        ... );
-int            oyjlMessageFuncSet    ( oyjlMessage_f      message_func );
+int            oyjlMessageFuncSet    ( oyjlMessage_f       message_func );
 
 /* --- i18n helpers --- */
-int oyjlInitLanguageDebug            ( const char        * project_name,
+typedef struct oyjlTr_s oyjlTr_s;
+int            oyjlInitLanguageDebug ( const char        * project_name,
                                        const char        * env_var_debug,
                                        int               * debug_variable,
                                        int                 use_gettext,
                                        const char        * env_var_locdir,
                                        const char        * default_locdir,
-                                       const char        * loc_domain,
+                                       oyjlTr_s         ** context,
                                        oyjlMessage_f       msg );
+char *         oyjlLanguage          ( const char        * loc );
+char *         oyjlCountry           ( const char        * loc );
+const char *   oyjlLang              ( const char        * loc );
+char *         oyjlTranslate         ( oyjlTr_s          * context,
+                                       const char        * string );
+typedef char*(*oyjlTranslate_f)      ( oyjlTr_s          * context,
+                                       const char        * string );
+#define OYJL_GETTEXT                   0x400000 /**< @brief use gettext */
+/* Workaround for chaotic key order. Slow. */
+#define OYJL_NO_OPTIMISE               0x800000 /**< @brief skip binary search */
+oyjlTr_s *     oyjlTr_New            ( const char        * loc,
+                                       const char        * domain,
+                                       oyjl_val          * catalog,
+                                       oyjlTranslate_f     translator,
+                                       void              * user_data,
+                                       void             (* deAlloc)(void*),
+                                       int                 flags );
+oyjlTranslate_f oyjlTr_GetTranslator ( oyjlTr_s          * context );
+const char *   oyjlTr_GetLang        ( oyjlTr_s          * context );
+const char *   oyjlTr_GetDomain      ( oyjlTr_s          * context );
+oyjl_val       oyjlTr_GetCatalog     ( oyjlTr_s          * context );
+void *         oyjlTr_GetUserData    ( oyjlTr_s          * context );
+int            oyjlTr_GetFlags       ( oyjlTr_s          * context );
+void           oyjlTr_SetFlags       ( oyjlTr_s          * context,
+                                       int                 flags );
+void           oyjlTr_SetLocale      ( oyjlTr_s          * context,
+                                       const char        * loc );
+void           oyjlTr_Release        ( oyjlTr_s         ** context );
+oyjlTr_s *     oyjlTr_Get            ( const char        * domain );
+int            oyjlTr_Set            ( oyjlTr_s         ** context );
+int            oyjlTr_Unset          ( const char        * domain );
+void           oyjlTranslateJson     ( oyjl_val            root,
+                                       oyjlTr_s          * context,
+                                       const char        * key_list );
 
 void       oyjlDebugVariableSet      ( int               * debug );
 
@@ -342,6 +403,9 @@ char **    oyjlStringSplit2          ( const char        * text,
 const char * oyjlStringDelimiter     ( const char        * text,
                                        const char        * delimiter,
                                        int               * length );
+int        oyjlStringSplitUTF8       ( const char        * text,
+                                       char            *** mbchars,
+                                       void*            (* alloc)(size_t) );
 char *     oyjlStringCopy            ( const char        * string,
                                        void*            (* alloc)(size_t));
 int        oyjlStringAdd             ( char             ** string,
@@ -381,8 +445,7 @@ char **    oyjlStringListCatList     ( const char       ** list,
                                        int                 n_app,
                                        int               * count,
                                        void*            (* alloc)(size_t) );
-void       oyjlStringListAddStaticString (
-                                       char            *** list,
+void       oyjlStringListAddString   ( char            *** list,
                                        int               * n,
                                        const char        * string,
                                        void*            (* alloc)(size_t),
@@ -396,38 +459,75 @@ int        oyjlStringsToDoubles      ( const char        * text,
                                        int               * count,
                                        void*            (* alloc)(size_t),
                                        double           ** value );
-int        oyjlWStringLen            ( const char        * text );
+char *     oyjlRegExpFind            ( char              * text,
+                                       const char        * regex );
+char *     oyjlRegExpEscape          ( const char        * text );
+int        oyjlRegExpReplace         ( char             ** text,
+                                       const char        * regex,
+                                       const char        * replacement );
 typedef struct oyjl_string_s * oyjl_str;
-oyjl_str   oyjlStrNew                ( size_t              length,
+oyjl_str   oyjlStr_New               ( size_t              length,
                                        void*            (* alloc)(size_t),
                                        void             (* deAlloc)(void*) );
-oyjl_str   oyjlStrNewFrom            ( char             ** text,
+oyjl_str   oyjlStr_NewFrom           ( char             ** text,
                                        size_t              length,
                                        void*            (* alloc)(size_t),
                                        void             (* deAlloc)(void*) );
-void       oyjlStrRelease            ( oyjl_str          * string_ptr );
+void       oyjlStr_Release           ( oyjl_str          * string_ptr );
 const char*oyjlStr                   ( oyjl_str            string );
-char *     oyjlStrPull               ( oyjl_str            str );
-void       oyjlStrClear              ( oyjl_str            string );
-int        oyjlStrAppendN            ( oyjl_str            string,
+char *     oyjlStr_Pull              ( oyjl_str            str );
+void       oyjlStr_Clear             ( oyjl_str            string );
+int        oyjlStr_AppendN           ( oyjl_str            string,
                                        const char        * append,
                                        int                 append_len );
-int        oyjlStrAdd                ( oyjl_str            string,
+int        oyjlStr_Add               ( oyjl_str            string,
                                        const char        * format,
                                                            ... );
-int        oyjlStrReplace            ( oyjl_str            text,
+int        oyjlStr_Replace           ( oyjl_str            text,
                                        const char        * search,
                                        const char        * replacement,
-                                       void             (* modifyReplacement)(const char * text, const char * start, const char * end, const char * search, const char ** replace, void * user_data),
+                                       void             (* modifyReplacement)
+                                                             (const char * text,
+                                                              const char * start,
+                                                              const char * end,
+                                                              const char * search,
+                                                              const char ** replace,
+                                                              void * user_data),
                                        void              * user_data );
+typedef enum {
+  oyjlNO_MARK,
+  oyjlRED,
+  oyjlGREEN,
+  oyjlBLUE,
+  oyjlBOLD,
+  oyjlITALIC,
+  oyjlUNDERLINE
+} oyjlTEXTMARK_e;
+const char * oyjlTermColor           ( oyjlTEXTMARK_e      mark,
+                                       const char        * text );
+const char * oyjlTermColorFromHtml   ( const char        * text,
+                                       int                 flags );
+char *       oyjlBT                  ( int                 stack_limit );
+#define OYJL_DATE           0x01
+#define OYJL_TIME           0x02
+#define OYJL_TIME_ZONE      0x04
+#define OYJL_TIME_ZONE_DIFF 0x08
+#define OYJL_BRACKETS       0x10
+const char * oyjlPrintTime           ( int                 flags,
+                                       oyjlTEXTMARK_e      mark );
 
 /* --- I/O helpers --- */
 char *     oyjlReadFileStreamToMem   ( FILE              * fp,
                                        int               * size );
 char *     oyjlReadFile              ( const char        * file_name,
                                        int               * size_ptr );
+char *     oyjlReadCommandF          ( int               * size,
+                                       const char        * mode,
+                                       void*            (* alloc)(size_t),
+                                       const char        * format,
+                                                           ... );
 int        oyjlWriteFile             ( const char        * filename,
-                                       void              * mem,
+                                       const void        * mem,
                                        int                 size );
 int        oyjlIsFile                ( const char        * fullname,
                                        const char        * mode,
@@ -440,13 +540,16 @@ void       oyjlLibRelease            ( );
 
  *  @{ */
 
+/** @brief Types of known objects */
 typedef enum {
   oyjlOBJECT_NONE,
   oyjlOBJECT_OPTION = 1769433455,      /**< @brief oyjlOption_s */
   oyjlOBJECT_OPTION_GROUP = 1735879023,/**< @brief oyjlOptionGroup_s */
   oyjlOBJECT_OPTIONS = 1937205615,     /**< @brief oyjlOptions_s */
   oyjlOBJECT_UI_HEADER_SECTION = 1936222575, /**< @brief oyjlUiHeaderSection_s */
-  oyjlOBJECT_UI = 1769302383           /**< @brief oyjlUi_s */
+  oyjlOBJECT_UI = 1769302383,          /**< @brief oyjlUi_s */
+  oyjlOBJECT_TR = 1920231791,          /**< @brief oyjlTr_s */
+  oyjlOBJECT_JSON = 1397385583         /**< @brief oyjlNodes_s */
 } oyjlOBJECT_e;
 
 /** @brief Type of option */
@@ -459,6 +562,7 @@ typedef enum oyjlOPTIONTYPE_e {
     oyjlOPTIONTYPE_END                 /**< */
 } oyjlOPTIONTYPE_e;
 
+/** @brief Types for oyjlVariable_u */
 typedef enum oyjlVARIABLETYPE_e {
     oyjlNONE,                          /**< no variable given, will be asked later with oyjlOptions_GetResult() */
     oyjlSTRING,                        /**< pointer to a array of char */
@@ -469,7 +573,7 @@ typedef enum oyjlVARIABLETYPE_e {
 /** @brief Choice item */
 typedef struct oyjlOptionChoice_s {
   char * nick;                         /**< @brief nick / ID as argument for a option */
-  char * name;                         /**< @brief i18n short name for labels */
+  char * name;                         /**< @brief i18n short name for labels; In a MAN section and when starting with "http" this string is marked as link. */
   char * description;                  /**< @brief i18n description sentence; can be "" */
   char * help;                         /**< @brief i18n longer help text; can be "" */
 } oyjlOptionChoice_s;
@@ -492,17 +596,18 @@ typedef union oyjlVariable_u {
  *
  *  The type is declared inside the ::oyjlOPTIONTYPE_e enum range. */
 typedef union oyjlOption_u {
-  struct {
-    oyjlOptionChoice_s * list;         /**< used for oyjlOPTIONTYPE_CHOICE | oyjlOPTIONTYPE_EDIT */
-    int selected;                      /**< the currently selected choice */
-  } choices;                           /**< @brief oyjlOPTIONTYPE_CHOICE | oyjlOPTIONTYPE_EDIT */
   /** @brief oyjlOPTIONTYPE_FUNCTION
+   *  The function is well called inside -h for generating help texts. Use OYJL_OPTION_FLAG_EDITABLE to supress this callback with -h.
    *  @param[in]   opt                 the option context
    *  @param[out]  selected            show the default; optional
    *  @param[in]   context             for more information
    *  @result                          the same as for the *choices::list* member; caller owns the memory
    */
   oyjlOptionChoice_s * (*getChoices)( oyjlOption_s * opt, int * selected, oyjlOptions_s * context );
+  struct {
+    oyjlOptionChoice_s * list;         /**< used for oyjlOPTIONTYPE_CHOICE | oyjlOPTIONTYPE_EDIT */
+    int selected;                      /**< the currently selected choice */
+  } choices;                           /**< @brief oyjlOPTIONTYPE_CHOICE | oyjlOPTIONTYPE_EDIT */
   struct {
     double d;                          /**< default / recommendation */
     double start;
@@ -511,23 +616,36 @@ typedef union oyjlOption_u {
   } dbl;                               /**< @brief oyjlOPTIONTYPE_DOUBLE */
 } oyjlOption_u;
 
-#define OYJL_OPTION_FLAG_EDITABLE      0x01 /**< @brief The oyjlOption_s choices are merely a hint. Let users fill other strings too. */
+#define OYJL_OPTION_FLAG_EDITABLE      0x001 /**< @brief The oyjlOption_s choices are merely a hint. Let users fill other strings too: "prog --opt=arg|..." */
+#define OYJL_OPTION_FLAG_ACCEPT_NO_ARG 0x002 /**< @brief Accept as well no arg: "prog --opt[=arg]" */
+#define OYJL_OPTION_FLAG_NO_DASH       0x004 /**< @brief No double dash '--' acceptance; single dash can be omitted by not specifying oyjlOption_s::o : "prog opt" */
+#define OYJL_OPTION_FLAG_REPETITION    0x008 /**< @brief Accept more than one occurence: "prog --opt=arg ..." */
+#define OYJL_OPTION_FLAG_MAINTENANCE   0x100 /**< @brief Maintenance option; can be invisible */
+#define OYJL_OPTION_FLAG_IMMEDIATE     0x200 /**< @brief Apply instantly in UI; opposite to ::OYJL_GROUP_FLAG_EXPLICITE */
 /** @brief abstract UI option
  *
  *  A oyjlOption_s::o is inside of oyjlOptionGroup_s::detail to be displayed and oyjlOptionGroup_s::mandatory/optional for syntax checking.
  */
 struct oyjlOption_s {
   char type[8];                        /**< @brief must be 'oiwi' */
-  /** - ::OYJL_OPTION_FLAG_EDITABLE : flag for oyjlOPTIONTYPE_CHOICE and oyjlOPTIONTYPE_FUNCTION. Hints a not closely specified intput. The content is typically not useful for a overview in a help or man page. These can print a overview with oyjlOption_s::value_type. This flag is intented for convinience suggestions or very verbose dictionaries used in scrollable pull down GUI elements. */
-  unsigned int flags;                  /**< @brief rendering hint */
+  /** - ::OYJL_OPTION_FLAG_EDITABLE : flag for oyjlOPTIONTYPE_CHOICE and oyjlOPTIONTYPE_FUNCTION. Hints a not closely specified intput. The content is typically not useful for a overview in a help or man page. These can print a overview with oyjlOption_s::value_type. This flag is intented for convinience suggestions or very verbose dictionaries used in scrollable pull down GUI elements.
+   *  - ::OYJL_OPTION_FLAG_ACCEPT_NO_ARG : the flagged option can accept as well no argument without error.
+   *    - oyjlSTRING will be set to empty string ("")
+   *    - oyjlDOUBLE and oyjlINT will be set to 1
+   *  - ::OYJL_OPTION_FLAG_NO_DASH can be used for subcommand options in ::OYJL_GROUP_FLAG_SUBCOMMAND flagged groups
+   *  - ::OYJL_OPTION_FLAG_REPETITION multi occurence; print trailing ...
+   *  - ::OYJL_OPTION_FLAG_IMMEDIATE instant applying; e.g. for cheap status info inside a ::OYJL_GROUP_FLAG_EXPLICITE flagged group
+   *  - ::OYJL_OPTION_FLAG_MAINTENANCE accept even without printed visibility
+   */
+  unsigned int flags;                  /**< @brief parsing and rendering hints */
   /** '#' is used as default option like a command without any arguments.
    *  '@' together with value_name expects arbitrary arguments as described in oyjlOption_s::value_name.
-   *  Reserved letters are ,(comma), \'(quote), \"(double quote), :(double point), ;(semikolon), /(slash), \(backslash)
+   *  Reserved letters are ,(comma), \'(quote), \"(double quote), .(dot), :(double point), ;(semikolon), /(slash), \\(backslash)
    *  The letter shall return strlen(o) <= 1.
    *  If zero '\000' terminated, this short :o: option name is not enabled and a long :option: name shall be provided.
    */
   const char * o;                      /**< @brief One letter UTF-8 option name; optional if *option* is present */
-  /** The same reserved letters apply as for the ::o member letter. */
+  /** The same reserved letters apply as for the oyjlOption_s::o member letter. */
   const char * option;                 /**< @brief String without white space, "my-option"; optional if *o* is present */
   const char * key;                    /**< @brief DB key; optional */
   const char * name;                   /**< @brief i18n label string */
@@ -540,6 +658,12 @@ struct oyjlOption_s {
   oyjlVariable_u variable;             /**< @brief automatically filled variable depending on *value_type* */
 };
 
+/** For a related flag see ::OYJL_OPTION_FLAG_NO_DASH */
+#define OYJL_GROUP_FLAG_SUBCOMMAND     0x080 /**< @brief This oyjlOptionGroup_s flag requires one single mandatory option with oyjlOPTIONTYPE_NONE. */
+/** For per option exception see ::OYJL_OPTION_FLAG_IMMEDIATE . The flag is intended for e.g. costly processing. */
+#define OYJL_GROUP_FLAG_EXPLICITE      0x100 /**< @brief Apply explicitely in UI */
+/** Recommend to set a special section name "GENERAL OPTIONS". Usualy it follows the "OPTIONS" section. */
+#define OYJL_GROUP_FLAG_GENERAL_OPTS   0x200 /**< @brief Hint for MAN page section */
 /**
  *  @brief Info to compile a Syntax line and check missing arguments
  *
@@ -547,17 +671,22 @@ struct oyjlOption_s {
  */
 typedef struct oyjlOptionGroup_s {
   char type [8];                       /**< @brief must be 'oiwg' */
-  unsigned int flags;                  /**< unused */
+  /** - ::OYJL_GROUP_FLAG_SUBCOMMAND : flag inhibits --style mandatory option documentation and uses subcommand style without double dash "--" prefix. */
+  unsigned int flags;                  /**< @brief parsing and rendering hints */
   const char * name;                   /**< @brief i18n label string */
   const char * description;            /**< @brief i18n short sentence about the option */
   const char * help;                   /**< @brief i18n longer text to explain what the option does; optional */
-  const char * mandatory;              /**< @brief list of mandatory options from a oyjlOption_s::o or oyjlOption_s::option for this group of associated options */
+  const char * mandatory;              /**< @brief list of mandatory options from a oyjlOption_s::o or oyjlOption_s::option for this group of associated options; one single option here makes a subcommand and is usualy easier to understand */
   const char * optional;               /**< @brief list of non mandatory options from a oyjlOption_s::o or oyjlOption_s::option for this group of associated options */
   const char * detail;                 /**< @brief list of options from a oyjlOption_s::o or oyjlOption_s::option for this group of associated options to display */
 } oyjlOptionGroup_s;
 
 /**
  *   @brief Main command line, options and groups
+ *
+ *  Man sections can be added by using the "man-"man_name identifier/name scheme, e.g. "man-see_also" in oyjlOption_s::option.
+ *
+ *  @see oyjlUi_ToMan()
  */
 struct oyjlOptions_s {
   char type [8];                       /**< @brief must be 'oiws' */
@@ -566,14 +695,16 @@ struct oyjlOptions_s {
   void * user_data;                    /**< @brief will be passed to functions; optional */
   int argc;                            /**< @brief plain reference from main(argc,argv) */
   const char ** argv;                  /**< @brief plain reference from main(argc,argv) */
-  void * private_data;                 /**< internal state; private, do not use */
+  void * private_data;                 /**< internal state; private to OyjlArgs API, do not use */
 };
 int    oyjlOptions_Count             ( oyjlOptions_s     * opts );
 int    oyjlOptions_CountGroups       ( oyjlOptions_s     * opts );
 oyjlOption_s * oyjlOptions_GetOption ( oyjlOptions_s     * opts,
                                        const char        * ol );
+#define OYJL_QUIET                     0x100000 /**< @brief be silent on error */
 oyjlOption_s * oyjlOptions_GetOptionL( oyjlOptions_s     * opts,
-                                       const char        * ostring );
+                                       const char        * ostring,
+                                       int                 flags );
 /** @brief option state */
 typedef enum {
   oyjlOPTION_NONE,                     /**< untouched */
@@ -582,7 +713,10 @@ typedef enum {
   oyjlOPTION_UNEXPECTED_VALUE,         /**< user error */
   oyjlOPTION_NOT_SUPPORTED,            /**< user error */
   oyjlOPTION_DOUBLE_OCCURENCE,         /**< user error; except '@' is specified */
-  oyjlOPTIONS_MISSING                  /**< user error; except '#' is specified */
+  oyjlOPTIONS_MISSING,                 /**< user error; except '#' is specified */
+  oyjlOPTION_NO_GROUP_FOUND,           /**< user error */
+  oyjlOPTION_SUBCOMMAND,               /**< category */
+  oyjlOPTION_NOT_ALLOWED_AS_SUBCOMMAND /**< user error */
 } oyjlOPTIONSTATE_e;
 oyjlOptions_s *    oyjlOptions_New   ( int                 argc,
                                        const char       ** argv );
@@ -598,6 +732,8 @@ char *   oyjlOptions_ResultsToText   ( oyjlOptions_s     * opts );
 char **  oyjlOptions_ResultsToList   ( oyjlOptions_s     * opts,
                                        const char        * option,
                                        int               * count );
+void     oyjlOptions_SetAttributes   ( oyjlOptions_s     * opts,
+                                       oyjl_val          * root );
 typedef struct oyjlUi_s oyjlUi_s;
 void   oyjlOptions_PrintHelp         ( oyjlOptions_s     * opts,
                                        oyjlUi_s          * ui,
@@ -627,11 +763,12 @@ struct oyjlUi_s {
 };
 oyjlUi_s *         oyjlUi_New        ( int                 argc,
                                        const char       ** argv );
+oyjlUi_s *         oyjlUi_Copy       ( oyjlUi_s          * src );
 enum {
   oyjlUI_STATE_NONE,                   /**< @brief nothing to report */
   oyjlUI_STATE_HELP,                   /**< @brief --help printed */
   oyjlUI_STATE_VERBOSE = 2,            /**< @brief --verbose option detected */
-  oyjlUI_STATE_EXPORT = 4,             /**< @brief --export=XXX printed */
+  oyjlUI_STATE_EXPORT = 4,             /**< @brief --export=XXX or other stuff printed */
   oyjlUI_STATE_OPTION = 24,            /**< @brief bit shift for detected error from option parser */
   oyjlUI_STATE_NO_CHECKS = 0x1000      /**< @brief skip any checks */
 };
@@ -645,8 +782,22 @@ oyjlUi_s *         oyjlUi_Create     ( int                 argc,
                                        oyjlOption_s   * options,
                                        oyjlOptionGroup_s * groups,
                                        int               * status );
+oyjlUi_s *         oyjlUi_FromOptions( const char        * nick,
+                                       const char        * name,
+                                       const char        * description,
+                                       const char        * logo,
+                                       oyjlUiHeaderSection_s * info,
+                                       oyjlOptions_s     * opts,
+                                       int               * status );
+void               oyjlUi_ReleaseArgs( oyjlUi_s         ** ui );
 void               oyjlUi_Release    ( oyjlUi_s         ** ui );
-int      oyjlUi_CountHeaderSections  ( oyjlUi_s          * ui );
+int      oyjlUiHeaderSection_Count   ( oyjlUiHeaderSection_s * sections );
+oyjlUiHeaderSection_s * oyjlUiHeaderSection_Append (
+                                       oyjlUiHeaderSection_s * sections,
+                                       const char        * nick,
+                                       const char        * label,
+                                       const char        * name,
+                                       const char        * description );
 oyjlUiHeaderSection_s * oyjlUi_GetHeaderSection (
                                        oyjlUi_s          * ui,
                                        const char        * nick );
@@ -658,20 +809,24 @@ char *             oyjlUi_ToMarkdown ( oyjlUi_s          * ui,
                                        int                 flags );
 char *             oyjlUi_ExportToJson(oyjlUi_s          * ui,
                                        int                 flags );
+oyjlUi_s *         oyjlUi_ImportFromJson(
+                                       oyjl_val            root,
+                                       int                 flags );
 #define OYJL_SOURCE_CODE_C             0x01 /**< @brief C programming language source code */
-#define OYJL_NO_DEFAULT_OPTIONS        0x02 /**< @brief omit automatic options generation for --help, --X export or --verbose */
-#define OYJL_SUGGEST_VARIABLE_NAMES    0x04 /**< @brief automatic suggestion of variable names for missing ::o and ::option members */
+#define OYJL_WITH_OYJL_ARGS_C          0x02 /**< @brief Include oyjl_args.c . Skip libOyjlCode. */
+#define OYJL_NO_DEFAULT_OPTIONS        0x04 /**< @brief omit automatic options generation for --help, --X export or --verbose */
+#define OYJL_SUGGEST_VARIABLE_NAMES    0x08 /**< @brief automatic suggestion of variable names for missing oyjlOption_s::o and oyjlOption_s::option members */
+#define OYJL_COMPLETION_BASH           0x100 /**< @brief bash completion source code */
 char *             oyjlUiJsonToCode  ( oyjl_val            root,
                                        int                 flags );
+void               oyjlUi_Translate  ( oyjlUi_s          * ui,
+                                       oyjlTr_s          * context );
 
-/** link with libOyjlArgsQml and use oyjl-args-qml renderer as library @see oyjlUi_ToJson() */
-int                oyjlArgsQmlStart  ( int                 argc,
-                                       const char       ** argv,
-                                       const char        * json,
-                                       int                 debug,
-                                       oyjlUi_s          * ui,
-                                       int               (*callback)(int argc, const char ** argv) );
-int                oyjlArgsQmlStart2 ( int                 argc,
+/** link with libOyjlArgsWeb and use microhttps WWW renderer as library \n
+ *  link with libOyjlArgsQml and use Qt's QML to render in a GUI
+ *  @see oyjlUi_ToJson()
+ */
+int                oyjlArgsRender    ( int                 argc,
                                        const char       ** argv,
                                        const char        * json,
                                        const char        * commands,
@@ -686,15 +841,17 @@ int                oyjlArgsQmlStart2 ( int                 argc,
 
 
 /* --- compile helpers --- */
-#if   defined(__clang__)
-#define OYJL_FALLTHROUGH
-#elif __GNUC__ >= 7 
+#if   __GNUC__ >= 7 
 #define OYJL_FALLTHROUGH              __attribute__ ((fallthrough));
+#elif defined(__clang__)
+#define OYJL_FALLTHROUGH
 #else
 #define OYJL_FALLTHROUGH
 #endif
 
 #if   __GNUC__ >= 7
+#define OYJL_DEPRECATED                __attribute__ ((deprecated))
+#elif defined(__clang__)
 #define OYJL_DEPRECATED                __attribute__ ((deprecated))
 #elif defined(_MSC_VER)
 #define OYJL_DEPRECATED                __declspec(deprecated)
@@ -703,6 +860,8 @@ int                oyjlArgsQmlStart2 ( int                 argc,
 #endif
 
 #if   (__GNUC__*100 + __GNUC_MINOR__) >= 406
+#define OYJL_UNUSED                    __attribute__ ((unused))
+#elif defined(__clang__)
 #define OYJL_UNUSED                    __attribute__ ((unused))
 #elif defined(_MSC_VER)
 #define OYJL_UNUSED                    __declspec(unused)

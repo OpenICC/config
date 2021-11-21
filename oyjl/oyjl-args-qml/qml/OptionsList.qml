@@ -1,7 +1,7 @@
 /** @file OptionsList.qml
  *
  *  @par Copyright:
- *            2018 (C) Kai-Uwe Behrmann
+ *            2018-2020 (C) Kai-Uwe Behrmann
  *            All Rights reserved.
  *
  *  @par License:
@@ -45,9 +45,10 @@ Rectangle {
                 width: parent.width
                 height: parent.height
                 onClicked: {
+                    setHelpText( "", false )
                     var text = groupDescriptions[section]
                     if( typeof text !== "undefined" )
-                        helpText = text
+                        setHelpText( "oyjl-html-format-marker" + text, false )
                     else
                         helpText = ""
                     focus = true
@@ -77,7 +78,24 @@ Rectangle {
             x: dens
             width:  parent.width - 2*dens
             height: h
-            color: run ? (bright ? Qt.lighter("steelblue") : "steelblue") : "transparent"
+            color: run ? (bright ? Qt.lighter("steelblue") : "steelblue") : immediate ? (bright ? Qt.lighter("grey") : "grey") : "transparent"
+
+            function setModified()
+            {
+                var v = appData.getOption(key);
+                var set;
+                set = (v === "true");
+                if(!set && v === "1")
+                    set = true;
+                if(!set && v === 1)
+                    set = true;
+                if(!set && v === true)
+                    set = true;
+                lswitch.labelFont.bold = set;
+                lslider.labelFont.bold = set;
+                comboBox.labelFont.bold = set;
+                linput.labelFont.bold = set;
+            }
 
             Combo {
                 id: comboBox
@@ -97,13 +115,16 @@ Rectangle {
                         init = false
                     } else
                         visible = false
+                    labelFont.bold = appData.getOption(key).length ? true : false
                 }
                 combo.onCurrentIndexChanged: {
                     var role = combo.textRole
+                    var old_text = combo.currentText
                     var t = combo.textAt(combo.currentIndex)
                     var i = combo.find(t)
                     var item = combo.model.get(i)
                     var nick = item.nick
+                    labelFont.bold = appData.getOption(key).length ? true : false
                     if(nick === currentValue || init)
                         return;
                     statusText = key + ":" + nick + " " + combo.textAt(combo.currentIndex) + " " + qsTr("selected") + "  " + qsTr("new/old") + ": " + nick + "/" + currentValue
@@ -111,6 +132,7 @@ Rectangle {
                     appData.setOption(key, item.nick)
                     var k = key
                     value = nick
+                    changed = value
                     callback( key, value, type, group, 0 )
                 }
             }
@@ -140,6 +162,7 @@ Rectangle {
                             slider.value = v
                         if(app_debug)
                             statusText = key + " double " + slider.from + " - " + slider.to + " , " + slider.stepSize
+                        labelFont.bold = appData.getOption(key).length ? true : false
                         visible = true
                         init = false
                     } else
@@ -152,10 +175,13 @@ Rectangle {
                         return;
                     statusText = key + ":" + currentValue + " " + slider.value + " " + qsTr("selected") + "  " + qsTr("new/old") + ": " + slider.value + "/" + currentValue
                     currentValue = slider.value;
-                    appData.setOption(key, slider.value)
+                    value = currentValue
+                    appData.setOption(key, value)
                     var k = key
                     value = JSON.stringify(slider.value)
+                    changed = value
                     callback( key, value, type, group, 1 )
+                    labelFont.bold = appData.getOption(k).length ? true : false
                 }
             }
             LSwitch {
@@ -181,6 +207,7 @@ Rectangle {
                         button = run
                         visible = true
                         init = false
+                        changedValue = changed
                     } else
                         visible = false
                 }
@@ -189,23 +216,43 @@ Rectangle {
                     var sv = switcher.checked
                     if(sv === currentValue || init)
                         return;
-                    statusText = key + ":" + currentValue + " " + sv + " " + qsTr("selected") + "  " + qsTr("new/old") + ": " + sv + "/" + currentValue
+                    statusText = key + ":" + currentValue + " " + sv + " " + qsTr("selected") + "  " + qsTr("new/old") + ": " + currentValue + "/" + sv
                     currentValue = sv;
                     appData.setOption(key, sv)
                     var k = key
                     value = JSON.stringify(sv)
+                    changed = value
                     var v = value
                     var ci = list.currentItem
                     var i = currentIndex
                     var d = model
                     if(sv)
+                    {
                         callback( key, value, type, group, 1 )
+                        changed = "true"
+                    }
+                    else
+                        changed = ""
+                    changedValue = changed
                 }
                 butt.onPressed: {
                     if(init) return;
                     statusText = key + ":" + qsTr("selected")
                     appData.setOption(key, true)
                     callback( key, JSON.stringify(true), type, group, 1 )
+                }
+                onChangedValueChanged: // just for fun as a Changed event; could alternatively be handled in onCheckedChanged as well
+                {
+                    var v = appData.getOption(key);
+                    var set;
+                    set = (v === "true");
+                    if(!set && v === "1")
+                        set = true;
+                    if(!set && v === 1)
+                        set = true;
+                    if(!set && v === true)
+                        set = true;
+                    labelFont.bold = set;
                 }
             }
             LInput {
@@ -217,6 +264,7 @@ Rectangle {
                 getLabelWidthMin: function() { return 0 }
                 color: "transparent"
                 property bool init: true
+                property bool repetition: false
                 Component.onCompleted: {
                     if(type === "string")
                     {
@@ -229,51 +277,147 @@ Rectangle {
                         if(app_debug)
                             statusText = key + " string"
                         setDataText2( this, text, value )
+                        repetition = j.repetition
                         visible = true
                         init = false
                     } else
                         visible = false
+                    labelFont.bold = appData.getOption(key).length ? true : false
                 }
-                combo.onCurrentTextChanged: {
-                    var cV = currentValue
-                    var sv = combo.currentText
-                    var k = key;
-                    if(sv === cV || sv.length === 0 || init)
-                        return;
-                    statusText = k + ":" + cV + " " + sv + " " + qsTr("selected")
-                    cV = sv;
-                    appData.setOption(k, cV);
-                    value = cV
-                    callback( key, value, type, group, 1 )
-                }
+                combo.onCurrentTextChanged: { value = combo.currentText; changed = value; }
+                combo.onEditTextChanged: { value = combo.editText; changed = value; }
+                combo.onDisplayTextChanged: { value = combo.displayText; changed = value; }
                 combo.onAccepted: {
                     var i = combo
-                    var t = i.editText
+                    var t = value
+                    var c = t[t.length-1]
+                    if(repetition && c === ";")
+                    {
+                        value_old = t
+                        combo.displayText = ""
+                        combo.editText = ""
+                        combo.currentText = ""
+                        return
+                    }
+                    var old = value_old
                     var k = key;
-                    var ind  = combo.find(t)
                     var model = combo.model
+                    if(old.length > 0)
+                        c = old[old.length-1]
+                    if(repetition && c === ";")
+                    {
+                        t = value_old + value
+                        i.displayText = t
+                        if( typeof model !== "undefined")
+                            model.append({key: t})
+                    }
+                    var ind  = combo.find(t)
                     if (ind === -1)
                     {
                         if( typeof model !== "undefined")
                             model.append({key: t})
                     }
                     statusText = k + ":" + t
-                    value = t
-                    callback( key, value, type, group, 1 )
+                    //value = t
+                    i.displayText = t;
+                    i.editText = t;
+                    //i.currentText = t;
+                    value_old = value
+                    appData.setOption(key, value)
+                    callback( key, value, type, group, 0 )
+                    labelFont.bold = appData.getOption(k).length ? true : false
                 }
-                //combo.onAcceptableInputChanged:  statusText = "AI: "+combo.currentText
-                //combo.onEditTextChanged: statusText = "ET: "+combo.editText
             }
             MouseArea {
                 width: comboBox.width - comboBox.combo.width
                 height: itemRect.height
                 onClicked: {
-                    statusText = description
+                    setHelpText( "", false )
+                    setHelpText( "", false )
+                    var named_option = 0
+                    if(typeof key !== "undefined" && key !== "@" && key !== "#")
+                        named_option = 1
+                    if( named_option )
+                    {
+                        if(key.length === 1)
+                            helpText = "[-" + key
+                        else
+                            helpText = "[--" + key
+                    }
+                    else if(typeof key !== "undefined")
+                        helpText = "[" + key
+                    if( value_name.length !== 0 )
+                        helpText += "=" + value_name
+                    helpText += "] "
+                    var found = 0
+                    if( typeof name !== "undefined" )
+                    {
+                        if(found === 1) helpText += " "; found = 0
+                        var n = name
+                        if( n.length !== 0 )
+                        {
+                            helpText += n
+                            found = 1
+                        }
+                    }
+                    if( typeof description !== "undefined" )
+                    {
+                        if(found === 1) helpText += "\n"; found = 0
+                        var d = description
+                        if( d.length !== 0 )
+                        {
+                            helpText += d
+                            found = 1
+                        }
+                    }
                     if( typeof help !== "undefined" )
-                        helpText = help
-                    else
-                        helpText = ""
+                    {
+                        if(found === 1) helpText += "\n"; found = 0
+                        var h = help
+                        if( h.length !== 0 )
+                        {
+                            helpText += h
+                            found = 1;
+                        }
+                    }
+                    if( type === "double")
+                    {
+                        if(found === 1) helpText += "\n"; found = 0
+                        if(typeof dbl.tick !== "undefined")
+                        {
+                            helpText += "(" + value_name + ":" + current + " [≥" + dbl.start + " ≤" + dbl.end + " Δ" + dbl.tick + "])"
+                            found = 1;
+                        }
+                    }
+
+                    if( type === "string" && repetition)
+                    {
+                        helpText += "\n\n";
+                        helpText += qsTr("Multiple Options Hint");
+                        helpText += "\n";
+                        helpText += qsTr("Enter first value, append ';' and confirm. The final ';' is not executed. Then select next value. Repeat as needed. A final confirm without ending ';' can execute.");
+                        found = 1;
+                    }
+
                     itemRect.focus = true
+                }
+                onDoubleClicked:
+                {
+                    if(app_debug)
+                        statusText = "onDoubleClicked: " + key + ":" + value + " " + type
+                    appData.setOption(key, false)
+                    current = ""
+                    value = ""
+                    changed = ""
+                    if( type === "bool" && lswitch.switcher.checked)
+                        lswitch.switcher.checked = false;
+                    if( type === "double" )
+                        lslider.labelFont.bold = appData.getOption(key).length ? true : false;
+                    if( type === "choice" && comboBox.combo.currentIndex >= 0 )
+                        comboBox.combo.currentIndex = -1;
+                    if( type === "string" && linput.combo.currentIndex >= 0 )
+                        linput.combo.currentIndex = -1;
+                    setModified()
                 }
             }
         }

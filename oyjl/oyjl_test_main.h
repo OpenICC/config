@@ -49,7 +49,7 @@ int verbose = 0;
 #ifndef OYJL_TEST_MAIN_FINISH
 /** @brief end your test program as you need by defining this macro
  *
- *  Place this macro in front of your #include oyjl_test_main.h.
+ *  Place this macro in front of your \#include oyjl_test_main.h.
  *  The macro is called as last entry inside oyjl_test_main.h defined main().
  *  @code
     #define OYJL_TEST_MAIN_FINISH printf("\n    My Test Program finished\n\n");
@@ -79,9 +79,6 @@ int main(int argc, char** argv)
     zout = stderr;
     list = 1;
   }
-
-  colorterm = getenv("COLORTERM");
-  if(!colorterm) colorterm = getenv("TERM");
 
   i = 1; while(i < argc) if( strcmp(argv[i++],"--silent") == 0 )
   { ++argpos;
@@ -116,18 +113,24 @@ int main(int argc, char** argv)
   /* give a summary */
   if(!list)
   {
-    const char * colorterm_ = colorterm;
-
-    fprintf( stdout, "\n################################################################\n" );
-    fprintf( stdout, "#                                                              #\n" );
-    fprintf( stdout, "#                     Results                                  #\n" );
+    int i = oyjl_print_sub_length + 12;
+    fputs( "\n", stdout );
+    while(i--) fputs( "#", stdout );
+    fputs( "\n", stdout );
+    fputs( "#", stdout );
+    i = oyjl_print_sub_length + 10;
+    while(i--) fputs( " ", stdout );
+    fputs( "#\n", stdout );
+    fprintf( stdout, "#                     " );
+    fprintf( stdout, oyjlTermColor_(oyjlBOLD, "Results" ));
+    i = oyjl_print_sub_length - 18;
+    while(i--) fputs( " ", stdout );
+    fputs( "#\n", stdout );
     fprintf( stdout, "    Total of Sub Tests:         %d\n", oy_test_sub_count );
     for(i = 0; i <= oyjlTESTRESULT_UNKNOWN; ++i)
     {
-      if(!results[i]) colorterm = NULL;
       fprintf( stdout, "    Tests with status %s:\t%d\n",
-                       oyjlTestResultToString( (oyjlTESTRESULT_e)i, 1 ), results[i] );
-      colorterm = colorterm_;
+                       oyjlTestResultToString( (oyjlTESTRESULT_e)i, results[i] ), results[i] );
     }
 
     error = (results[oyjlTESTRESULT_FAIL] ||
@@ -165,7 +168,7 @@ int main(int argc, char** argv)
 
   return error;
 }
-/*  @} *//* oyjl_test */
+/** @} *//* oyjl_test */
 /** @} *//* oyjl */
 
 #endif /* OYJL_TEST_MAIN_H */

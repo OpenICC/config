@@ -3,14 +3,14 @@
  *  oyjl - string, file i/o and other basic helpers
  *
  *  @par Copyright:
- *            2016-2019 (C) Kai-Uwe Behrmann
+ *            2016-2021 (C) Kai-Uwe Behrmann
  *
  *  @brief    Oyjl core functions
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
  *  @par License:
  *            MIT <http://www.opensource.org/licenses/mit-license.php>
  *
- * Copyright (c) 2004-2019  Kai-Uwe Behrmann  <ku.b@gmx.de>
+ * Copyright (c) 2004-2021  Kai-Uwe Behrmann  <ku.b@gmx.de>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,14 +25,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <ctype.h>   /* isspace() */
+#include <ctype.h>   /* isspace() tolower() isdigit() */
 #include <math.h>    /* NAN */
 #include <stdarg.h>  /* va_list */
 #include <stddef.h>  /* ptrdiff_t size_t */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>   /* time_t localtime() */
 #include <unistd.h>
+#include <errno.h>
 #include <wchar.h>  /* wcslen() */
 
 #include "oyjl.h"
@@ -42,13 +44,274 @@
 #ifdef OYJL_HAVE_LOCALE_H
 #include <locale.h>           /* setlocale LC_NUMERIC */
 #endif
-int oyjl_debug_local = 0;
-int * oyjl_debug = &oyjl_debug_local;
+#ifdef OYJL_HAVE_REGEX_H
+# include <regex.h>
+#endif
+
+/*     Sections     */
+/* --- Debug_Section --- */
+/* --- Message_Section --- */
+/* --- String_Section --- */
+/* --- IO_Section --- */
+/* --- Render_Section --- */
+/* --- Init_Section --- */
+/* --- I18n_Section --- */
+/* --- Misc_Section --- */
+
+
+/* --- Debug_Section --- */
+int oyjl_debug_local_ = 0;
+int * oyjl_debug = &oyjl_debug_local_;
 
 /** @brief   set own debug variable */
 void       oyjlDebugVariableSet      ( int               * debug )
 { oyjl_debug = debug; }
 
+#ifdef OYJL_HAVE_BACKTRACE
+#include <execinfo.h>
+#define BT_BUF_SIZE 100
+#define oyjlFree_m_(x) { free(x); x = NULL; }
+char * oyjlFindApplication_(const char * app_name);
+
+/** @brief backtrace
+ *
+ *  Create backtrace of execution stack.
+ *
+ *  @param[in]      stack_limit         set limit of stack depth
+ *  @return                             one line string with function names and belonging lines of code
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2021/03/20
+ *  @since   2021/03/20 (Oyjl: 1.0.0)
+ */
+char *   oyjlBT                      ( int                 stack_limit )
+{
+  char * text = NULL;
+
+          int j, nptrs;
+          void *buffer[BT_BUF_SIZE];
+          char **strings;
+
+          nptrs = backtrace(buffer, BT_BUF_SIZE);
+
+          strings = backtrace_symbols(buffer, nptrs);
+          if( strings == NULL )
+          {
+            perror("backtrace_symbols");
+          } else
+          {
+            int size = 0;
+            char * prog,
+                 * main_prog = NULL;
+            char * addr_infos = NULL;
+            char * txt = NULL;
+
+            int start = nptrs-1;
+            do { --start; } while( start >= 0 && (strstr(strings[start], "(main+") == NULL) );
+            if(start < 0) start = nptrs-1; /* handle threads */
+
+            for(j = start; j >= (*oyjl_debug?0:1); j--)
+            {
+              const char * line = strings[j],
+                         * tmp = strchr( line, '(' ),
+                         * addr = strchr( tmp?tmp:line, '[' );
+
+              prog = oyjlStringCopy( line, NULL );
+              txt = strchr( prog, '(' );
+              if(txt) txt[0] = '\000';
+
+              if(j == start)
+              {
+                main_prog = oyjlStringCopy( prog, 0 );
+                if(!oyjlIsFile(main_prog, "r", NULL, 0))
+                {
+                  char *app = NULL;
+                  if((app = oyjlFindApplication_( main_prog )) != NULL &&
+                      oyjlIsFile(app, "r", NULL, 0))
+                  {
+                    if( main_prog ) oyjlFree_m_( main_prog );
+                    main_prog = app;
+                    app = NULL;
+                  }
+                  if(app) oyjlFree_m_( app );
+                }
+                if(*oyjl_debug)
+                  fprintf(stderr, "prog = %s main_prog = %s\n", prog, main_prog );
+              }
+
+
+              if( main_prog && prog && strstr(main_prog, prog) == NULL)
+              {
+                char * addr2 = NULL;
+                txt = strchr( tmp?tmp:line, '(' );
+                if(txt) addr2 = oyjlStringCopy( txt+1, NULL );
+                if(addr2) txt = strchr( addr2, ')' );
+                if(txt) txt[0] = '\000';
+                if(addr2)
+                {
+                  addr_infos = oyjlReadCommandF( &size, "r", malloc, "eu-addr2line -s --pretty-print -i -f -C -e %s %s", prog, addr2 );
+                  oyjlFree_m_(addr2);
+                  if(addr_infos)
+                  {
+                    txt = strrchr(addr_infos, ':');
+                    if(txt) txt[0] = '\000';
+                  }
+                }
+              }
+              else if(addr)
+              {
+                char * addr2 = oyjlStringCopy( addr+1, NULL );
+                addr2[strlen(addr2)-1] = '\000';
+                addr_infos = oyjlReadCommandF( &size, "r", NULL, "addr2line -spifCe %s %s", main_prog ? main_prog : prog, addr2 );
+                oyjlFree_m_(addr2);
+              }
+
+              if(*oyjl_debug > 1)
+                fprintf(stderr, "%s\n", line);
+
+              {
+                char * t = NULL, * txt = NULL, * addr_info = NULL, * line_number = NULL , * func_name = NULL, * discriminator = NULL;
+                if(addr_infos)
+                {
+                  addr_info = oyjlStringCopy( addr_infos, NULL );
+
+                  if(addr_info[strlen(addr_info)-1] == '\n') addr_info[strlen(addr_info)-1] = '\000';
+
+                  if(addr_info)
+                  {
+                    if( addr_info[strlen(addr_info)-1] == ')' &&
+                        strrchr( addr_info, '(' ) )
+                    {
+                      txt = strrchr( addr_info, '(' );
+                      discriminator = oyjlStringCopy( txt, NULL );
+                      txt[-1] = '\000';
+                    } 
+                  }
+
+                  txt = strrchr( addr_info, ' ' );
+                  if(txt && strrchr( txt, ' '))
+                  {
+                    func_name = oyjlStringCopy( addr_info, NULL );
+                    txt = strrchr( func_name, ' ' );
+                    if(txt) txt = strrchr( txt, ' ' );
+                    if(txt) txt[0] = '\000';
+                    txt = strrchr( func_name, ' ' ); /* at */
+                    if(txt) txt[0] = '\000';
+                    else oyjlFree_m_(func_name);
+
+                    if(func_name) txt = strrchr( addr_info, ' ' ) + 1;
+                    if(txt) line_number = oyjlStringCopy( txt, NULL );
+                  } else
+                  {
+                    txt = strchr( addr_info, '(' );
+                    if(txt) txt[-1] = '\000';
+                  }
+                }
+                if(func_name) t = oyjlStringCopy( func_name, NULL );
+                else
+                {
+                  if(tmp)
+                  {
+                    t = oyjlStringCopy( tmp[0] == '(' ? &tmp[1] : tmp, NULL );
+                    txt = strchr(t, '+');
+                    if(txt) txt[0] = '\000';
+                  }
+                  else
+                    t = oyjlStringCopy( addr_infos, NULL );
+                }
+                if(t)
+                {
+                  if(j == (*oyjl_debug ? 0 : 1))
+                  {
+                    oyjlStringAdd( &text, 0,0, "%s", stack_limit >= 0 ? oyjlTermColor(oyjlBOLD, t) : t );
+                    oyjlStringAdd( &text, 0,0, "(%s) ", line_number ? stack_limit >= 0 ? oyjlTermColor(oyjlITALIC, line_number ) : line_number : "");
+                  }
+                  else
+                  {
+                    oyjlStringAdd( &text, 0,0, "%s", stack_limit >= 0 ? oyjlTermColor(oyjlBOLD, t) : t );
+                    oyjlStringAdd( &text, 0,0, "(%s)->", line_number ? stack_limit >= 0 ? oyjlTermColor(oyjlITALIC, line_number ) : line_number  : "");
+                  }
+                  oyjlFree_m_(t);
+                }
+                oyjlFree_m_(addr_info);
+                if(line_number) oyjlFree_m_(line_number);
+                if(func_name) oyjlFree_m_(func_name);
+                if(discriminator) oyjlFree_m_(discriminator);
+              }
+              oyjlFree_m_( addr_infos );
+              oyjlFree_m_( prog );
+            }
+            oyjlStringAdd( &text, 0,0, "\n" );
+            free(strings);
+            oyjlFree_m_( main_prog );
+          }
+  return text;
+}
+#else
+char *   oyjlBT                      ( int                 stack_limit OYJL_UNUSED )
+{
+  return NULL;
+}
+#endif
+
+/** @brief print current date time
+ *
+ *  Create a static string to contain ISO conforming date/time string.
+ *
+ *  @param[in]      flags               0 default so ISO dateTtime+-TimeZoneDiff == OYJL_DATE | OYJL_TIME | OYJL_OYJL_TIME_ZONE_DIFF
+ *                                      - OYJL_DATE : %F
+ *                                      - OYJL_TIME : %H:%M:%S
+ *                                      - OYJL_OYJL_TIME_ZONE : %Z
+ *                                      - OYJL_OYJL_TIME_ZONE_DIFF : %z
+ *                                      - OYJL_BRACKETS : [datetime]
+ *  @param[in]      mark                set text marking
+ *  @return                             one line string with function names and belonging lines of code
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2021/05/21
+ *  @since   2021/05/21 (Oyjl: 1.0.0)
+ */
+const char * oyjlPrintTime           ( int                 flags,
+                                       oyjlTEXTMARK_e      mark )
+{
+  static char t[64];
+  struct tm * gmt;
+  time_t cutime = time(NULL); /* time right NOW */
+  gmt = localtime( &cutime );
+  t[0] = '\000';
+
+  if(flags == 0)
+    strftime( t, 64, "%FT%H:%M:%S%z", gmt );
+  else
+  {
+    /** One can use OYJL_BRACKETS alone and has dateTtime+-TimeZoneDiff included. */
+    if(flags == OYJL_BRACKETS)
+      flags |= OYJL_DATE | OYJL_TIME | OYJL_TIME_ZONE_DIFF;
+    /** One can use OYJL_TIME_ZONE or OYJL_TIME_ZONE_DIFF alone and has dateTtime included. */
+    if(!(flags & OYJL_DATE || flags & OYJL_TIME))
+      flags |= OYJL_DATE | OYJL_TIME;
+
+    if(flags & OYJL_BRACKETS)
+      sprintf( &t[strlen(t)], "[" );
+    if(flags & OYJL_DATE)
+      strftime( &t[strlen(t)], 64, "%F", gmt );
+    if(flags & OYJL_DATE && flags & OYJL_TIME)
+      sprintf( &t[strlen(t)], "T" );
+    if(flags & OYJL_TIME)
+      strftime( &t[strlen(t)], 50, "%H:%M:%S", gmt );
+    if(flags & OYJL_TIME_ZONE)
+      strftime( &t[strlen(t)], 40, "%Z", gmt );
+    if(flags & OYJL_TIME_ZONE_DIFF)
+      strftime( &t[strlen(t)], 40, "%z", gmt );
+    if(flags & OYJL_BRACKETS)
+      sprintf( &t[strlen(t)], "]" );
+  }
+  return oyjlTermColor(mark,t);
+}
+
+/* --- Debug_Section --- */
+
+/* --- Message_Section --- */
 /** @brief   the default message handler to stderr
  *
  *  @version OpenICC: 0.1.0
@@ -66,10 +329,10 @@ int          oyjlMessageFunc         ( int/*oyjlMSG_e*/    error_code,
 
   OYJL_CREATE_VA_STRING(format, text, malloc, return 1)
 
-  if(error_code == oyjlMSG_INFO) status_text = "Info: ";
-  if(error_code == oyjlMSG_CLIENT_CANCELED) status_text = "Client Canceled: ";
-  if(error_code == oyjlMSG_INSUFFICIENT_DATA) status_text = "Insufficient data: ";
-  if(error_code == oyjlMSG_ERROR) status_text = "!!! ERROR: ";
+  if(error_code == oyjlMSG_INFO) status_text = oyjlTermColor(oyjlGREEN,"Info: ");
+  if(error_code == oyjlMSG_CLIENT_CANCELED) status_text = oyjlTermColor(oyjlBLUE,"Client Canceled: ");
+  if(error_code == oyjlMSG_INSUFFICIENT_DATA) status_text = oyjlTermColor(oyjlRED,"Insufficient data: ");
+  if(error_code == oyjlMSG_ERROR) status_text = oyjlTermColor(oyjlRED,"ERROR: ");
 
   if(status_text)
     fprintf( stderr, "%s", status_text );
@@ -96,8 +359,9 @@ int            oyjlMessageFuncSet    ( oyjlMessage_f       message_func )
     oyjlMessage_p = message_func;
   return 0;
 }
+/* --- Message_Section --- */
 
-/** \addtogroup oyjl_core Core
+/** \addtogroup oyjl_core OyjlCore
  *  @brief I/O and String Handling
  *
  *  Basic C FILE input and output is provided by oyjlWriteFile(), oyjlReadFile()
@@ -110,17 +374,18 @@ int            oyjlMessageFuncSet    ( oyjlMessage_f       message_func )
  *
  *  The oyjl_str based oyStrXXX API's use a more carful memory
  *  management and thus perform way faster on larger memory arrays as they
- *  need fewer allocations and copies. oyjlStrNew() allocates a new object,
- *  or oyjlStrNewFrom() wrappes a existing string array into a new object.
- *  oyjlStr() lets you see the contained char array. oyjlStrAppendN()
- *  performs fast concatenation. oyjlStrReplace() uses the object advantages.
- *  oyjlStrPull() directly takes the char array out of control of the oyjl_str
- *  object and oyjlStrRelease() frees the object and all memory.
+ *  need fewer allocations and copies. oyjlStr_New() allocates a new object,
+ *  or oyjlStr_NewFrom() wrappes a existing string array into a new object.
+ *  oyjlStr() lets you see the contained char array. oyjlStr_AppendN()
+ *  performs fast concatenation. oyjlStr_Replace() uses the object advantages.
+ *  oyjlStr_Pull() directly takes the char array out of control of the oyjl_str
+ *  object and oyjlStr_Release() frees the object and all memory.
  *
  *  @{ *//* oyjl_core */
 
+/* --- String_Section --- */
 /* return the beginning of the next word */
-const char *   oyjlStringGetNext     ( const char        * text )
+static const char * oyjlStringGetNext_( const char        * text )
 {
   /* remove leading white space */
   if(text && text[0] && isspace(text[0]))
@@ -137,19 +402,19 @@ const char *   oyjlStringGetNext     ( const char        * text )
 
   return text && text[0] ? text : NULL;
 }
-int            oyjlStringNextSpace   ( const char        * text )
+static int     oyjlStringNextSpace_  ( const char        * text )
 {
   int len = 0;
   while( text && text[len] && !isspace(text[len]) ) len++;
   return len;
 }
 
-/**
+/**  @internal
  *   Assume some text and extract the found words.
  *   The words can be separated by white space as 
  *   seen by isspace().
  */
-char **        oyjlStringSplitSpace  ( const char        * text,
+static char ** oyjlStringSplitSpace_ ( const char        * text,
                                        int               * count,
                                        void*            (* alloc)(size_t))
 {
@@ -164,7 +429,7 @@ char **        oyjlStringSplitSpace  ( const char        * text,
     if(!alloc) alloc = malloc;
 
     if(tmp && tmp[0] && !isspace(tmp[0])) ++n;
-    while( tmp && tmp[0] && (tmp = oyjlStringGetNext( tmp )) != NULL ) ++n;
+    while( tmp && tmp[0] && (tmp = oyjlStringGetNext_( tmp )) != NULL ) ++n;
 
     if((list = alloc( (n+1) * sizeof(char*) )) == 0) return NULL;
     memset( list, 0, (n+1) * sizeof(char*) );
@@ -172,17 +437,17 @@ char **        oyjlStringSplitSpace  ( const char        * text,
     {
       const char * start = text;
       if(start && isspace(start[0]))
-        start = oyjlStringGetNext( start );
+        start = oyjlStringGetNext_( start );
 
       for(i = 0; i < n; ++i)
       {
-        int len = oyjlStringNextSpace( start );
+        int len = oyjlStringNextSpace_( start );
 
         if((list[i] = alloc( len+1 )) == 0) return NULL;
 
         memcpy( list[i], start, len );
         list[i][len] = 0;
-        start = oyjlStringGetNext( start );
+        start = oyjlStringGetNext_( start );
       }
     }
   }
@@ -254,7 +519,7 @@ char **        oyjlStringSplit2      ( const char        * text,
     if(!alloc) alloc = malloc;
 
     if(!delimiter || !delimiter[0])
-      return oyjlStringSplitSpace( text, count, alloc );
+      return oyjlStringSplitSpace_( text, count, alloc );
 
     tmp = oyjlStringDelimiter(tmp, delimiter, NULL);
     if(tmp == text) ++n;
@@ -348,11 +613,11 @@ int        oyjlStringAdd             ( char             ** string,
 
   OYJL_CREATE_VA_STRING(format, text, alloc, return 1)
 
-  if(string && *string)
+  if(string && *string && text)
   {
     int l = strlen(*string),
         l2 = strlen(text);
-    text_copy = allocate( l2 + l + 1 );
+    text_copy = (char*)allocate( l2 + l + 1 );
     strcpy( text_copy, *string );
     strcpy( &text_copy[l], text );
 
@@ -429,6 +694,8 @@ void       oyjlStringAddN            ( char             ** text,
   char * text_copy = NULL;
 
   if(!text) return;
+  if(!deAlloc && !alloc)
+    deAlloc = free;
 
   text_copy = oyjlStringAppendN(*text, append, append_len, alloc);
 
@@ -462,11 +729,11 @@ int        oyjlStringReplace         ( char             ** text,
   if(!text || !*text || !(*text)[0])
     return 0;
 
-  str = oyjlStrNewFrom(text, 0, alloc,deAlloc);
-  n = oyjlStrReplace( str, search, replacement, 0, NULL );
-  t = oyjlStrPull(str);
+  str = oyjlStr_NewFrom(text, 0, alloc,deAlloc);
+  n = oyjlStr_Replace( str, search, replacement, 0, NULL );
+  t = oyjlStr_Pull(str);
   *text = t;
-  oyjlStrRelease( &str );
+  oyjlStr_Release( &str );
 
   return n;
 }
@@ -525,7 +792,11 @@ void       oyjlStringListRelease     ( char            *** l,
       size_t i;
       for(i = 0; (int)i < size; ++i)
         if((list)[i])
+        {
+          (list)[i][0] = '?';
           deAlloc( (list)[i] );
+          (list)[i] = NULL;
+        }
       deAlloc( list );
       *l = NULL;
     }
@@ -533,8 +804,7 @@ void       oyjlStringListRelease     ( char            *** l,
 }
 
 /** @brief append a string to a string list */
-void       oyjlStringListAddStaticString (
-                                       char            *** list,
+void       oyjlStringListAddString   ( char            *** list,
                                        int               * n,
                                        const char        * string,
                                        void*            (* alloc)(size_t),
@@ -635,17 +905,31 @@ void     oyjlStringListAddList       ( char            *** list,
 
 /** show better const behaviour and return instant error status over strtol()
  *
+ *  @param[in]     text                string
+ *  @param[out]    value               resulting number
  *  @return                            error
+ *                                     - 0 : text input was completely read as number
+ *                                     - -1 : text input was read as number with white space or other text after
+ *                                     - 1 : missed text input
+ *                                     - 2 : no number detected
+ *
  */
 int      oyjlStringToLong            ( const char        * text,
                                        long              * value )
 {
   char * end = 0;
+  int error = -1;
   *value = strtol( text, &end, 0 );
-  if(end && end != text && end[0] == '\000' )
-    return 0;
+  if(end && end != text && isdigit(text[0]) && !isdigit(end[0]) )
+  {
+    if(end[0] && end != text)
+      error = -1;
+    else
+      error = 0;
+  }
   else
-    return 1;
+    error = 1;
+  return error;
 }
 
 /** @brief   text to double conversion
@@ -658,14 +942,14 @@ int      oyjlStringToLong            ( const char        * text,
  *                                     - 1 : missed text input
  *                                     - 2 : no number detected
  *
- *  @version Oyranos: 0.9.7
- *  @date    2018/03/18
+ *  @version Oyjl: 1.0.0
+ *  @date    2021/10/04
  *  @since   2011/11/17 (Oyranos: 0.2.0)
  */
 int          oyjlStringToDouble      ( const char        * text,
                                        double            * value )
 {
-  char * p = NULL, * t = NULL;
+  char * end = NULL, * t = NULL;
   int len, pos = 0;
   int error = -1;
 #ifdef OYJL_HAVE_LOCALE_H
@@ -679,34 +963,41 @@ int          oyjlStringToDouble      ( const char        * text,
   {
     *value = NAN;
     error = 1;
-    return error;
+    goto clean_oyjlStringToDouble;
   }
 
   /* avoid irritating valgrind output of "Invalid read of size 8"
    * might be a glibc error or a false positive in valgrind */
-  oyjlAllocHelper_m( t, char, len + 2*sizeof(double) + 1, malloc, return 1);
+  oyjlAllocHelper_m( t, char, len + 2*sizeof(double) + 1, malloc, error = 1; goto clean_oyjlStringToDouble);
   memset( t, 0, len + 2*sizeof(double) + 1 );
 
   /* remove leading empty space */
   while(text[pos] && isspace(text[pos])) pos++;
   memcpy( t, &text[pos], len );
 
-  *value = strtod( t, &p );
+  *value = strtod( t, &end );
+
+  if(end && end != text && isdigit(text[0]) && !isdigit(end[0]) )
+  {
+    if(end[0] && end != text)
+      error = -1;
+    else
+      error = 0;
+  }
+  else if(end && end == t)
+  {
+    *value = NAN;
+    error = 2;
+  }
+
+clean_oyjlStringToDouble:
 
 #ifdef OYJL_HAVE_LOCALE_H
   setlocale(LC_NUMERIC, save_locale);
   if(save_locale) free( save_locale );
 #endif
 
-  if(p && p != t && p[0] == '\000')
-    error = 0;
-  else if(p && p == t)
-  {
-    *value = NAN;
-    error = 2;
-  }
-
-  free( t );
+  if(t) free( t );
 
   return error;
 }
@@ -714,12 +1005,16 @@ int          oyjlStringToDouble      ( const char        * text,
 /** @brief   text to double list
  *
  *  @param[in]     text                source string
- *  @param[in]     delimiter           the ASCII char(s) which mark the split; e.g. comma ","
+ *  @param[in]     delimiter           the ASCII char(s) which mark the split;
+ *                                     e.g. comma ","
  *  @param[out]    count               number of detected string segments; optional
  *  @param[in]     alloc               custom allocator; optional, default is malloc
+ *  @param[out]    value               array of detected number of count elements
  *  @return                            error
- *                                     - 0 : text input was completely read as number
- *                                     - -1 : text input was read as number with white space or other text after
+ *                                     - 0 : text input was completely read as
+ *                                           number
+ *                                     - -1 : text input was read as number with
+ *                                           white space or other text after
  *                                     - 1 : missed text input
  *                                     - 2 : no number detected
  *
@@ -761,30 +1056,249 @@ int          oyjlStringsToDoubles    ( const char        * text,
   return error;
 }
 
-/** @brief   number of letters in a UTF-8 string
+/** @brief   search for pattern
  *
- *  A convinience wrapper for wcslen().
+ *  This function behaves like strstr(), but extends to regular expressions.
+ *  Test for OYJL_HAVE_REGEX_H macro to see if regexec() API is
+ *  used. Otherwise only C strstr() API will be called.
  *
- *  @param[in]     text                source string
- *  @return                            letters
+ *  @param         text                string to search in
+ *  @param         regex               regular expression to try with text
+ *  @return                            result:
+ *                                     - 0: no match
+ *                                     - >0: first string adress in text
  *
  *  @version Oyjl: 1.0.0
- *  @date    2019/08/06
- *  @since   2019/08/06 (Oyjl: 1.0.0)
+ *  @date    2021/01/06
+ *  @since   2020/07/28 (Oyjl: 1.0.0)
  */
-int        oyjlWStringLen            ( const char        * text )
+char *     oyjlRegExpFind            ( char              * text,
+                                       const char        * regex )
+{
+  char * match = NULL;
+  if( !text || !regex )
+    return match;
+
+#ifdef OYJL_HAVE_REGEX_H
+  int status = 0;
+  regex_t re;
+  regmatch_t re_match = {0,0};
+  int error = 0;
+  if((error = regcomp(&re, regex, REG_EXTENDED)) != 0)
+  {
+    char * err_msg = calloc( 1024, sizeof(char) );
+    regerror( error, &re, err_msg, 1024 );
+    oyjlMessage_p( oyjlMSG_INFO, 0,
+                   OYJL_DBG_FORMAT "regcomp(\"%s\") %s",
+                   OYJL_DBG_ARGS,  regex, err_msg );
+    if(err_msg) free(err_msg);
+    return 0;
+  }
+  status = regexec( &re, text, (size_t)1, &re_match, 0 );
+  regfree( &re );
+  if(status == 0 && re_match.rm_so != -1)
+    match = &text[re_match.rm_so];
+#endif
+
+  if(match == NULL)
+    match = strstr(text, regex);
+
+  return match;
+}
+
+/** @brief   replace pattern
+ *
+ *  Test for OYJL_HAVE_REGEX_H macro to see if regexec() API is
+ *  used.
+ *
+ *  @param         text                string to search in
+ *  @param         regex               regular expression to try with text
+ *  @param         replacement         substitute all matches of regex in text
+ *  @return                            count of replacements
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2021/09/29
+ *  @since   2021/09/29 (Oyjl: 1.0.0)
+ */
+int        oyjlRegExpReplace         ( char             ** text,
+                                       const char        * regex,
+                                       const char        * replacement )
+{
+  int count = 0;
+  if( !text || !*text || !regex || !replacement )
+    return 0;
+
+#ifdef OYJL_HAVE_REGEX_H
+  int status = 0;
+  regex_t re;
+  int n;
+  regmatch_t re_match = {0,0};
+  oyjl_str str;
+  const char * txt;
+  int error = 0;
+  if((error = regcomp(&re, regex, REG_EXTENDED)) != 0)
+  {
+    char * err_msg = calloc( 1024, sizeof(char) );
+    regerror( error, &re, err_msg, 1024 );
+    oyjlMessage_p( oyjlMSG_INFO, 0,
+                   OYJL_DBG_FORMAT "regcomp(\"%s\") %s",
+                   OYJL_DBG_ARGS,  regex, err_msg );
+    if(err_msg) free(err_msg);
+    return 0;
+  }
+
+  str = oyjlStr_NewFrom(text, 0, malloc, free);
+  n = re.re_nsub;
+  txt = oyjlStr(str);
+  while((status = regexec( &re, txt, (size_t)1, &re_match, 0 )) == 0)
+  {
+    int len = strlen(txt);
+    char * tail = NULL;
+    if(len > re_match.rm_eo)
+      tail = oyjlStringCopy( &txt[re_match.rm_eo], 0 );
+    n = oyjlStr_Replace( str, &txt[re_match.rm_so], replacement, 0, NULL );
+    if(len > re_match.rm_eo)
+    {
+      oyjlStr_Add( str, tail );
+      free(tail);
+    }
+    txt = oyjlStr(str);
+    ++count;
+    if(!n) break;
+  }
+  regfree( &re );
+  *text = oyjlStr_Pull( str );
+  oyjlStr_Release( &str );
+
+#else
+
+  count = oyjlStringReplace(&text, regex, replacement, 0,0);
+
+#endif
+  return count;
+}
+
+
+void oyjlNoBracketCb_(const char * text OYJL_UNUSED, const char * start, const char * end, const char * search, const char ** replace, void * data OYJL_UNUSED)
+{
+  if(start < end)
+  {
+    const char * word = start;
+    while(word && (word = strstr(word+1,"\\[")) != NULL && word < end)
+      *replace = search;
+  }
+}
+void       oyjlRegExpEscape2_        ( oyjl_str            text )
+{
+  oyjl_str tmp = text;
+  if(!text) return;
+
+#ifdef OYJL_HAVE_REGEX_H
+  oyjlStr_Replace( tmp, "\\", "\\\\", oyjlNoBracketCb_, NULL );
+  oyjlStr_Replace( tmp, ".", "\\.", 0, NULL );
+  oyjlStr_Replace( tmp, "^", "\\^", 0, NULL );
+  oyjlStr_Replace( tmp, "$", "\\$", 0, NULL );
+  oyjlStr_Replace( tmp, "*", "\\*", 0, NULL );
+  oyjlStr_Replace( tmp, "+", "\\+", 0, NULL );
+  oyjlStr_Replace( tmp, "?", "\\?", 0, NULL );
+  //oyjlStr_Replace( tmp, "!", "\\!", 0, NULL );
+  oyjlStr_Replace( tmp, "(", "\\(", 0, NULL );
+  oyjlStr_Replace( tmp, ")", "\\)", 0, NULL );
+  oyjlStr_Replace( tmp, "[", "\\[", 0, NULL );
+  //oyjlStr_Replace( tmp, "]", "\\]", 0, NULL );
+  oyjlStr_Replace( tmp, "{", "\\{", 0, NULL );
+  //oyjlStr_Replace( tmp, "}", "\\}", 0, NULL );
+  //oyjlStr_Replace( tmp, ",", "\\,", 0, NULL );
+  oyjlStr_Replace( tmp, "|", "\\|", 0, NULL );
+#endif
+}
+
+/** @brief   use a pattern literaly
+ *
+ *  This function detects OYJL_HAVE_REGEX_H macro internally to
+ *  fit the oyjlRegExpMatch() implementation.
+ *
+ *  It is escaping: \n
+ *  .$*+?()[{\|
+ *
+ *  @param         text                string to escape
+ *  @return                            escaped string
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2020/08/14
+ *  @since   2020/08/14 (Oyjl: 1.0.0)
+ */
+char *     oyjlRegExpEscape          ( const char        * text )
+{
+  char * out = NULL;
+  const char * t = text;
+  oyjl_str tmp;
+  if(!text) return NULL;
+
+  tmp = oyjlStr_New(10,0,0);
+  oyjlStr_AppendN( tmp, t, strlen(t) );
+  oyjlRegExpEscape2_( tmp );
+  out = oyjlStr_Pull(tmp); 
+  oyjlStr_Release( &tmp );
+  return out;
+}
+
+/*
+* Index into the table below with the first byte of a UTF-8 sequence to
+* get the number of trailing bytes that are supposed to follow it.
+* Note that *legal* UTF-8 values can't have 4 or 5-bytes. The table is
+* left as-is for anyone who may want to do such conversion, which was
+* allowed in earlier algorithms.
+*/
+static const char trailingBytesForUTF8[256] = {
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
+};
+
+/** @brief   split letters of a UTF-8 string
+ *
+ *  @param[in]     text                source string in UTF-8 format
+ *  @param[out]    mbchars             NULL terminated array of count letters in UTF-8 format; optional
+ *  @param[in]     alloc               custom allocator; optional, default is malloc
+ *  @return                            count of letters
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2020/04/23
+ *  @since   2020/04/23 (Oyjl: 1.0.0)
+ */
+int        oyjlStringSplitUTF8       ( const char        * text,
+                                       char            *** mbchars,
+                                       void*            (* alloc)(size_t) )
 {
   int len = strlen(text), wlen = 0;
-  wchar_t * wcs = (wchar_t*) calloc( len + 1, sizeof(wchar_t) );
-  if(wcs)
+  int pos = 0;
+  if(mbchars)
+    oyjlAllocHelper_m( *mbchars, char*, len + 1, alloc, return -2);
+  while(pos < len && text[pos])
   {
-    mbstowcs( wcs, text, len + 1 );
-    wlen = wcslen(wcs);
-    free(wcs);
+    const char * ctext = &text[pos];
+    int c = (unsigned char)ctext[0];
+    int trailing_bytes = trailingBytesForUTF8[c];
+    if(trailing_bytes > 3)
+      break;
+    if(mbchars)
+    {
+      oyjlAllocHelper_m( (*mbchars)[wlen], char, 4 + 1, alloc, return -2);
+      memcpy((*mbchars)[wlen], ctext, trailing_bytes + 1);
+    }
+    pos += trailing_bytes;
+    /*fprintf( stderr, "WString: current char: %d  next letter: %s trailing bytes: %d\n", c, &text[pos+1], trailing_bytes );*/
+    ++pos;
+    ++wlen;
   }
   return wlen;
 }
-
 
 /**
  *  A string representation with preallocation for faster memory
@@ -812,10 +1326,10 @@ struct oyjl_string_s
  *  @return                            the object
  *
  *  @version Oyjl: 1.0.0
- *  @date    2019/02/14
+ *  @date    2021/10/24
  *  @since   2019/02/14 (Oyjl: 1.0.0)
  */
-oyjl_str   oyjlStrNew                ( size_t              length,
+oyjl_str   oyjlStr_New               ( size_t              length,
                                        void*            (* alloc)(size_t),
                                        void             (* deAlloc)(void*) )
 {
@@ -850,10 +1364,10 @@ oyjl_str   oyjlStrNew                ( size_t              length,
  *
  *
  *  @version Oyjl: 1.0.0
- *  @date    2019/02/15
+ *  @date    2021/10/24
  *  @since   2019/02/15 (Oyjl: 1.0.0)
  */
-oyjl_str   oyjlStrNewFrom            ( char             ** text,
+oyjl_str   oyjlStr_NewFrom           ( char             ** text,
                                        size_t              length,
                                        void*            (* alloc)(size_t),
                                        void             (* deAlloc)(void*) )
@@ -883,7 +1397,7 @@ oyjl_str   oyjlStrNewFrom            ( char             ** text,
  *  @param[in]     append_len          length of append
  *  @return                            error
  */
-int        oyjlStrAppendN            ( oyjl_str            string,
+int        oyjlStr_AppendN           ( oyjl_str            string,
                                        const char        * append,
                                        int                 append_len )
 {
@@ -917,7 +1431,7 @@ int        oyjlStrAppendN            ( oyjl_str            string,
  *  @param[in]     ...                 argument list for format
  *  @return                            error
  */
-int        oyjlStrAdd                ( oyjl_str            string,
+int        oyjlStr_Add               ( oyjl_str            string,
                                        const char        * format,
                                                            ... )
 {
@@ -931,7 +1445,7 @@ int        oyjlStrAdd                ( oyjl_str            string,
 
   if(text)
   {
-    oyjlStrAppendN( string, text, strlen(text) );
+    oyjlStr_AppendN( string, text, strlen(text) );
     deAllocate( text );
   }
 
@@ -951,17 +1465,23 @@ int        oyjlStrAdd                ( oyjl_str            string,
  *                                     - search: used term to find actual start
  *                                     - replace: possibly modified replacement text
  *                                     - context: user data
- *  @param[in,out] context             optional user data for modifyReplacement
+ *  @param[in,out] user_data           optional user data for modifyReplacement
  *  @return                            number of occurences
  *
  *  @version Oyjl: 1.0.0
- *  @date    2019/08/02
+ *  @date    2021/10/24
  *  @since   2019/02/15 (Oyjl: 1.0.0)
  */
-int        oyjlStrReplace            ( oyjl_str            text,
+int        oyjlStr_Replace           ( oyjl_str            text,
                                        const char        * search,
                                        const char        * replacement,
-                                       void             (* modifyReplacement)(const char * text, const char * start, const char * end, const char * search, const char ** replace, void * user_data),
+                                       void             (* modifyReplacement)
+                                                             (const char * text,
+                                                              const char * start,
+                                                              const char * end,
+                                                              const char * search,
+                                                              const char ** replace,
+                                                              void * user_data),
                                        void              * user_data )
 {
   struct oyjl_string_s * str = text;
@@ -979,23 +1499,23 @@ int        oyjlStrReplace            ( oyjl_str            text,
     int s_len = strlen(search);
     while((end = strstr(start,search)) != 0)
     {
-      if(!t) t = oyjlStrNew(10,0,0);
-      oyjlStrAppendN( t, start, end-start );
+      if(!t) t = oyjlStr_New(10,0,0);
+      oyjlStr_AppendN( t, start, end-start );
       if(modifyReplacement) modifyReplacement( oyjlStr(text), start, end, search, &replacement, user_data );
-      oyjlStrAppendN( t, replacement, strlen(replacement) );
+      oyjlStr_AppendN( t, replacement, strlen(replacement) );
       ++n;
       if(strlen(end) >= (size_t)s_len)
         start = end + s_len;
       else
       {
         if(strstr(start,search) != 0)
-          oyjlStrAppendN( t, replacement, strlen(replacement) );
+          oyjlStr_AppendN( t, replacement, strlen(replacement) );
         start = end = end + s_len;
         break;
       }
     }
     if(n && start && end == NULL)
-      oyjlStrAppendN( t, start, strlen(start) );
+      oyjlStr_AppendN( t, start, strlen(start) );
   }
 
   if(t)
@@ -1018,8 +1538,8 @@ int        oyjlStrReplace            ( oyjl_str            text,
       oyjlAllocHelper_m( str->s, char, length, str->alloc, return 0 );
       str->s[0] = '\000';
       str->alloc_len = length;
-      oyjlStrAppendN( str, oyjlStr(t), strlen(oyjlStr(t)) );
-      oyjlStrRelease( &t );
+      oyjlStr_AppendN( str, oyjlStr(t), strlen(oyjlStr(t)) );
+      oyjlStr_Release( &t );
     }
   }
 
@@ -1037,10 +1557,10 @@ int        oyjlStrReplace            ( oyjl_str            text,
  *  @return                            the char array from str
  *
  *  @version Oyjl: 1.0.0
- *  @date    2019/02/15
+ *  @date    2021/10/24
  *  @since   2019/02/15 (Oyjl: 1.0.0)
  */
-char *     oyjlStrPull               ( oyjl_str            str )
+char *     oyjlStr_Pull              ( oyjl_str            str )
 {
   struct oyjl_string_s * string;
   char * t = NULL;
@@ -1064,14 +1584,14 @@ char *     oyjlStrPull               ( oyjl_str            str )
 /** @brief   clear text in a string object
  *
  *  @version Oyjl: 1.0.0
- *  @date    2019/06/14
+ *  @date    2021/10/24
  *  @since   2019/06/14 (Oyjl: 1.0.0)
  */
-void       oyjlStrClear              ( oyjl_str            string )
+void       oyjlStr_Clear             ( oyjl_str            string )
 {
   struct oyjl_string_s * str = string;
   void (* deAlloc)(void*) = str->deAlloc;
-  char * s = oyjlStrPull( string );
+  char * s = oyjlStr_Pull( string );
   if(s) deAlloc(s);
 }
 
@@ -1080,10 +1600,10 @@ void       oyjlStrClear              ( oyjl_str            string )
  *  All references from previous oyjlStr() calls will be void.
  *
  *  @version Oyjl: 1.0.0
- *  @date    2019/02/14
+ *  @date    2021/10/24
  *  @since   2019/02/14 (Oyjl: 1.0.0)
  */
-void       oyjlStrRelease            ( oyjl_str          * string_ptr )
+void       oyjlStr_Release           ( oyjl_str          * string_ptr )
 {
   struct oyjl_string_s * str;
   if(!string_ptr) return;
@@ -1107,7 +1627,9 @@ const char*oyjlStr                   ( oyjl_str            string )
 {
   return (const char*)string->s;
 }
+/* --- String_Section --- */
 
+/* --- IO_Section --- */
 /** @brief read FILE into memory
  *
  *  allocators are malloc()/realloc()
@@ -1146,8 +1668,8 @@ char *     oyjlReadFileStreamToMem   ( FILE              * fp,
   return mem;
 }
 
-#include <errno.h>
 #define WARNc_S(...) oyjlMessage_p( oyjlMSG_ERROR, 0, __VA_ARGS__ )
+#include <errno.h>
 /** @brief read local file into memory
  *
  *  uses malloc()
@@ -1203,6 +1725,163 @@ char *    oyjlReadFile( const char * file_name,
     *size_ptr = size;
 
   return text;
+}
+
+/** @internal
+ *  Copy to external allocator */
+char *       oyjlReAllocFromStdMalloc_(char              * mem,
+                                       int               * size,
+                                       void*            (* alloc)(size_t) )
+{
+  if(mem)
+  {
+    if(alloc != malloc)
+    {
+      char* temp = mem;
+
+      mem = alloc( *size + 1 );
+      if(mem)
+      {
+        memcpy( mem, temp, *size );
+        mem[*size] = '\000';
+      }
+      else
+        *size = 0;
+
+      free( temp );
+    } else
+      mem[*size] = '\000';
+  }
+
+  return mem;
+}
+
+int oyjlIsFileFull_ (const char* fullFileName, const char * read_mode);
+/* resembles which */
+char * oyjlFindApplication_(const char * app_name)
+{
+  const char * path = getenv("PATH");
+  char * full_app_name = NULL;
+  if(path && app_name)
+  {
+    int paths_n = 0, i;
+    char ** paths = oyjlStringSplit( path, ':', &paths_n, malloc );
+    for(i = 0; i < paths_n; ++i)
+    {
+      char * full_name = NULL;
+      int found;
+      oyjlStringAdd( &full_name, 0,0, "%s/%s", paths[i], app_name );
+      found = oyjlIsFileFull_( full_name, "rb" );
+      if(found)
+      {
+        i = paths_n;
+        full_app_name = strdup( full_name );
+      }
+      free( full_name );
+      if(found) break;
+    }
+    oyjlStringListRelease( &paths, paths_n, free );
+  }
+  return full_app_name;
+}
+
+/** @internal
+ *  Read a file stream without knowing its size in advance.
+ */
+char * oyjlReadCmdToMem_             ( const char        * command,
+                                       int               * size,
+                                       const char        * mode,
+                                       void*            (* alloc)(size_t) )
+{
+  char * text = 0;
+  FILE * fp = 0;
+
+  if(!alloc) alloc = malloc;
+
+  if(command && command[0] && size )
+  {
+    {
+      if(*oyjl_debug && (strstr(command, "addr2line") == NULL || *oyjl_debug > 1))
+        oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "%s", OYJL_DBG_ARGS, command );
+      fp = oyjlPOPEN_m( command, mode );
+    }
+    if(fp)
+    {
+      int mem_size = 0;
+      char* mem = NULL;
+
+      text = oyjlReadFileStreamToMem(fp, size);
+
+      if(!feof(fp))
+      {
+        if(text) { free( text ); text = NULL; }
+        *size = 0;
+        mem_size = 1024;
+        mem = malloc(mem_size+1);
+        oyjlPCLOSE_m(fp);
+        fp = oyjlPOPEN_m( command, mode );
+      }
+      if(fp)
+      while(!feof(fp))
+      {
+        if(*size >= mem_size)
+        {
+          mem_size *= 10;
+          mem = realloc( mem, mem_size+1 );
+          if(!mem) { *size = 0; break; }
+        }
+        if(mem)
+          *size += fread( &mem[*size], sizeof(char), mem_size-*size, fp );
+      }
+      if(fp && mem)
+      {
+        mem = oyjlReAllocFromStdMalloc_( mem, size, alloc );
+        text = mem;
+      }
+      if(fp)
+        oyjlPCLOSE_m(fp);
+      fp = 0;
+
+      if(*size == 0)
+      {
+        char * t = strdup(command);
+        char * end = strstr( t?t:"", " " ), * app;
+        if(end)
+          end[0] = '\000';
+
+        if((app = oyjlFindApplication_( t )) == NULL)
+          oyjlMessage_p( oyjlMSG_ERROR,0, OYJL_DBG_FORMAT "%s: \"%s\"",
+                         OYJL_DBG_ARGS, _("Program not found"), command?command:"");
+
+        if(t) free(t);
+        if(app) free(app);
+      }
+    }
+  }
+
+  return text;
+}
+
+/** @brief Read a stream from shell command.
+ */
+char *     oyjlReadCommandF          ( int               * size,
+                                       const char        * mode,
+                                       void*            (* alloc)(size_t),
+                                       const char        * format,
+                                                           ... )
+{
+  char * result = NULL;
+  char * text = 0;
+
+  if(!alloc) alloc = malloc;
+
+  OYJL_CREATE_VA_STRING(format, text, malloc, return NULL)
+
+  result = oyjlReadCmdToMem_( text, size, mode, alloc );
+
+  free(text);
+
+  return result;
 }
 
 
@@ -1299,6 +1978,8 @@ int   oyjlIsFile                     ( const char        * fullname,
     mod_time += status.st_mtimespec.tv_nsec/1000000. ;
 #   elif defined(WIN32)
     mod_time = (double)status.st_mtime ;
+#   elif defined(__ANDROID__)
+    mod_time = status.st_mtime ;
 #   else
     mod_time = status.st_mtim.tv_sec ;
     mod_time += status.st_mtim.tv_nsec/1000000. ;
@@ -1373,6 +2054,8 @@ int oyjlMakeDir_ (const char* path)
 
   if(full_name)
     path_name = oyjlExtractPathFromFileName_(full_name);
+  if(path_name && path_name[0] == '\000')
+    oyjlStringAdd( &path_name, 0,0, "%s", full_name );
   if(path_name)
   {
     if(!oyjlIsDirFull_(path_name))
@@ -1413,7 +2096,7 @@ int oyjlMakeDir_ (const char* path)
 /** @brief write memory to FILE
  */
 int  oyjlWriteFile                   ( const char        * filename,
-                                       void              * mem,
+                                       const void        * mem,
                                        int                 size )
 {
   FILE *fp = 0;
@@ -1440,6 +2123,8 @@ int  oyjlWriteFile                   ( const char        * filename,
         r = fputc ( block[pt++] , fp);
       } while (--size);
 #else
+      if(*oyjl_debug && *oyjl_debug > 1)
+        oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "%s(%d)", OYJL_DBG_ARGS, full_name, size );
       written_n = fwrite( mem, 1, size, fp );
       if(written_n != size)
         r = errno;
@@ -1474,65 +2159,326 @@ int  oyjlWriteFile                   ( const char        * filename,
 
   return written_n;
 }
+/* --- IO_Section --- */
 /** @} *//* oyjl_core */
 
-/** \addtogroup oyjl
- *  @{ *//* oyjl */
+/* --- Render_Section --- */
+#if !defined(COMPILE_STATIC) || !defined(HAVE_QT)
+#warning "compile dynamic section"
+#ifdef COMPILE_STATIC
+#warning "COMPILE_STATIC defined"
+#endif
+#ifdef HAVE_QT
+#warning "HAVE_QT defined"
+#endif
 
-static char * oyjl_nls_path_ = NULL;
-void oyjlLibRelease() { if(oyjl_nls_path_) { putenv("NLSPATH=C"); free(oyjl_nls_path_); } }
-#define OyjlToString2_M(t) OyjlToString_M(t)
-#define OyjlToString_M(t) #t
-/** @brief   init the libraries language; optionaly
- *
- *  Additionally use setlocale() somewhere in your application.
- *  The message catalog search path is detected from the project specific
- *  environment variable specified in \em env_var_locdir and
- *  the LOCPATH environment variables. If those are not present
- *  a expected fall back directory from \em default_locdir is used.
- *
- *  @param         project_name        project name display string; e.g. "MyProject"
- *  @param         environment_debug_variable string; e.g. "MP_DEBUG"
- *  @param         debug_variable      int C variable; e.g. my_project_debug
- *  @param         use_gettext         switch gettext support on or off
- *  @param         env_var_locdir      environment variable string for locale path; e.g. "MP_LOCALEDIR"
- *  @param         default_locdir      default locale path C string; e.g. "/usr/local/share/locale"
- *  @param         loc_domain          locale domain string related to your pot, po and mo files; e.g. "myproject"
- *  @param         msg                 your message function of type oyjlMessage_f; optional - default is Oyjl message function
- *  @return                            error
- *                                     - -1 : issue
- *                                     - 0 : success
- *                                     - >= 1 : found error
- *
- *  @version Oyjl: 1.0.0
- *  @date    2019/01/13
- *  @since   2019/01/13 (Oyjl: 1.0.0)
- */
-int oyjlInitLanguageDebug            ( const char        * project_name,
-                                       const char        * env_var_debug,
-                                       int               * debug_variable,
-                                       int                 use_gettext,
-                                       const char        * env_var_locdir,
-                                       const char        * default_locdir,
-                                       const char        * loc_domain,
-                                       oyjlMessage_f       msg )
+#ifdef HAVE_DL
+#include <dlfcn.h>
+static void *  oyjl_args_render_lib_ = NULL;
+static char *  oyjlLibNameCreate_    ( const char        * lib_base_name,
+                                       int                 version )
 {
+  char * fn = NULL;
+
+#ifdef __APPLE__
+    oyjlStringAdd( &fn, 0,0, "%s%s.%d%s", OYJL_LIB_PREFIX, lib_base_name, version, OYJL_LIB_SUFFIX );
+#elif defined(_WIN32)
+    oyjlStringAdd( &fn, 0,0, "%s%s-%d%s", OYJL_LIB_PREFIX, lib_base_name, version, OYJL_LIB_SUFFIX );
+#else
+    oyjlStringAdd( &fn, 0,0, "%s%s%s.%d", OYJL_LIB_PREFIX, lib_base_name, OYJL_LIB_SUFFIX, version );
+#endif
+  return fn;
+}
+static char *  oyjlFuncNameCreate_   ( const char        * base_name )
+{
+  char * func = NULL;
+
+  func = oyjlStringCopy( base_name, NULL );
+  if(func)
+  {
+    func[0] = tolower(func[0]);
+    oyjlStringAdd( &func, 0,0, "_" );
+  }
+  return func;
+}
+#else
+#warning "HAVE_DL not defined (possibly dlfcn.h not found?): dynamic loading of libOyjlArgsQml will not be possible"
+#endif /* HAVE_DL */
+
+#ifdef __cplusplus
+extern "C" { // "C" API wrapper 
+#endif
+typedef int (*oyjlArgsRender_f)     ( int                 argc,
+                                      const char       ** argv,
+                                      const char        * json,
+                                      const char        * commands,
+                                      const char        * output,
+                                      int                 debug,
+                                      oyjlUi_s          * ui,
+                                      int               (*callback)(int argc, const char ** argv));
+static int (*oyjlArgsRender_p)       ( int                 argc,
+                                       const char       ** argv,
+                                       const char        * json,
+                                       const char        * commands,
+                                       const char        * output,
+                                       int                 debug,
+                                       oyjlUi_s          * ui,
+                                       int               (*callback)(int argc, const char ** argv)) = NULL;
+static int oyjl_args_render_init_ = 0;
+static int oyjlArgsRendererLoad_( const char * render_lib )
+{
+  const char * name = render_lib;
+  char * fn = oyjlLibNameCreate_(name, 1), * func = NULL;
   int error = -1;
 
-  if(!msg) msg = oyjlMessage_p;
-
-  if(getenv(env_var_debug))
+#ifdef HAVE_DL
+  if(oyjl_args_render_lib_)
+    dlclose( oyjl_args_render_lib_ );
+  oyjl_args_render_lib_ = NULL;
+  oyjlArgsRender_p = NULL;
+  oyjl_args_render_lib_ = dlopen(fn, RTLD_LAZY);
+  if(!oyjl_args_render_lib_)
   {
-    *debug_variable = atoi(getenv(env_var_debug));
-    if(*debug_variable)
+    oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "not existent: %s", OYJL_DBG_ARGS, fn );
+    error = 1;
+  }
+  else
+  {
+    func = oyjlFuncNameCreate_(name);
+    oyjlArgsRender_p = (oyjlArgsRender_f)dlsym( oyjl_args_render_lib_, func );
+    if(oyjlArgsRender_p)
+      error = 0; /* found */
+    else
+      oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "%s: %s", OYJL_DBG_ARGS, func, dlerror() );
+  }
+#else
+  oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "no dlopen() API available for %s", OYJL_DBG_ARGS, fn );
+  error = 1;
+#endif
+  free(fn);
+
+  return error;
+}
+
+static int oyjlArgsRendererSelect_  (  oyjlUi_s          * ui )
+{
+  const char * arg = NULL, * name = NULL;
+  oyjlOption_s * R;
+  int error = 0;
+
+  if( !ui )
+  {
+    oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "no \"ui\" argument passed in", OYJL_DBG_ARGS );
+    return 1;
+  }
+
+  R = oyjlOptions_GetOptionL( ui->opts, "R", 0 );
+  if(!R)
+  {
+    oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "no \"-R|--render\" argument found: Can not select", OYJL_DBG_ARGS );
+    return 1;
+  }
+
+  if(R->variable_type != oyjlSTRING)
+  {
+    oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "no \"-R|--render\" oyjlSTRING variable declared", OYJL_DBG_ARGS );
+    return 1;
+  }
+
+  arg = oyjlStringCopy( *R->variable.s, NULL );
+  if(!arg)
+  {
+    oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "no \"-R|--render\" oyjlSTRING variable found", OYJL_DBG_ARGS );
+    return 1;
+  }
+  else
+  {
+    if(arg[0])
     {
-      int v = oyjlVersion(0);
-      if(*debug_variable)
-        msg( oyjlMSG_INFO, 0, "%s (Oyjl compile v: %s runtime v: %d)", project_name, OYJL_VERSION_NAME, v );
+      char * low = oyjlStringToLower_( arg );
+      if(low)
+      {
+        if(strlen(low) >= strlen("gui") && memcmp("gui",low,strlen("gui")) == 0)
+          name = "OyjlArgsQml";
+        else
+        if(strlen(low) >= strlen("qml") && memcmp("qml",low,strlen("qml")) == 0)
+          name = "OyjlArgsQml";
+        else
+        if(strlen(low) >= strlen("cli") && memcmp("cli",low,strlen("cli")) == 0)
+          name = "OyjlArgsCli";
+        else
+        if(strlen(low) >= strlen("web") && memcmp("web",low,strlen("web")) == 0)
+          name = "OyjlArgsWeb";
+        if(!name)
+        {
+          oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "\"-R|--render\" not supported: %s|%s", OYJL_DBG_ARGS, arg,oyjlTermColor(oyjlBOLD,low) );
+          free(low);
+          return 1;
+        }
+        free(low);
+        error = oyjlArgsRendererLoad_( name );
+      }
+    }
+    else /* report all available renderers */
+    {
+      if(oyjlArgsRendererLoad_( "OyjlArgsQml" ) == 0)
+        oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "OyjlArgsQml found - option -R=\"gui\"", OYJL_DBG_ARGS );
+      if(oyjlArgsRendererLoad_( "OyjlArgsCli" ) == 0)
+        oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "OyjlArgsCli found - option -R=\"cli\"", OYJL_DBG_ARGS );
+      if(oyjlArgsRendererLoad_( "OyjlArgsWeb" ) == 0)
+        oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "OyjlArgsWeb found - option -R=\"web\"", OYJL_DBG_ARGS );
     }
   }
 
-#ifdef OYJL_USE_GETTEXT
+  if(!oyjl_args_render_init_)
+  {
+    char * fn = oyjlLibNameCreate_(name, 1);
+    ++oyjl_args_render_init_;
+
+#ifdef HAVE_DL
+#else
+    oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "no dlopen() API available for %s", OYJL_DBG_ARGS, fn );
+#endif
+
+    free(fn);
+  }
+
+  return error;
+}
+
+
+/** \addtogroup oyjl_args
+ *  @{ *//* oyjl_args */
+/** @brief Load renderer for graphical rendering options
+ *
+ *  The function version in libOyjlCore dynamicaly dlopen() s libOyjlArgsQml.
+ *  The function version in liboyjl-core-static needs as well
+ *  liboyjl-args-qml-static to work. You should check wich library is linked
+ *  and possibly guard the according code in case no QML library is available:
+ *  @code
+    #if !defined(NO_OYJL_ARGS_RENDER)
+    if(render && ui)
+      // code with oyjlArgsRender() goes here
+    #endif
+    @endcode
+ *
+ *  @param[in]     argc                number of arguments from main()
+ *  @param[in]     argv                arguments from main()
+ *  @param[in]     json                JSON UI text; optional, can be generated from ui
+ *  @param[in]     commands            JSON commands/config text; optional, can be generated from ui or passed in as --render="XXX" option
+ *  @param[in]     output              write ui interaction results; optional
+ *  @param[in]     debug               set debug level
+ *  @param[in]     ui                  user interface structure
+ *  @param[in,out] callback            the function resembling main() to call into;
+ *                                     It will be used to parse args, show help texts,
+ *                                     all options handling and data processing
+ *  @return                            return value for main()
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2020/03/05
+ *  @since   2019/12/14 (Oyjl: 1.0.0)
+ */
+int oyjlArgsRender                   ( int                 argc,
+                                       const char       ** argv,
+                                       const char        * json,
+                                       const char        * commands,
+                                       const char        * output,
+                                       int                 debug,
+                                       oyjlUi_s          * ui,
+                                       int               (*callback)(int argc, const char ** argv))
+{
+  int result = -1;
+  oyjlArgsRendererSelect_(ui);
+  if(oyjlArgsRender_p)
+    result = oyjlArgsRender_p(argc, argv, json, commands, output, debug, ui, callback );
+  fflush(stdout);
+  fflush(stderr);
+  return result;
+}
+/** @} *//* oyjl_args */
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+#endif /* !COMPILE_STATIC || !HAVE_QT */
+
+
+/** \addtogroup oyjl
+    @section oyjl_intro Introduction
+  
+    Oyjl API provides a platformindependent C interface for JSON I/O, conversion to and from
+    XML + YAML, string helpers, file reading, testing and argument handling.
+
+    The API's are quite independent. 
+
+    @section oyjl_api API Documentation
+    The API of the @ref oyjl is declared in the oyjl.h header file.
+    - @ref oyjl_tree - OyjlTree JSON modeled C data structure with data I/O API: *libOyjlCore*, all parsers (JSON,YAML,XML) reside in *libOyjl*
+    - @ref oyjl_core - OyjlCore API: *libOyjlCore*
+    - @ref oyjl_test - OyjlTest API: header only implementation in *oyjl_test.h* and *oyjl_test_main.h*
+    - @ref oyjl_args - OyjlArgs Argument Handling API: link to *libOyjlCore* or with slightly reduced functionality in the stand alone *oyjl_args.c* version
+
+    @section oyjl_tools Tools Documentation
+    Oyjl comes with a few tools, which use the Oyjl API's.
+    - @ref oyjl - JSON manipulation
+    - @ref oyjltranslate - localisation helper tool
+    - @ref oyjlargs - code generation tool
+    - @ref oyjlargsqml - interactive option renderer written in Qt's QML
+ *  @{ *//* oyjl */
+
+static char * oyjl_nls_path_ = NULL;
+char * oyjl_debug_node_path_ = NULL;
+char * oyjl_debug_node_value_ = NULL;
+extern char * oyjl_term_color_html_;
+void oyjlLibRelease() {
+  int i;
+  if(oyjl_nls_path_)
+  {
+    putenv("NLSPATH=C"); free(oyjl_nls_path_); oyjl_nls_path_ = NULL;
+  }
+#if defined(HAVE_DL) && (!defined(COMPILE_STATIC) || !defined(HAVE_QT))
+  if(oyjl_args_render_lib_)
+  {
+    dlclose(oyjl_args_render_lib_); oyjl_args_render_lib_ = NULL; oyjl_args_render_init_ = 0;
+  }
+#endif
+  if(oyjl_tr_context_)
+  {
+    i = 0;
+    while(oyjl_tr_context_[i])
+    {
+      oyjlTr_Release( &oyjl_tr_context_[i] );
+      ++i;
+    }
+    free(oyjl_tr_context_);
+    oyjl_tr_context_ = NULL;
+  }
+  if(oyjl_debug_node_path_)
+  {
+    free(oyjl_debug_node_path_);
+    oyjl_debug_node_path_ = NULL;
+  }
+  if(oyjl_debug_node_value_)
+  {
+    free(oyjl_debug_node_value_);
+    oyjl_debug_node_value_ = NULL;
+  }
+  if(oyjl_term_color_html_)
+  {
+    free(oyjl_term_color_html_);
+    oyjl_term_color_html_ = NULL;
+  }
+}
+/* --- Render_Section --- */
+
+/* --- Init_Section --- */
+#define OyjlToString2_M(t) OyjlToString_M(t)
+#define OyjlToString_M(t) #t
+void   oyjlGettextSetup_             ( int                 use_gettext OYJL_UNUSED,
+                                       const char        * loc_domain OYJL_UNUSED,
+                                       const char        * env_var_locdir OYJL_UNUSED,
+                                       const char        * default_locdir OYJL_UNUSED )
+{
+#ifdef OYJL_HAVE_LIBINTL_H
   {
     if( use_gettext )
     {
@@ -1546,18 +2492,18 @@ int oyjlInitLanguageDebug            ( const char        * project_name,
       {
         tmp = strdup(getenv(env_var_locdir));
         environment_locale_dir = domain_path = tmp;
-        if(*debug_variable)
-          msg( oyjlMSG_INFO, 0,"found environment variable: %s=%s", env_var_locdir, domain_path );
+        if(*oyjl_debug)
+          oyjlMessage_p( oyjlMSG_INFO, 0,"found environment variable: %s=%s", env_var_locdir, domain_path );
       } else
         if(environment_locale_dir == NULL && getenv("LOCPATH") && strlen(getenv("LOCPATH")))
       {
         domain_path = NULL;
         locpath = getenv("LOCPATH");
-        if(*debug_variable)
-          msg( oyjlMSG_INFO, 0,"found environment variable: LOCPATH=%s", locpath );
+        if(*oyjl_debug)
+          oyjlMessage_p( oyjlMSG_INFO, 0,"found environment variable: LOCPATH=%s", locpath );
       } else
-        if(*debug_variable)
-        msg( oyjlMSG_INFO, 0,"no %s or LOCPATH environment variable found; using default path: %s", env_var_locdir, domain_path );
+        if(*oyjl_debug)
+        oyjlMessage_p( oyjlMSG_INFO, 0,"no %s or LOCPATH environment variable found; using default path: %s", env_var_locdir, domain_path );
 
       if(domain_path || locpath)
       {
@@ -1575,48 +2521,205 @@ int oyjlInitLanguageDebug            ( const char        * project_name,
       /* LOCPATH appears to be ignored by bindtextdomain("domain", NULL),
        * so it is set here to bindtextdomain(). */
       path = domain_path ? domain_path : locpath;
-# ifdef OYJL_HAVE_LIBINTL_H
-      bindtextdomain( loc_domain, path );
-#endif
-      if(*debug_variable)
+      const char * d = textdomain( loc_domain );
+      const char * dpath = bindtextdomain( loc_domain, path );
+      if(*oyjl_debug)
+        oyjlMessage_p( oyjlMSG_INFO, 0,"bindtextdomain( \"%s\", \"%s\"/%s ) = ", loc_domain, path, dpath, d );
+      if(*oyjl_debug)
       {
         char * fn = NULL;
         int stat = -1;
         const char * gettext_call = OyjlToString2_M(_());
+        const char * domain = textdomain(NULL);
 
         if(path)
           oyjlStringAdd( &fn, 0,0, "%s/de/LC_MESSAGES/%s.mo", path ? path : "", loc_domain);
         if(fn)
           stat = oyjlIsFileFull_( fn, "r" );
-        msg( oyjlMSG_INFO, 0,"bindtextdomain(\"%s\") to %s\"%s\" %s for %s", loc_domain, locpath?"effectively ":"", path ? path : "", (stat > 0)?"Looks good":"Might fail", gettext_call );
+        oyjlMessage_p( oyjlMSG_INFO, 0,"bindtextdomain(\"%s\"/%s) to %s\"%s\" %s for %s  test:%s", loc_domain, domain, locpath?"effectively ":"", path ? path : "", (stat > 0)?"Looks good":"Might fail", gettext_call, _("Example") );
         if(fn) free(fn);
       }
       if(tmp)
         free(tmp);
     }
   }
-#endif /* OYJL_USE_GETTEXT */
+#endif /* OYJL_HAVE_LIBINTL_H */
+}
+void   oyjlInitI18n_                 ( const char        * loc )
+{
+#ifndef OYJL_SKIP_TRANSLATE
+  oyjl_val oyjl_catalog = NULL;
+  oyjlTr_s * trc = NULL;
+  int use_gettext = 0;
+#ifdef OYJL_USE_GETTEXT
+  use_gettext = 1;
+#else
+# include "liboyjl.i18n.h"
+  int size = sizeof(liboyjl_i18n_oiJS);
+  oyjl_catalog = (oyjl_val) oyjlStringAppendN( NULL, (const char*) liboyjl_i18n_oiJS, size, malloc );
+  if(*oyjl_debug)
+    oyjlMessage_p( oyjlMSG_INFO, 0,OYJL_DBG_FORMAT "loc: \"%s\" domain: \"%s\" catalog-size: %d", OYJL_DBG_ARGS, loc, OYJL_DOMAIN, size );
+#endif
+  oyjlGettextSetup_( use_gettext, OYJL_DOMAIN, "OYJL_LOCALEDIR", OYJL_LOCALEDIR );
+  trc = oyjlTr_New( loc, OYJL_DOMAIN, &oyjl_catalog, 0,0,0, *oyjl_debug > 1?OYJL_OBSERVE:0 );
+  oyjlTr_SetFlags( trc, 0 );
+  oyjlTr_Set( &trc );
+#endif
+}
+
+/** @brief   init the libraries language; optionaly
+ *
+ *  Additionally use setlocale() to obtain locale in your application.
+ *  The message catalog search path is detected from the project specific
+ *  environment variable specified in \em env_var_locdir and
+ *  the \em LOCPATH environment variables. If those are not present
+ *  a expected fall back directory from \em default_locdir is used.
+ *
+ *  @param         project_name        project name display string; e.g. "MyProject"
+ *  @param         env_var_debug       environment debug variable string;
+ *                                     e.g. "MP_DEBUG"
+ *  @param         debug_variable      int C variable; e.g. my_project_debug
+ *  @param         use_gettext         switch gettext support on or off
+ *  @param         env_var_locdir      environment variable string for locale path;
+ *                                     e.g. "MP_LOCALEDIR"
+ *  @param         default_locdir      default locale path C string;
+ *                                     e.g. "/usr/local/share/locale"
+ *  @param         context             locale, domain and possibly more information
+ *                                     - domain: po and mo files; e.g. "myproject"
+ *  @param         msg                 your message function of type oyjlMessage_f; optional - default is Oyjl message function
+ *  @return                            error
+ *                                     - -1 : issue
+ *                                     - 0 : success
+ *                                     - >= 1 : found error
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2019/01/13
+ *  @since   2019/01/13 (Oyjl: 1.0.0)
+ */
+int oyjlInitLanguageDebug            ( const char        * project_name,
+                                       const char        * env_var_debug,
+                                       int               * debug_variable,
+                                       int                 use_gettext OYJL_UNUSED,
+                                       const char        * env_var_locdir OYJL_UNUSED,
+                                       const char        * default_locdir OYJL_UNUSED,
+                                       oyjlTr_s         ** context,
+                                       oyjlMessage_f       msg )
+{
+  int error = -1;
+  oyjlTr_s * trc = context?*context:NULL;
+  const char * loc = oyjlTr_GetLang( trc );
+  const char * loc_domain = oyjlTr_GetDomain( trc );
+
+  if(!msg) msg = oyjlMessage_p;
+
+  if(debug_variable)
+    oyjlDebugVariableSet( debug_variable );
+  oyjlMessageFuncSet(msg);
+
+  if(*debug_variable)
+    oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "loc: %s loc_domain: %s", OYJL_DBG_ARGS, loc, loc_domain );
+
+  if(getenv(env_var_debug))
+  {
+    *debug_variable = atoi(getenv(env_var_debug));
+    if(*debug_variable)
+    {
+      int v = oyjlVersion(0);
+      if(*debug_variable)
+        msg( oyjlMSG_INFO, 0, "%s (Oyjl compile v: %s runtime v: %d)", project_name, OYJL_VERSION_NAME, v );
+    }
+  }
+
+  oyjlInitI18n_( loc );
+
+  if(loc_domain)
+  {
+    oyjlGettextSetup_( use_gettext, loc_domain, env_var_locdir, default_locdir );
+    int state = oyjlTr_Set( context ); /* just pass domain in */
+    if(*oyjl_debug)
+      msg( oyjlMSG_INFO, 0, "use_gettext: %d loc_domain: %s env_var_locdir: %s default_locdir: %s oyjlTr_Set: %d", use_gettext, loc_domain, env_var_locdir, default_locdir, state );
+  }
 
   return error;
 }
+/* --- Init_Section --- */
 
+/* --- I18n_Section --- */
+/** @brief   obtain language part of i18n locale code
+ *
+ *  @param         loc                 locale name as from setlocale("")
+ *  @return                            language part
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2020/07/27
+ *  @since   2020/07/27 (Oyjl: 1.0.0)
+ */
+char *         oyjlLanguage          ( const char        * loc )
+{
+  if(strchr(loc,'_') != NULL)
+  {
+    char * t = strdup(loc);
+    char * tmp = strchr(t,'_');
+    tmp[0] = '\000';
+    return t;
+  } else
+    return strdup(loc);
+}
 
+/** @brief   obtain country part of i18n locale code
+ *
+ *  @param         loc                 locale name as from setlocale("")
+ *  @return                            country part
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2020/07/27
+ *  @since   2020/07/27 (Oyjl: 1.0.0)
+ */
+char *         oyjlCountry           ( const char        * loc )
+{
+  if(strchr(loc,'_') != NULL)
+  {
+    char * t = strdup( strchr(loc,'_') + 1 );
+    if(strchr(t,'.') != NULL)
+    {
+      char * tmp = strchr(t,'.');
+      tmp[0] = '\000';
+    }
+    return t;
+  }
+  else
+    return NULL;
+}
+
+/* --- I18n_Section --- */
+
+/* --- Misc_Section --- */
 #include "oyjl_version.h"
 #include <yajl/yajl_parse.h>
 #include <yajl/yajl_version.h>
 /** @brief  give the compiled in library version
  *
- *  @param[in]  type           request API type
+ *  @param[in]  vtype          request API type
  *                             - 0 - Oyjl API
  *                             - 1 - Yajl API
  *  @return                    OYJL_VERSION at library compile time
  */
-int            oyjlVersion           ( int                 type )
+int            oyjlVersion           ( int                 vtype )
 {
-  if(type == 1)
+  if(vtype == 1)
     return YAJL_VERSION;
 
   return OYJL_VERSION;
 }
+/* --- Misc_Section --- */
 
 /** @} *//* oyjl */
+
+/* additional i18n strings */
+void oyjlDummy_(void)
+{
+  char * t = oyjlStringCopy( _("Information"), 0 );
+  free(t);
+}
+
+

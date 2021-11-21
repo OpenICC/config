@@ -42,81 +42,86 @@
 <context>
     <name>AppData</name>
     <message>
-        <location filename="../src/app_data.cpp" line="76"/>
+        <location filename="../src/app_data.cpp" line="79"/>
         <source>Json is invalid</source>
         <translation>Json is ungültig</translation>
     </message>
     <message>
-        <location filename="../src/app_data.cpp" line="85"/>
+        <location filename="../src/app_data.cpp" line="106"/>
         <source>finished loading</source>
         <translation>Laden beendet</translation>
     </message>
     <message>
-        <location filename="../src/app_data.cpp" line="215"/>
-        <location filename="../src/app_data.cpp" line="217"/>
+        <location filename="../src/app_data.cpp" line="243"/>
+        <location filename="../src/app_data.cpp" line="245"/>
         <source>%1 Version</source>
         <translation>%1 Version</translation>
     </message>
     <message>
-        <location filename="../src/app_data.cpp" line="222"/>
+        <location filename="../src/app_data.cpp" line="250"/>
         <source>NONE</source>
         <translation>NICHTS</translation>
     </message>
     <message>
-        <location filename="../src/app_data.cpp" line="239"/>
-        <source>%1:%2</source>
-        <translation type="unfinished"></translation>
+        <location filename="../src/app_data.cpp" line="366"/>
+        <source>Permission not granted: </source>
+        <translation>Berechtigung nicht gewährt: </translation>
     </message>
 </context>
 <context>
     <name>AppWindow</name>
     <message>
-        <location filename="../qml/AppWindow.qml" line="122"/>
-        <location filename="../qml/AppWindow.qml" line="162"/>
+        <location filename="../qml/AppWindow.qml" line="125"/>
+        <location filename="../qml/AppWindow.qml" line="165"/>
         <source>discharging</source>
         <translation>entladend</translation>
     </message>
     <message>
-        <location filename="../qml/AppWindow.qml" line="122"/>
+        <location filename="../qml/AppWindow.qml" line="125"/>
         <source>charging</source>
         <translation>aufladend</translation>
     </message>
     <message>
-        <location filename="../qml/AppWindow.qml" line="122"/>
+        <location filename="../qml/AppWindow.qml" line="125"/>
         <source>full</source>
         <translation>voll</translation>
     </message>
     <message>
-        <location filename="../qml/AppWindow.qml" line="123"/>
-        <location filename="../qml/AppWindow.qml" line="162"/>
+        <location filename="../qml/AppWindow.qml" line="126"/>
+        <location filename="../qml/AppWindow.qml" line="165"/>
         <source>Battery</source>
         <translation>Batterie</translation>
     </message>
     <message>
-        <location filename="../qml/AppWindow.qml" line="142"/>
+        <location filename="../qml/AppWindow.qml" line="145"/>
         <source>Night</source>
         <translation>Nacht</translation>
     </message>
     <message>
-        <location filename="../qml/AppWindow.qml" line="144"/>
+        <location filename="../qml/AppWindow.qml" line="147"/>
         <source>Day</source>
         <translation>Tag</translation>
     </message>
     <message>
-        <location filename="../qml/AppWindow.qml" line="162"/>
+        <location filename="../qml/AppWindow.qml" line="165"/>
         <source>not used</source>
         <translation>nicht benutzt</translation>
     </message>
     <message>
-        <location filename="../qml/AppWindow.qml" line="182"/>
+        <location filename="../qml/AppWindow.qml" line="185"/>
         <source>Busy</source>
         <translation>Beschäftigt</translation>
+    </message>
+    <message>
+        <location filename="../qml/AppWindow.qml" line="455"/>
+        <source>Ok</source>
+        <translation>Ja</translation>
     </message>
 </context>
 <context>
     <name>LSwitch</name>
     <message>
-        <location filename="../qml/LSwitch.qml" line="83"/>
+        <location filename="../qml/LSwitch.qml" line="85"/>
         <source>Ok</source>
         <translation>Ja</translation>
     </message>
@@ -124,44 +129,79 @@
 <context>
     <name>OptionsList</name>
     <message>
-        <location filename="../qml/OptionsList.qml" line="109"/>
-        <location filename="../qml/OptionsList.qml" line="153"/>
-        <location filename="../qml/OptionsList.qml" line="192"/>
-        <location filename="../qml/OptionsList.qml" line="206"/>
-        <location filename="../qml/OptionsList.qml" line="243"/>
+        <location filename="../qml/OptionsList.qml" line="130"/>
+        <location filename="../qml/OptionsList.qml" line="176"/>
+        <location filename="../qml/OptionsList.qml" line="219"/>
+        <location filename="../qml/OptionsList.qml" line="240"/>
         <source>selected</source>
         <translation>ausgewählt</translation>
     </message>
     <message>
-        <location filename="../qml/OptionsList.qml" line="109"/>
-        <location filename="../qml/OptionsList.qml" line="153"/>
-        <location filename="../qml/OptionsList.qml" line="192"/>
+        <location filename="../qml/OptionsList.qml" line="130"/>
+        <location filename="../qml/OptionsList.qml" line="176"/>
+        <location filename="../qml/OptionsList.qml" line="219"/>
         <source>new/old</source>
         <translation>alt/neu</translation>
+    </message>
+    <message>
+        <location filename="../qml/OptionsList.qml" line="396"/>
+        <source>Multiple Options Hint</source>
+        <translation>Hinweis für Mehrfachoptionen</translation>
+    </message>
+    <message>
+        <location filename="../qml/OptionsList.qml" line="398"/>
+        <source>Enter first value, append &apos;;&apos; and confirm. The final &apos;;&apos; is not executed. Then select next value. Repeat as needed. A final confirm without ending &apos;;&apos; can execute.</source>
+        <translation>Zunächst einen Wert eingeben, dann ein Semikolon &apos;;&apos; anhängen und bestätigen. Anschließend den nächsten Wert wählen. Das Auswählen bei Bedarf wiederholen. Ein Bestätigen ohne Semikolon  &apos;;&apos; am Ende kann den Befehl ausführen.</translation>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
-        <location filename="../qml/main.qml" line="38"/>
+        <location filename="../qml/main.qml" line="41"/>
         <source>Loaded</source>
         <translation>Geladen</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="90"/>
+        <location filename="../qml/main.qml" line="100"/>
         <source>commands enabled</source>
         <translation>Kommandos an</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="444"/>
-        <location filename="../qml/main.qml" line="477"/>
+        <location filename="../qml/main.qml" line="762"/>
+        <location filename="../qml/main.qml" line="813"/>
+        <location filename="../qml/main.qml" line="846"/>
         <source>Launched app for </source>
         <translation>Starte Programm für </translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="618"/>
+        <location filename="../qml/main.qml" line="899"/>
+        <source>Show Log</source>
+        <translation>Zeige Meldungen</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="899"/>
+        <source>Show JSON</source>
+        <translation>Zeige JSON</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="1084"/>
         <source>Load failed</source>
         <translation>Laden daneben</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="1136"/>
+        <source>granted</source>
+        <translation>gewährt</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="1136"/>
+        <source>denied</source>
+        <translation>abgelehnt</translation>
+    </message>
+    <message>
+        <location filename="../qml/main.qml" line="1138"/>
+        <source>Never ask again</source>
+        <translation>Nicht mehr fragen</translation>
     </message>
 </context>
 </TS>

@@ -1,7 +1,7 @@
 /** @file AppWindow.qml
  *
  *  @par Copyright:
- *            2014-2018 (C) Kai-Uwe Behrmann
+ *            2014-2021 (C) Kai-Uwe Behrmann
  *            All Rights reserved.
  *
  *  @par License:
@@ -33,19 +33,19 @@ ApplicationWindow {
     objectName: "mainWindow"
     color: bg
     visible: true
+    readonly property int dens: Math.round(Screen.logicalPixelDensity)
     readonly property bool fullscreen: (Qt.platform.os === "android" ||
                                         Qt.platform.os === "blackberry" ||
                                         Qt.platform.os === "ios" ||
                                         Qt.platform.os === "tvos" ||
                                         Qt.platform.os === "windowsphone")
-    width: if( !fullscreen )
-               200*dens
-    height: if( !fullscreen )
-                150*dens
+
+
+    width: fullscreen === false ? 200*dens : width
+    height: fullscreen === false ? 150*dens : height
     minimumWidth: 100*dens
     minimumHeight: 75*dens
 
-    readonly property int dens: Math.round(Screen.logicalPixelDensity)
     readonly property string dpiName: {
 //        if(density >= 21.26) // 560
 //            "xxxxhdpi"
@@ -82,7 +82,6 @@ ApplicationWindow {
 
     Settings {
         objectName: "Settings"
-        property alias app_debug: mainWindow.app_debug
         property alias prefered_theme: mainWindow.prefered_theme
         property alias accent: mainWindow.accent
     }
@@ -95,13 +94,17 @@ ApplicationWindow {
 
     property string logo;
     property string icon;
-    onIconChanged: {
-        appData.setWindowIcon( icon ) // set window icon
+    onIconChanged: { var i = icon
+        appData.setWindowIcon( i ) // set window icon
     }
 
     // DEBUG
     property int app_debug: 0
-    onApp_debugChanged: appData.setDebug( app_debug )
+    signal debugChanged(var debug)
+    onDebugChanged: {
+        app_debug = debug;
+        statusText = "app_debug: " + debug
+    }
 
     Screen.onPrimaryOrientationChanged: {
         if(app_debug)
@@ -179,7 +182,7 @@ ApplicationWindow {
             if(isbusy === false)
             {
                 timer_status_text_ = statusText
-                statusText = qsTr("Busy")
+                statusText = qsTr("Busy") + " (" + timer_status_text_ + ")"
                 isbusy = true
             }
         }
@@ -235,10 +238,14 @@ ApplicationWindow {
     {
         if(app_debug)
             statusText = "checkLand(): old index: " + pages.currentIndex + "/" + pagesContentIndex + " landscape: " + landscape + " indexAt(): " + pages.indexAt(1,1)
-        if(width > height)
-            landscape = 1
+        var keyboard_factor = 1.2
+        var l;
+        if(width > height * keyboard_factor) // virtual keyboard shall not interfere on mobile portrait mode
+            l = 1
         else
-            landscape = 0
+            l = 0
+        if(l !== landscape)
+            landscape = l;
     }
     onLandscapeChanged: {
         if(app_debug)
@@ -322,20 +329,16 @@ ApplicationWindow {
         for (i = 0; i < count; ++i)
         {
             var p = pagesModel.get(i)
-            // is not needed as visibility and focus are handled in swipe aware pages.onContentXChanged
-            /*if(i === page)
-                p.visible = true
-            else if(landscape)
+            // Not needed for all pages, as visibility and focus are handled in swipe aware pages.onContentXChanged
+            if(landscape)
             {
-                if(p.width < mainWindow.width && i >= page && page <= i + 1 ) // half page
+                if( i === 1 && pagesModel.get(0).visible && p.visible === false) // half page
+                {
                     p.visible = true
-                else
-                    p.visible = false
+                    if(app_debug)
+                        statusText = p.objectName + " " + i + " " + (p.visible?"+":"-") + " " + p.width  + "/" + mainWindow.width
+                }
             }
-            else
-                p.visible = false*/
-            if(app_debug)
-                statusText = p.objectName + " " + i + " " + (p.visible?"+":"-") + " " + p.width  + "/" + mainWindow.width
         }
     }
 
@@ -367,6 +370,8 @@ ApplicationWindow {
         focus: true
 
         onContentXChanged: {
+            if(Qt.platform.os === "android") // contentX is not relyable on Android
+                return
             if(app_debug)
                 statusText = "onContentXChanged " + contentX
             var count = pagesModel.count
@@ -382,18 +387,28 @@ ApplicationWindow {
                 var x = Math.round(contentX)
                 if(start <= x && x < end)
                 {
-                    p.visible = true
-                    p.focus = true
+                    if(p.visible === false)
+                    {
+                        p.visible = true
+                        p.focus = true
+                        if(app_debug)
+                            statusText = p.objectName + " " + i + " " + (p.visible?"+":"-") + " " + p.width  + "/" + mainWindow.width + " " + start + " - " + end
+                    }
                 } else if(start - pages.width < x && x < end)
                 {
-                    p.visible = true
-                    p.focus = false
-                } else {
+                    if(p.visible === false)
+                    {
+                        p.visible = true
+                        p.focus = false
+                        if(app_debug)
+                            statusText = p.objectName + " " + i + " " + (p.visible?"+":"-") + " " + p.width  + "/" + mainWindow.width + " " + start + " - " + end
+                    }
+                } else if(p.visible === true) {
                     p.visible = false
                     p.focus = false
+                    if(app_debug)
+                        statusText = p.objectName + " " + i + " " + (p.visible?"+":"-") + " " + p.width  + "/" + mainWindow.width + " " + start + " - " + end
                 }
-                if(app_debug)
-                    statusText = p.objectName + " " + i + " " + (p.visible?"+":"-") + " " + p.width  + "/" + mainWindow.width + " " + start + " - " + end
                 start += w
             }
         }
@@ -407,6 +422,40 @@ ApplicationWindow {
         }
     }
 
+
+    property string top_message: ""
+    property alias top: topMessage
+    onTop_messageChanged: if(top_message !== "") topMessage.visible = 1
+    Rectangle {
+        id: topMessage
+        objectName: "topMessage"
+
+        width: parent.width
+        height: parent.height
+        visible: false
+        color: "gray"
+        TextArea {
+            id: topMessageTextArea
+            x: dens*2
+            y: dens*2
+            width: parent.width - dens*4
+            height: parent.height - font.pixelSize*2 - dens*6
+            text: top_message
+            textFormat: Qt.RichText
+            wrapMode: TextEdit.Wrap
+            readOnly: true
+            color: fg
+            background: Rectangle { color: bg }
+        }
+        Button {
+            x: dens*2
+            y: topMessageTextArea.height + dens * 4
+            width: parent.width - dens * 4
+            height: font.pixelSize*2
+            text: qsTr("Ok");
+            onClicked: parent.visible = 0
+        }
+    }
 
     footer: Rectangle {
         id: mainStatusBar

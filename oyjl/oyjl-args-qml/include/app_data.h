@@ -22,6 +22,7 @@
 #include <QByteArray>
 #include "oyjl.h"
 
+#include <QApplication>
 #include <QFile>
 #include <QDir>
 #include <QTimer>
@@ -29,7 +30,6 @@
 
 #include "utils.h"
 extern QApplication * a;
-extern int app_debug;
 
 class AppData : public QObject
 {
@@ -46,9 +46,9 @@ class AppData : public QObject
                REVISION 1)
 private slots:
 public:
-    AppData(QObject * parent = 0)
+    AppData(QObject * parent = nullptr)
       : QObject(parent)
-      , m_model(0)
+      , m_model(nullptr)
     {
 #if !defined(Q_OS_ANDROID)
     // Linux polles the sysfs interface
@@ -74,16 +74,21 @@ public:
         emit logMessage();
     }
     Q_INVOKABLE void setWindowIcon(QString name) { QUrl url = name; QIcon icon(url.toLocalFile());
+                                                   if(icon.isNull()) { QIcon i(name); icon = i; }
                                                    if(icon.isNull()) { LOG( "Icon does not exist ??? " + name );
                                                    } else { LOG( "Set Icon: " + name ); a->setWindowIcon(icon); }}
 
     Q_INVOKABLE QString getJSON(QString url);
     Q_INVOKABLE void  writeJSON(QString url);
     Q_INVOKABLE QString getLibDescription(int);
-    Q_INVOKABLE void setOption(QString key, QString value);
+    Q_INVOKABLE void    setOption(QString key, QString value);
+    Q_INVOKABLE QString getOption(QString key);
+    Q_INVOKABLE QString dumpOptions();
+    Q_INVOKABLE void    clearOptions() { oyjlTreeFree(m_model); m_model = nullptr; }
     Q_INVOKABLE QString findLogo(QString pattern);
     Q_INVOKABLE QString readFile(QString url);
-    Q_INVOKABLE void setDebug( int debug ) { app_debug = debug; LOG(QString::number(debug)); }
+    Q_INVOKABLE QString requestPermission( QString name );
+    Q_INVOKABLE int hasPermission( QString name );
 
 public slots:
     void readBattery();
