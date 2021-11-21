@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openicc\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2019-09-01 08:05+0200\n"
+"POT-Creation-Date: 2021-11-11 09:14+0100\n"
 "PO-Revision-Date: 2006-06-29 19:31+0200\n"
 "Last-Translator: Pascal LACROIX <lacroixpascal at vfemail.net>\n"
 "Language-Team: <fr@li.org>\n"
@@ -21,246 +21,260 @@ msgid "!!! ERROR"
 msgstr ""
 
 #. type,   flags, o,  option,          key,  name,             description,         help, value_name,    value_type,        values, variable_type, result
-#: tools/openicc_device.c:109
+#: tools/openicc_device.c:107
 msgid "Add"
 msgstr ""
 
-#: tools/openicc_device.c:132
+#: tools/openicc_device.c:134
 #, fuzzy
 msgid "Add Device"
 msgstr "Couleur"
 
-#: tools/openicc_device.c:109 tools/openicc_device.c:132
+#: tools/openicc_device.c:107 tools/openicc_device.c:134
 msgid "Add Device to DB"
 msgstr ""
 
-#: tools/openicc_device.c:101
+#: tools/openicc_device.c:99
 msgid "Camera"
 msgstr ""
 
-#: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:190
-#: libopenicc/openicc_db.c:444
+#: libopenicc/openicc_db.c:60 libopenicc/openicc_db.c:198
+#: libopenicc/openicc_db.c:452
 #, fuzzy
 msgid "Could not alloc memory"
 msgstr "Ouvrir Profil"
 
-#: libopenicc/openicc_db.c:422
+#: libopenicc/openicc_db.c:430
 #, fuzzy
 msgid "Could not create a intermediate db object for"
 msgstr "Ouvrir Profil"
 
-#: libopenicc/openicc_db.c:510
+#: libopenicc/openicc_db.c:518
 #, fuzzy
 msgid "Could not create root JSON node for"
 msgstr "Ouvrir Profil"
 
-#: libopenicc/openicc_db.c:125 libopenicc/openicc_db.c:158
+#: libopenicc/openicc_db.c:133 libopenicc/openicc_db.c:166
 #, fuzzy
 msgid "Could not find config"
 msgstr "Ouvrir Profil"
 
-#: libopenicc/openicc_db.c:503
+#: libopenicc/openicc_db.c:511
 #, fuzzy
 msgid "Could not obtain JSON node for"
 msgstr "Ouvrir Profil"
 
-#: libopenicc/openicc_db.c:461
+#: libopenicc/openicc_db.c:469
 msgid "Could not set JSON string for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:239
+#: libopenicc/openicc_db.c:247
 #, fuzzy
 msgid "Could not setup db objetc"
 msgstr "Ouvrir Profil"
 
 #. declare some option choices
-#: tools/openicc_device.c:97 tools/openicc_device.c:110
+#: tools/openicc_device.c:95 tools/openicc_device.c:108
 #, fuzzy
 msgid "DB File"
 msgstr "Fichier"
 
-#: tools/openicc_device.c:110
+#: tools/openicc_device.c:108
 msgid "DB File Name"
 msgstr ""
 
-#: tools/openicc_device.c:112
+#: tools/openicc_device.c:110
 #, fuzzy
 msgid "Device"
 msgstr "Couleur"
 
-#: tools/openicc_device.c:111
+#: tools/openicc_device.c:109
 #, fuzzy
 msgid "Device Class"
 msgstr "Couleur"
 
-#: tools/openicc_device.c:112
+#: tools/openicc_device.c:110
 #, fuzzy
 msgid "Device position"
 msgstr "Description"
 
-#: tools/openicc_device.c:115
+#: tools/openicc_device.c:113
 msgid "Dump OpenICC JSON"
 msgstr ""
 
-#: tools/openicc_device.c:113 tools/openicc_device.c:133
+#: tools/openicc_device.c:111 tools/openicc_device.c:135
 #, fuzzy
 msgid "Erase Device"
 msgstr "Couleur"
 
-#: tools/openicc_device.c:113
+#: tools/openicc_device.c:111
 #, fuzzy
 msgid "Erase Devices"
 msgstr "Couleur"
 
-#: tools/openicc_device.c:133
+#: tools/openicc_device.c:135
 msgid "Erase a Devices from the DB"
 msgstr ""
 
-#: tools/openicc_device.c:110 tools/openicc_device.c:114
+#: tools/openicc_device.c:108 tools/openicc_device.c:112
 msgid "FILENAME"
 msgstr ""
 
-#: tools/openicc_device.c:114
+#: tools/openicc_device.c:112
 #, fuzzy
 msgid "File Name"
 msgstr "Fichier"
 
-#: tools/openicc_device.c:110
+#: tools/openicc_device.c:108
 #, fuzzy
 msgid "File Name of OpenICC Device Data Base JSON"
 msgstr "Couleur"
 
-#: tools/openicc_device.c:97
+#: tools/openicc_device.c:95
 msgid "File Name of device JSON Data Base"
 msgstr ""
 
-#: tools/openicc_device.c:135
+#: tools/openicc_device.c:149
+msgid "For more information read the man page:"
+msgstr ""
+
+#: tools/openicc_device.c:137
 #, fuzzy
 msgid "General options"
 msgstr "Options"
 
-#: tools/openicc_device.c:116
+#: tools/openicc_device.c:114
 msgid "Help"
 msgstr ""
 
 #. type,   flags, name,              description,                          help, mandatory, optional, detail
-#: tools/openicc_device.c:117 tools/openicc_device.c:131
+#: tools/openicc_device.c:116 tools/openicc_device.c:133
 #, fuzzy
 msgid "List Devices"
 msgstr "Oyranos Préférences"
 
-#: tools/openicc_device.c:118
+#: tools/openicc_device.c:117
 msgid "List all key/values pairs"
 msgstr ""
 
-#: tools/openicc_device.c:120
+#: tools/openicc_device.c:119
 msgid "Local System"
 msgstr ""
 
-#: tools/openicc_device.c:118
+#: tools/openicc_device.c:117
 msgid "Long Format"
 msgstr ""
 
-#: tools/openicc_device.c:140
+#: tools/openicc_device.c:142
 msgid "Manipulation of OpenICC color management data base device entries."
 msgstr ""
 
-#: tools/openicc_device.c:135
+#: tools/openicc_device.c:137
 msgid "Misc"
 msgstr ""
 
-#: tools/openicc_device.c:99
+#: tools/openicc_device.c:97
 #, fuzzy
 msgid "Monitor"
 msgstr "Écran Profil"
 
-#: tools/openicc_device.c:112
+#: tools/openicc_device.c:110
 msgid "NUMBER"
 msgstr ""
 
-#: libopenicc/openicc_db.c:486
+#: libopenicc/openicc_db.c:494
 msgid "No JSON content obtained for"
 msgstr ""
 
-#: libopenicc/openicc_db.c:495
+#: libopenicc/openicc_db.c:503
 msgid "No JSON obtained for"
 msgstr ""
 
-#: tools/openicc_device.c:115
+#: tools/openicc_device.c:113
 #, fuzzy
 msgid "OpenICC Json"
 msgstr "ICC Examin Version"
 
-#: tools/openicc_device.c:142
+#: tools/openicc_device.c:144
 msgid "OpenICC devices handling tool"
 msgstr ""
 
-#: libopenicc/openicc_db.c:163 tools/openicc_device.c:188
+#: libopenicc/openicc_db.c:171 tools/openicc_device.c:212
 msgid "Paths:"
 msgstr ""
 
-#: tools/openicc_device.c:131
+#: tools/openicc_device.c:133
 msgid "Print the Devices in the DB"
 msgstr ""
 
-#: tools/openicc_device.c:100
+#: tools/openicc_device.c:98
 msgid "Printer"
 msgstr ""
 
-#: tools/openicc_device.c:102
+#: tools/openicc_device.c:100
 #, fuzzy
 msgid "Scanner"
 msgstr "Oyranos Préférences"
 
-#: tools/openicc_device.c:134
+#: tools/openicc_device.c:136
 msgid "Show DB Path"
 msgstr ""
 
-#: tools/openicc_device.c:134
+#: tools/openicc_device.c:136
 msgid "Show Filepath to the DB"
 msgstr ""
 
-#: tools/openicc_device.c:119
+#: tools/openicc_device.c:118
 msgid "Show Path"
 msgstr ""
 
-#: tools/openicc_device.c:120
+#: tools/openicc_device.c:119
 msgid "System"
 msgstr ""
 
-#: tools/openicc_device.c:114
+#: tools/openicc_device.c:112
 msgid "The File Name of the OpenICC Device in Json format."
 msgstr ""
 
-#: tools/openicc_device.c:121
+#: tools/openicc_device.c:120
 msgid "Verbose"
 msgstr ""
+
+#: tools/openicc_device.c:123
+#, fuzzy
+msgid "Version"
+msgstr "ICC Examin Version"
 
 #: libopenicc/openicc_core.c:130
 msgid "WARNING"
 msgstr ""
 
-#: tools/openicc_device.c:124
+#: tools/openicc_device.c:126
 #, fuzzy
 msgid "Write"
 msgstr "Model:"
 
-#: tools/openicc_device.c:124
+#: tools/openicc_device.c:126
 #, fuzzy
 msgid "Write DB File"
 msgstr "Ouvrir Profil"
 
-#: libopenicc/openicc_db.c:479
+#: libopenicc/openicc_db.c:487
 msgid "Writing failed for"
 msgstr ""
 
-#: tools/openicc_device.c:201
+#: tools/openicc_device.c:225
 msgid "unable to open data base"
 msgstr ""
 
-#: tools/openicc_device.c:121
+#: tools/openicc_device.c:120
 msgid "verbose"
 msgstr ""
+
+#: tools/openicc_device.c:123
+#, fuzzy
+msgid "version"
+msgstr "ICC Examin Version"
 
 #~ msgid " with "
 #~ msgstr " avec "
@@ -1461,10 +1475,6 @@ msgstr ""
 
 #~ msgid "Value"
 #~ msgstr "Valeur"
-
-#, fuzzy
-#~ msgid "Version"
-#~ msgstr "ICC Examin Version"
 
 #, fuzzy
 #~ msgid "Version:         "
