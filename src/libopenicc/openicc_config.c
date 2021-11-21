@@ -491,26 +491,23 @@ int                openiccConfig_GetKeyNames (
 
   if(!error)
   {
-    keys[0] = oyjlStringCopy( xpath, malloc );
-    error = !keys[0];
+    free(keys);
+    keys = oyjlTreeToPaths( list, child_levels, NULL, 0/*OYJL_KEY*/, &count );
   }
-
-  if(!error)
-    oyjlTreeToPaths( list, child_levels, NULL, 0, &keys );
 
   if(!error && n)
-  {
-    while(keys && keys[count]) ++count;
-    *n = count?count-1:0;
-  }
+    *n = count;
 
   if(!error && key_names && keys)
   {
     /* the first key comes from this function is is artifical: remove it */
-    free(keys[0]);
-    for(i=0; i < count-1; ++i)
-      keys[i] = keys[i+1];
-    keys[--count] = NULL;
+    for(i=0; i < count; ++i)
+    {
+      char * t = NULL;
+      oyjlStringAdd( &t, 0,0, "%s/%s", xpath, keys[i] );
+      free(keys[i]);
+      keys[i] = t;
+    }
     if(alloc && alloc != malloc)
     {
       char ** l = (char**) alloc(sizeof(char*) * (count+1));
