@@ -48,7 +48,7 @@
 
  *  @{ */
 
-int            openiccInit           ( void );
+int            openiccInit           ( const char        * loc );
 
 typedef void * (*openiccAlloc_f)     ( size_t              size );
 typedef void   (*openiccDeAlloc_f)   ( void              * data );
@@ -79,6 +79,7 @@ int            openiccReadFileSToMem ( FILE              * fp,
                                        int               * size);
 void *         openiccMemDup         ( const void        * src,
                                        size_t              size );
+void           openiccLibRelease     ( void );
 /** 
  *  @} *//* misc
  */
