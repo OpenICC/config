@@ -3,14 +3,14 @@
  *  oyjl - UI helpers
  *
  *  @par Copyright:
- *            2018-2021 (C) Kai-Uwe Behrmann
+ *            2018-2022 (C) Kai-Uwe Behrmann
  *
  *  @brief    Oyjl argument handling with libOyjlCore
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
  *  @par License:
  *            MIT <http://www.opensource.org/licenses/mit-license.php>
  *
- *  Copyright (c) 2018-2021  Kai-Uwe Behrmann  <ku.b@gmx.de>
+ *  Copyright (c) 2018-2022  Kai-Uwe Behrmann  <ku.b@gmx.de>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,10 +47,11 @@ oyjlOptionChoice_s * oyjlOption_GetChoices_ (
  *  @memberof oyjlOptions_s
  *
  *  @version Oyjl: 1.0.0
- *  @date    2019/12/01
+ *  @date    2022/05/01
  *  @since   2018/08/14 (OpenICC: 0.1.1)
  */
-char * oyjlOptions_ResultsToJson  ( oyjlOptions_s  * opts )
+char * oyjlOptions_ResultsToJson     ( oyjlOptions_s     * opts,
+                                       int                 flags )
 {
   char * rjson = NULL;
   oyjlOptsPrivate_s * results = opts->private_data;
@@ -76,8 +77,7 @@ char * oyjlOptions_ResultsToJson  ( oyjlOptions_s  * opts )
     oyjlValueSetString( value, results->values[i] );
   }
 
-  i = 0;
-  oyjlTreeToJson( root, &i, &rjson );
+  rjson = oyjlTreeToText( root, flags );
   oyjlTreeFree( root );
 
   return rjson;
@@ -237,7 +237,7 @@ oyjl_val       oyjlUi_ExportToJson_  ( oyjlUi_s          * ui,
   {
     oyjlOption_s * o = &ui->opts->array[i];
     oyjlTreeSetStringF( root, OYJL_CREATE_NEW, o->type, OYJL_REG "/ui/options/array/[%d]/%s", i, "type" );
-    oyjlTreeSetDoubleF( root, OYJL_CREATE_NEW, o->flags, OYJL_REG "/ui/options/array/[%d]/%s", i, "flags" );
+    oyjlTreeSetIntF( root, OYJL_CREATE_NEW, o->flags, OYJL_REG "/ui/options/array/[%d]/%s", i, "flags" );
     if(o->o)
     oyjlTreeSetStringF( root, OYJL_CREATE_NEW, o->o, OYJL_REG "/ui/options/array/[%d]/%s", i, "o" );
     if(o->option)
@@ -305,7 +305,7 @@ oyjl_val       oyjlUi_ExportToJson_  ( oyjlUi_s          * ui,
   {
     oyjlOptionGroup_s * g = &ui->opts->groups[i];
     oyjlTreeSetStringF( root, OYJL_CREATE_NEW, g->type, OYJL_REG "/ui/options/groups/[%d]/%s", i, "type" );
-    oyjlTreeSetDoubleF( root, OYJL_CREATE_NEW, g->flags, OYJL_REG "/ui/options/groups/[%d]/%s", i, "flags" );
+    oyjlTreeSetIntF( root, OYJL_CREATE_NEW, g->flags, OYJL_REG "/ui/options/groups/[%d]/%s", i, "flags" );
     if(g->name)
     oyjlTreeSetStringF( root, OYJL_CREATE_NEW, g->name, OYJL_REG "/ui/options/groups/[%d]/%s", i, "name" );
     if(g->description)
@@ -378,16 +378,14 @@ oyjl_val       oyjlUi_ExportToJson_  ( oyjlUi_s          * ui,
  *  @see oyjlUiJsonToCode()
  *
  *  @version Oyjl: 1.0.0
- *  @date    2020/10/12
+ *  @date    2022/05/01
  *  @since   2019/06/16 (Oyjl: 1.0.0)
  */
 char *       oyjlUi_ExportToJson     ( oyjlUi_s          * ui,
-                                       int                 flags OYJL_UNUSED )
+                                       int                 flags )
 {
-  char * t = NULL;
-  int i = 0;
   oyjl_val root = oyjlUi_ExportToJson_( ui, flags );
-  oyjlTreeToJson( root, &i, &t );
+  char * t = oyjlTreeToText( root, flags );
   oyjlTreeFree( root );
 
   return t;
@@ -587,7 +585,10 @@ oyjlUi_s *     oyjlUi_ImportFromJson ( oyjl_val            root,
               oyjlValueSetString( attrv, rootv->u.string );
               break;
           case oyjl_t_number: /* 2 - floating or integer number */
-              oyjlValueSetDouble( attrv, rootv->u.number.d );
+              if(OYJL_IS_INTEGER(rootv))
+                oyjlValueSetInt( attrv, rootv->u.number.i );
+              else
+                oyjlValueSetDouble( attrv, rootv->u.number.d );
               break;
           case oyjl_t_true:   /* 5 - boolean true or 1 */
           case oyjl_t_false:  /* 6 - boolean false or 0 */
@@ -1415,7 +1416,7 @@ char *             oyjlUiJsonToCode  ( oyjl_val            root,
     oyjlStr_Add( s, "  {\n" );
     if(flags & OYJL_WITH_OYJL_ARGS_C)
     oyjlStr_Add( s, "#if 0\n" );
-    oyjlStr_Add( s, "    char * json = oyjlOptions_ResultsToJson( ui->opts );\n" );
+    oyjlStr_Add( s, "    char * json = oyjlOptions_ResultsToJson( ui->opts, OYJL_JSON );\n" );
     oyjlStr_Add( s, "    if(json)\n" );
     oyjlStr_Add( s, "      fputs( json, stderr );\n" );
     oyjlStr_Add( s, "    fputs( \"\\n\", stderr );\n" );
@@ -1915,8 +1916,8 @@ char *             oyjlUiJsonToCode  ( oyjl_val            root,
       v = oyjlTreeGetValue( val, 0, "flags" ); flg = OYJL_IS_INTEGER(v) ? OYJL_GET_INTEGER(v) : 0;
       if(flg & OYJL_GROUP_FLAG_SUBCOMMAND)
         sub = 1;
-      mandatory_list = oyjlStringSplit2( mandatory, "|,", &mandatory_n, NULL, malloc );
-      optional_list = oyjlStringSplit2( optional, "|,", &optional_n, NULL, malloc );
+      mandatory_list = oyjlStringSplit2( mandatory, "|,", 0, &mandatory_n, NULL, malloc );
+      optional_list = oyjlStringSplit2( optional, "|,", 0, &optional_n, NULL, malloc );
       oyjlStr_Add( s, "        " );
       found = 0;
       for(j = 0; j < mandatory_n; ++j)
@@ -1928,20 +1929,23 @@ char *             oyjlUiJsonToCode  ( oyjl_val            root,
         oyjlStr_Add( s, "%s%s%s%s%s%s", found?"|":"", opt->o?"-":"", opt->o?opt->o:"", (opt->o && opt->option)?"|":"", (opt->option && !sub)?"--":"", opt->option?opt->option:"" );
         ++found;
       }
-      oyjlStr_Add( s, ")\n" );
-      oyjlStr_Add( s, "          COMPREPLY=($(compgen -W '" );
-      found = 0;
-      for(j = 0; j < optional_n; ++j)
+      if(found)
       {
-        const char * ooption = optional_list[j];
-        opt = oyjlOptions_GetOptionL( ui->opts, ooption, 0 );
-        oyjlStr_Add( s, "%s%s%s%s%s%s%s%s", found?" ":"", opt->o?"-":"", opt->o?opt->o:"", (opt->o && WANT_ARG(opt))?"=":"", opt->o?" ":"", opt->option?"--":"", opt->option?opt->option:"", (opt->option && WANT_ARG(opt))?"=":"" );
-        ++found;
+        oyjlStr_Add( s, ")\n" );
+        oyjlStr_Add( s, "          COMPREPLY=($(compgen -W '" );
+        found = 0;
+        for(j = 0; j < optional_n; ++j)
+        {
+          const char * ooption = optional_list[j];
+          opt = oyjlOptions_GetOptionL( ui->opts, ooption, 0 );
+          oyjlStr_Add( s, "%s%s%s%s%s%s%s%s", found?" ":"", opt->o?"-":"", opt->o?opt->o:"", (opt->o && WANT_ARG(opt))?"=":"", opt->o?" ":"", opt->option?"--":"", opt->option?opt->option:"", (opt->option && WANT_ARG(opt))?"=":"" );
+          ++found;
+        }
+        oyjlStr_Add( s, "' -- \"$cur\"))\n" );
+        oyjlStr_Add( s, "            set +x +v\n" );
+        oyjlStr_Add( s, "            return\n" );
+        oyjlStr_Add( s, "            ;;\n" );
       }
-      oyjlStr_Add( s, "' -- \"$cur\"))\n" );
-      oyjlStr_Add( s, "            set +x +v\n" );
-      oyjlStr_Add( s, "            return\n" );
-      oyjlStr_Add( s, "            ;;\n" );
       oyjlStringListRelease( &mandatory_list, mandatory_n, free );
       oyjlStringListRelease( &optional_list, optional_n, free );
     }
@@ -1958,8 +1962,8 @@ char *             oyjlUiJsonToCode  ( oyjl_val            root,
         continue;
       if(strcmp(mandatory,"@") != 0)
         continue;
-      mandatory_list = oyjlStringSplit2( mandatory, "|,", &mandatory_n, NULL, malloc );
-      optional_list = oyjlStringSplit2( optional, "|,", &optional_n, NULL, malloc );
+      mandatory_list = oyjlStringSplit2( mandatory, "|,", 0, &mandatory_n, NULL, malloc );
+      optional_list = oyjlStringSplit2( optional, "|,", 0, &optional_n, NULL, malloc );
       oyjlStr_Add( s, "        " );
       oyjlStr_Add( s, ".*)\n" );
       oyjlStr_Add( s, "          COMPREPLY=($(compgen -W '" );
@@ -2007,7 +2011,7 @@ char *             oyjlUiJsonToCode  ( oyjl_val            root,
       v = oyjlTreeGetValue( val, 0, "flags" ); flg = OYJL_IS_INTEGER(v) ? OYJL_GET_INTEGER(v) : 0;
       if(flg & OYJL_GROUP_FLAG_SUBCOMMAND)
         sub = 1;
-      mandatory_list = oyjlStringSplit2( mandatory, "|,", &mandatory_n, NULL, malloc );
+      mandatory_list = oyjlStringSplit2( mandatory, "|,", 0, &mandatory_n, NULL, malloc );
       for(j = 0; j < mandatory_n; ++j)
       {
         const char * moption = mandatory_list[j];
@@ -2051,11 +2055,11 @@ char *             oyjlUiJsonToCode  ( oyjl_val            root,
  *  the -R option.
  *
  *  @version Oyjl: 1.0.0
- *  @date    2021/11/14
+ *  @date    2022/05/01
  *  @since   2018/08/14 (OpenICC: 0.1.1)
  */
 char *       oyjlUi_ToJson           ( oyjlUi_s          * ui,
-                                       int                 flags OYJL_UNUSED )
+                                       int                 flags )
 {
   char * t = NULL, num[64];
   oyjl_val root, key;
@@ -2236,7 +2240,7 @@ char *       oyjlUi_ToJson           ( oyjlUi_s          * ui,
     }
 
     int d = 0;
-    char ** d_list = oyjlStringSplit2( g->detail, "|,", &d, NULL, malloc );
+    char ** d_list = oyjlStringSplit2( g->detail, "|,", 0, &d, NULL, malloc );
     for(j = 0; j < d; ++j)
     {
       char * option = d_list[j];
@@ -2558,8 +2562,7 @@ char *       oyjlUi_ToJson           ( oyjlUi_s          * ui,
     }
   }
 
-  i = 0;
-  oyjlTreeToJson( root, &i, &t );
+  t = oyjlTreeToText( root, flags );
   oyjlTreeFree( root );
 
   return t;
@@ -2660,13 +2663,13 @@ oyjlUiHeaderSection_s * oyjlUiInfo_  ( const char          * documentation,
     /* type,  nick,      label,name,                 description */
     { "oihs", "version", NULL, OYJL_VERSION_NAME, NULL },
     { "oihs", "manufacturer", NULL, "Kai-Uwe Behrmann", "http://www.oyranos.org" },
-    { "oihs", "copyright", NULL, "Copyright © 2017-2021 Kai-Uwe Behrmann", NULL },
+    { "oihs", "copyright", NULL, "Copyright © 2017-2022 Kai-Uwe Behrmann", NULL },
     { "oihs", "license", NULL, "newBSD", "http://www.oyranos.org" },
     { "oihs", "url", NULL, "http://www.oyranos.org", NULL },
-    { "oihs", "support", NULL, "https://www.github.com/oyranos-cms/oyranos/issues", NULL },
-    { "oihs", "download", NULL, "https://github.com/oyranos-cms/oyranos/releases", NULL },
-    { "oihs", "sources", NULL, "https://github.com/oyranos-cms/oyranos", NULL },
-    { "oihs", "development", NULL, "https://github.com/oyranos-cms/oyranos", NULL },
+    { "oihs", "support", NULL, "https://www.gitlab.com/oyranos/oyranos/issues", NULL },
+    { "oihs", "download", NULL, "https://gitlab.com/oyranos/oyranos/-/releases", NULL },
+    { "oihs", "sources", NULL, "https://gitlab.com/oyranos/oyranos", NULL },
+    { "oihs", "development", NULL, "https://gitlab.com/oyranos/oyranos", NULL },
     { "oihs", "oyjl_module_author", NULL, "Kai-Uwe Behrmann", "http://www.behrmann.name" },
     { "oihs", "documentation", NULL, "http://www.oyranos.org", documentation },
     { "oihs", "date", NULL, date_name, date_description },

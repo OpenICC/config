@@ -3,7 +3,7 @@
  *  oyjl - Basic helper C API's
  *
  *  @par Copyright:
- *            2010-2021 (C) Kai-Uwe Behrmann
+ *            2010-2022 (C) Kai-Uwe Behrmann
  *
  *  @brief    Oyjl API provides a platformindependent C interface for JSON I/O, conversion to and from
  *            XML + YAML, string helpers, file reading, testing and argument handling.
@@ -230,6 +230,12 @@ oyjl_val   oyjlTreeParseYaml         ( const char        * yaml,
 oyjl_val   oyjlTreeNew               ( const char        * path );
 void       oyjlTreeClearValue        ( oyjl_val            root,
                                        const char        * xpath );
+#define    OYJL_JSON                   0x0    /**< @brief  JSON format; default */
+#define    OYJL_YAML                   0x01   /**< @brief  YAML format */
+#define    OYJL_XML                    0x08   /**< @brief  XML format */
+#define    OYJL_NO_MARKUP              0x100  /**< @brief  plain text; use oyjlTermColorToPlain() */
+char *     oyjlTreeToText            ( oyjl_val            v,
+                                       int                 flags );
 void       oyjlTreeToJson            ( oyjl_val            v,
                                        int               * level,
                                        char             ** json );
@@ -253,6 +259,10 @@ char *     oyjlTreeGetPath           ( oyjl_val            v,
 oyjl_val   oyjlTreeGetValue          ( oyjl_val            v,
                                        int                 flags,
                                        const char        * path );
+oyjl_val oyjlTreeGetNewValueFromArray( oyjl_val            root,
+                                       const char        * name,
+                                       oyjl_val          * array_ret,
+                                       int               * pos_ret );
 oyjl_val   oyjlTreeGetValueF         ( oyjl_val            v,
                                        int                 flags,
                                        const char        * format,
@@ -265,6 +275,11 @@ int        oyjlTreeSetStringF        ( oyjl_val            root,
 int        oyjlTreeSetDoubleF        ( oyjl_val            root,
                                        int                 flags,
                                        double              value,
+                                       const char        * format,
+                                                           ... );
+int        oyjlTreeSetIntF           ( oyjl_val            root,
+                                       int                 flags,
+                                       long long           value,
                                        const char        * format,
                                                            ... );
 oyjl_val   oyjlTreeSerialise         ( oyjl_val            v,
@@ -282,6 +297,8 @@ int        oyjlValueSetString        ( oyjl_val            v,
                                        const char        * string );
 int        oyjlValueSetDouble        ( oyjl_val            v,
                                        double              value );
+int        oyjlValueSetInt           ( oyjl_val            v,
+                                       long long           value );
 void       oyjlValueCopy             ( oyjl_val            v,
                                        oyjl_val            src );
 void       oyjlValueClear            ( oyjl_val            v );
@@ -330,7 +347,8 @@ typedef enum {
   oyjlMSG_INFO = 400,                  /**< @brief informational, for debugging */
   oyjlMSG_CLIENT_CANCELED,             /**< @brief user side requested stop */
   oyjlMSG_INSUFFICIENT_DATA,           /**< @brief missing or insufficient data */
-  oyjlMSG_ERROR                        /**< @brief error */
+  oyjlMSG_ERROR,                       /**< @brief usage error */
+  oyjlMSG_PROGRAM_ERROR                /**< @brief program error */
 } oyjlMSG_e;
 /** @brief custom message function type */
 typedef int (* oyjlMessage_f)        ( int/*oyjlMSG_e*/    error_code,
@@ -397,6 +415,7 @@ char **    oyjlStringSplit           ( const char        * text,
                                        void*            (* alloc)(size_t));
 char **    oyjlStringSplit2          ( const char        * text,
                                        const char        * delimiter,
+                                       const char        *(splitFunc)( const char * text, const char * delimiter, int * length ),
                                        int               * count,
                                        int              ** index,
                                        void*            (* alloc)(size_t));
@@ -451,9 +470,11 @@ void       oyjlStringListAddString   ( char            *** list,
                                        void*            (* alloc)(size_t),
                                        void             (* deAlloc)(void*) );
 int        oyjlStringToLong          ( const char        * text,
-                                       long              * value );
+                                       long              * value,
+                                       const char       ** end );
 int        oyjlStringToDouble        ( const char        * text,
-                                       double            * value );
+                                       double            * value,
+                                       const char       ** end );
 int        oyjlStringsToDoubles      ( const char        * text,
                                        const char        * delimiter,
                                        int               * count,
@@ -461,6 +482,9 @@ int        oyjlStringsToDoubles      ( const char        * text,
                                        double           ** value );
 char *     oyjlRegExpFind            ( char              * text,
                                        const char        * regex );
+const char*oyjlRegExpDelimiter       ( const char        * text,
+                                       const char        * delimiter,
+                                       int               * length );
 char *     oyjlRegExpEscape          ( const char        * text );
 int        oyjlRegExpReplace         ( char             ** text,
                                        const char        * regex,
@@ -494,6 +518,7 @@ int        oyjlStr_Replace           ( oyjl_str            text,
                                                               const char ** replace,
                                                               void * user_data),
                                        void              * user_data );
+
 typedef enum {
   oyjlNO_MARK,
   oyjlRED,
@@ -505,8 +530,13 @@ typedef enum {
 } oyjlTEXTMARK_e;
 const char * oyjlTermColor           ( oyjlTEXTMARK_e      mark,
                                        const char        * text );
+const char * oyjlTermColorF          ( oyjlTEXTMARK_e      mark,
+                                       const char        * format,
+                                       ... );
 const char * oyjlTermColorFromHtml   ( const char        * text,
                                        int                 flags );
+const char * oyjlTermColorToPlain    ( const char        * text );
+
 char *       oyjlBT                  ( int                 stack_limit );
 #define OYJL_DATE           0x01
 #define OYJL_TIME           0x02
@@ -533,6 +563,7 @@ int        oyjlIsFile                ( const char        * fullname,
                                        const char        * mode,
                                        char              * info,
                                        int                 info_len );
+int        oyjlHasApplication        ( const char        * app_name);
 void       oyjlLibRelease            ( );
 /** @} *//* oyjl_core */
 
@@ -636,6 +667,7 @@ struct oyjlOption_s {
    *  - ::OYJL_OPTION_FLAG_REPETITION multi occurence; print trailing ...
    *  - ::OYJL_OPTION_FLAG_IMMEDIATE instant applying; e.g. for cheap status info inside a ::OYJL_GROUP_FLAG_EXPLICITE flagged group
    *  - ::OYJL_OPTION_FLAG_MAINTENANCE accept even without printed visibility
+   *  - ::OYJL_NO_OPTIMISE pass values through as is
    */
   unsigned int flags;                  /**< @brief parsing and rendering hints */
   /** '#' is used as default option like a command without any arguments.
@@ -727,7 +759,8 @@ oyjlOPTIONSTATE_e  oyjlOptions_GetResult (
                                        const char       ** result_string,
                                        double            * result_dbl,
                                        int               * result_int );
-char *   oyjlOptions_ResultsToJson   ( oyjlOptions_s     * opts );
+char *   oyjlOptions_ResultsToJson   ( oyjlOptions_s     * opts,
+                                       int                 flags );
 char *   oyjlOptions_ResultsToText   ( oyjlOptions_s     * opts );
 char **  oyjlOptions_ResultsToList   ( oyjlOptions_s     * opts,
                                        const char        * option,

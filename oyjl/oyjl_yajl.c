@@ -3,7 +3,7 @@
  *  oyjl - Yajl tree extension
  *
  *  @par Copyright:
- *            2016-2019 (C) Kai-Uwe Behrmann
+ *            2016-2022 (C) Kai-Uwe Behrmann
  *
  *  @brief    Oyjl parsing functions
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de> and Florian Forster  <ff at octo.it>
@@ -448,6 +448,7 @@ static int handle_null (void *ctx)
 oyjl_val oyjlTreeParse   (const char *input,
                           char *error_buffer, size_t error_buffer_size)
 {
+  char * tmp = NULL;
   if(input && strlen(input) > 4 && memcmp(input, "oiJS", 4) == 0)
     return (oyjl_val)input;
 
@@ -521,6 +522,12 @@ static yajl_callbacks oyjl_tree_callbacks_ = {
     yajl_config(handle, yajl_allow_comments, 1);
 #endif
 
+    if(strstr(input, "\033[0") != NULL)
+    {
+      const char * t = oyjlTermColorToPlain(input);
+      input = tmp = oyjlStringCopy( t, 0 );
+    }
+
     status = yajl_parse(handle,
                         (unsigned char *) input,
                         strlen (input));
@@ -552,6 +559,7 @@ static yajl_callbacks oyjl_tree_callbacks_ = {
           }
           context_pop(&ctx);
         }
+        if(tmp) free(tmp);
         oyjlTreeFree( ctx.root );
         return NULL;
     }
@@ -560,6 +568,7 @@ static yajl_callbacks oyjl_tree_callbacks_ = {
     status = yajl_complete_parse (handle);
 #endif
     yajl_free (handle);
+    if(tmp) free(tmp);
     return (ctx.root);
 }
 #undef Florian_Forster_SOURCE_GUARD
@@ -576,7 +585,10 @@ static yajl_callbacks oyjl_tree_callbacks_ = {
  *                                     - >= 0 -> index in array
  *  @return                            new node
  */
-oyjl_val oyjlTreeGetNewValueFromArray( oyjl_val root, const char * name, oyjl_val * array_ret, int * pos_ret )
+oyjl_val oyjlTreeGetNewValueFromArray( oyjl_val            root,
+                                       const char        * name,
+                                       oyjl_val          * array_ret,
+                                       int               * pos_ret )
 {
   oyjl_val array = NULL, node;
   int pos = -1;
@@ -715,7 +727,7 @@ void             oyjlParseXMLDoc_    ( xmlDocPtr           doc,
       int err = -1;
 
       if(flags & OYJL_NUMBER_DETECTION)
-        err = oyjlStringToDouble( val, &d );
+        err = oyjlStringToDouble( val, &d, 0 );
       if(err == 0)
       {
         root->type = oyjl_t_number;
@@ -805,8 +817,15 @@ oyjl_val   oyjlTreeParseXml          ( const char        * xml,
   xmlDocPtr doc = NULL;
   xmlNodePtr cur = NULL;
   oyjl_val jroot =  NULL;
+  char * tmp = NULL;
 
   if(!xml) return jroot;
+
+  if(strstr(xml, "\033[0") != NULL)
+  {
+    const char * t = oyjlTermColorToPlain(xml);
+    xml = tmp = oyjlStringCopy( t, 0 );
+  }
 
   doc = xmlParseMemory( xml, strlen(xml) );
   cur = xmlDocGetRootElement(doc);
@@ -825,6 +844,7 @@ oyjl_val   oyjlTreeParseXml          ( const char        * xml,
 
   if(doc)
     xmlFreeDoc( doc );
+  if(tmp) free(tmp);
 
   return jroot;
 }
@@ -881,7 +901,7 @@ static int oyjlYamlReadNode_( yaml_document_t * doc, yaml_node_t * node, int fla
       double d;
       int err = -1;
       if(flags & OYJL_NUMBER_DETECTION && is_key != 1)
-        err = oyjlStringToDouble( tmp, &d );
+        err = oyjlStringToDouble( tmp, &d, 0 );
       if(err == 0)
         oyjlStringAdd( json, 0,0, "%s", tmp );
       else
@@ -954,6 +974,7 @@ oyjl_val   oyjlTreeParseYaml         ( const char        * yaml,
   yaml_document_t document;
   yaml_node_t * root = NULL;
   char * json = NULL;
+  char * tmp = NULL;
   oyjl_val jroot = NULL;
   int error = 0;
 
@@ -966,6 +987,12 @@ oyjl_val   oyjlTreeParseYaml         ( const char        * yaml,
     oyjlMessage_p( oyjlMSG_ERROR, 0, OYJL_DBG_FORMAT "%s", OYJL_DBG_ARGS,
                    "YAML initialisation failed" );
     return jroot;
+  }
+
+  if(strstr(yaml, "\033[0") != NULL)
+  {
+    const char * t = oyjlTermColorToPlain(yaml);
+    yaml = tmp = oyjlStringCopy( t, 0 );
   }
 
   yaml_parser_set_input_string( &parser, (const unsigned char*) yaml, strlen(yaml));
@@ -996,6 +1023,7 @@ oyjl_val   oyjlTreeParseYaml         ( const char        * yaml,
 
   yaml_parser_delete(&parser);
   yaml_document_delete(&document);
+  if(tmp) free(tmp);
 
   return jroot;
 }

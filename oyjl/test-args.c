@@ -15,7 +15,8 @@
 #define TESTS_RUN \
   TEST_RUN( testArgsPrint, "Options print", 1 ); \
   TEST_RUN( testArgsCheck, "Options checking", 1 ); \
-  TEST_RUN( testArgs, "Options handling", 1 );
+  TEST_RUN( testArgs, "Options handling", 1 ); \
+  TEST_RUN( testArgsValues, "Value converting", 1 );
 
 //#include "oyjl.h"
 #include "oyjl_version.h"
@@ -851,13 +852,13 @@ oyjlTESTRESULT_e testArgs()
                                        sections, oarray, groups_no_args, NULL );
 
   text = oyjlUi_ToMan( ui, 0 );
-  if( text && strlen(text) == 3241 &&
+  if( text && strlen(text) == 3355 &&
       strstr(text, "\n\\fB\\-\\-candle\\fR\tCandle"))
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
     "oyjlUi_ToMan() %lu", strlen(text) );
   } else
   { PRINT_SUB( oyjlTESTRESULT_FAIL, 
-    "oyjlUi_ToMan() 3241 == %lu", text ? strlen(text) : 0 );
+    "oyjlUi_ToMan() 3355 == %lu", text ? strlen(text) : 0 );
   }
   OYJL_TEST_WRITE_RESULT( text, strlen(text), "oyjlUi_ToMan", "txt" )
   if(verbose && text)
@@ -865,7 +866,7 @@ oyjlTESTRESULT_e testArgs()
   if(text) {free(text);} text = NULL;
 
   text = oyjlUi_ToMarkdown( ui, 0 );
-  if( text && strlen(text) == 8634 &&
+  if( text && strlen(text) == 8828 &&
       strstr(text, "><strong>--candle</strong><") )
   { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
     "oyjlUi_ToMarkdown() %lu", strlen(text) );
@@ -1105,6 +1106,45 @@ oyjlTESTRESULT_e testArgs()
   return result;
 }
 
+oyjlTESTRESULT_e testArgsValues2     ( const char        * value,
+                                       const char        * value_erg,
+                                       oyjlTESTRESULT_e    result,
+                                       oyjlTESTRESULT_e    fail )
+{
+  const char * v = value;
+  char * t = oyjlOptionsResultValueCopy_( value, 0 );
+
+  if(strcmp(t, value_erg) == 0)
+  { PRINT_SUB( oyjlTESTRESULT_SUCCESS, 
+    "oyjlOptionsResultValueCopy_(%s) = %s", v, t );
+  } else
+  { PRINT_SUB( fail, 
+    "oyjlOptionsResultValueCopy_(%s) = %s", v, t );
+  }
+  free(t);
+
+  t = oyjlOptionsResultValueCopy_( value, OYJL_NO_OPTIMISE );
+  if(strcmp(t, value) != 0)
+  { PRINT_SUB( fail, 
+    "oyjlOptionsResultValueCopy_(%s,OYJL_NO_OPTIMISE) = %s", v, t );
+  }
+  free(t);
+
+  return result;
+}
+
+oyjlTESTRESULT_e testArgsValues()
+{
+  oyjlTESTRESULT_e result = oyjlTESTRESULT_UNKNOWN;
+
+  fprintf(stdout, "\n" );
+  setlocale(LC_ALL,"en_GB.UTF8");
+
+  result = testArgsValues2( "\"val1\"", "val1", result, oyjlTESTRESULT_XFAIL );
+  result = testArgsValues2( "val2", "val2", result, oyjlTESTRESULT_XFAIL );
+
+  return result;
+}
 
 /* --- end actual tests --- */
 

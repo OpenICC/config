@@ -5,7 +5,7 @@
  *  oyjl - convinient tree JSON APIs
  *
  *  @par Copyright:
- *            2011-2021 (C) Kai-Uwe Behrmann
+ *            2011-2022 (C) Kai-Uwe Behrmann
  *
  *  @brief    tree based JSON API
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
@@ -47,10 +47,14 @@ void       oyjlValueDebug_           ( oyjl_val            v,
                                        int                 flags );
 #define OYJL_DEBUG_NODE_IS_VALUE(xpath_,value_text_) ( oyjl_debug_node_path_ && oyjl_debug_node_path_[0] && xpath_ && oyjlPathMatch( xpath_, oyjl_debug_node_path_, 0 ) && ( (oyjl_debug_node_value_ && value_text_ && strstr( value_text_, oyjl_debug_node_value_ ) != NULL) || oyjl_debug_node_value_ == NULL))
 int oyjlIsDirFull_ (const char* name);
+int oyjlMakeDir_ (const char* path);
 
 int        oyjlTreePathsGetIndex_    ( const char        * term,
                                        int               * index );
 char *     oyjlTreePrint             ( oyjl_val            v );
+const char *       oyjlTreeGetString_( oyjl_val            v,
+                                       int                 flags OYJL_UNUSED,
+                                       const char        * path );
 #define OYJL_ENUM_CASE_TO_STRING(case_) case case_: return #case_
 #define OYJL_ENUM_CASE_TO_VALUE(case_, val) case case_: value = val; break;
 
@@ -61,12 +65,14 @@ char *     oyjlTreePrint             ( oyjl_val            v );
 
 typedef struct {
   char       ** options; /* detected vanilla args + probably "@" for anonymous args */
-  const char ** values; /* the vanilla args from main(argv[]) */
+  char       ** values; /* the vanilla args from main(argv[]) */
   int           count; /* number of detected options */
   int           group; /* detected group */
   void        * attr; /* oyjl_val attributes */
   int           memory_allocation; /* 0: as usual; 1 - sections, 2 - opts->groups and 4 - opts->array are owned and need to be released */
 } oyjlOptsPrivate_s;
+char * oyjlOptionsResultValueCopy_   ( const char        * arg,
+                                       int                 flags );
 
 oyjlUiHeaderSection_s * oyjlUiInfo_  ( const char        * documentation,
                                        const char        * date_name,
@@ -90,7 +96,9 @@ enum {
   oyjlOPTIONSTYLE_MAN = 0x20,                           /* add Unix MAN page groff syntax decoration */
   oyjlOPTIONSTYLE_MARKDOWN = 0x40,                      /* add markdown syntax decoration */
   oyjlOPTIONSTYLE_GROUP_SUBCOMMAND = 0x080,             /* supresses dash(es): option */
-  oyjlOPTIONSTYLE_OPTION_ONLY = 0x100                   /* print the option without any args */
+  oyjlOPTIONSTYLE_GROUP_EXPLICITE = 0x100,              /* -- just for alignment */
+  oyjlOPTIONSTYLE_GROUP_GENERAL_OPTS = 0x200,           /* -- just for alignment */
+  oyjlOPTIONSTYLE_OPTION_ONLY = 0x8000                  /* print the option without any args */
 };
 char *       oyjlOption_PrintArg_    ( oyjlOption_s      * o,
                                        int                 style );
@@ -109,6 +117,7 @@ int  oyjlManAddOptionToGroup_        ( char             ** group,
 
 char *       oyjlStringToLower_      ( const char        * t );
 char *       oyjlStringToUpper_      ( const char        * t );
+#define      oyjlIsString_m( text ) (text&&text[0])
 
 #ifdef __cplusplus
 }

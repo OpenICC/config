@@ -3,7 +3,7 @@
  *  oyjl - Yajl tree extension
  *
  *  @par Copyright:
- *            2016-2021 (C) Kai-Uwe Behrmann
+ *            2016-2022 (C) Kai-Uwe Behrmann
  *
  *  @brief    Oyjl tree functions
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
@@ -56,6 +56,7 @@
  *                                     - 7 : JSON
  *                                     - 8 : XML
  *                                     - 9 : YAML
+ *                                     - 10 : C
  *                                     - 0 : not detected
  *                                     - -1 : no input
  *                                     - -2 : no data
@@ -76,6 +77,8 @@ int          oyjlDataFormat          ( const char        * text )
     return 7;
   if((i == 0 || text[i-1] == '\n') && strlen(&text[i]) > 4 && memcmp( &text[i], "---\n", 4 ) == 0)
     return 9;
+  if(strstr(text, "#define ") || strstr(text, "#include ") || strstr(text, "int ") || strstr(text, "char *"))
+    return 10;
   if(!c)
     return -2;
   else
@@ -95,6 +98,7 @@ const char * oyjlDataFormatToString  ( int                 format )
     case 7: text = "JSON"; break;
     case 8: text = "XML"; break;
     case 9: text = "YAML"; break;
+    case 10: text = "C"; break;
     case 0: text = "unknown"; break;
     case -1: text = "no input"; break;
     case -2: text = "no data"; break;
@@ -541,27 +545,64 @@ char *     oyjlJsonEscape            ( const char        * in,
   return out;
 }
 
+/** @brief convert a C tree into a text string
+ *
+ *  @see oyjlTreeToJson() oyjlTreeToYaml() oyjlTreeToXml()
+ */
+char *     oyjlTreeToText            ( oyjl_val            v,
+                                       int                 flags )
+{
+  int level = 0;
+  char * text = NULL;
+
+  if(flags & OYJL_YAML)
+    oyjlTreeToYaml( v, &level, &text );
+  else if(flags & OYJL_XML)
+    oyjlTreeToXml( v, &level, &text );
+  else
+    oyjlTreeToJson( v, &level, &text );
+
+  if(text && flags & OYJL_NO_MARKUP)
+  {
+    const char * t = NULL;
+    t = oyjlTermColorToPlain( text );
+    if(t && t != text)
+    {
+      free(text); text = NULL;
+      text = oyjlStringCopy( t, 0 );
+    }
+  }
+
+  return text;
+}
+
 int  oyjlTreeToJson21_(oyjl_val v, int * level, oyjl_str json)
 {
   int error = 0;
+  const char * t;
   if(v)
   switch(v->type)
   {
     case oyjl_t_null:
-         oyjlStr_AppendN (json, "null", 4); break;
+         t = oyjlTermColor(oyjlUNDERLINE,"null");
+         oyjlStr_AppendN (json, t, strlen(t)); break;
          break;
     case oyjl_t_number:
-         oyjlStr_AppendN (json, v->u.number.r, strlen(v->u.number.r));
+         t = oyjlTermColor(oyjlBLUE, v->u.number.r);
+         oyjlStr_AppendN (json, t, strlen(t));
          break;
     case oyjl_t_true:
-         oyjlStr_AppendN (json, "true", 4); break;
+         t = oyjlTermColor(oyjlGREEN,"true");
+         oyjlStr_AppendN (json, t, strlen(t)); break;
     case oyjl_t_false:
-         oyjlStr_AppendN (json, "false", 5); break;
+         t = oyjlTermColor(oyjlRED,"false");
+         oyjlStr_AppendN (json, t, strlen(t)); break;
     case oyjl_t_string:
          {
           char * escaped = oyjlJsonEscape( v->u.string, OYJL_QUOTE | OYJL_NO_BACKSLASH );
+          t = oyjlTermColor(oyjlBOLD,escaped);
           oyjlStr_AppendN( json, "\"", 1 );
-          oyjlStr_AppendN( json, escaped, strlen(escaped) );
+          oyjlStr_AppendN( json, t, strlen(t) );
           oyjlStr_AppendN( json, "\"", 1 );
           free( escaped );
          }
@@ -607,7 +648,8 @@ int  oyjlTreeToJson21_(oyjl_val v, int * level, oyjl_str json)
              oyjlStr_AppendN( json, "\"", 1 );
              {
               char * escaped = oyjlJsonEscape( v->u.object.keys[i], OYJL_QUOTE | OYJL_NO_BACKSLASH );
-              oyjlStr_AppendN( json, escaped, strlen(escaped) );
+              const char * t = oyjlTermColor(oyjlITALIC,escaped);
+              oyjlStr_AppendN( json, t, strlen(t) );
               free( escaped );
              }
              oyjlStr_AppendN( json, "\": ", 3 );
@@ -772,19 +814,19 @@ void               oyjlTreeToYaml    ( oyjl_val            v,
     case oyjl_t_null:
          break;
     case oyjl_t_number:
-         oyjlStringAdd (text, 0,0, "%s", v->u.number.r);
+         oyjlStringAdd (text, 0,0, " %s", oyjlTermColor(oyjlBLUE,v->u.number.r));
          break;
     case oyjl_t_true:
-         oyjlStringAdd (text, 0,0, "true"); break;
+         oyjlStringAdd (text, 0,0, " %s", oyjlTermColor(oyjlGREEN,"true")); break;
     case oyjl_t_false:
-         oyjlStringAdd (text, 0,0, "false"); break;
+         oyjlStringAdd (text, 0,0, " %s", oyjlTermColor(oyjlRED,"false")); break;
     case oyjl_t_string:
          {
           const char * t = v->u.string;
           char * tmp = oyjlStringCopy(t,malloc);
           oyjlStringReplace( &tmp, "\"", "\\\"", 0, 0);
           oyjlStringReplace( &tmp, ": ", ":\\ ", 0, 0);
-          oyjlStringAdd (text, 0,0, YAML_INDENT "%s", tmp);
+          oyjlStringAdd (text, 0,0, YAML_INDENT "%s", oyjlTermColor(oyjlBOLD,tmp));
           if(tmp) free(tmp);
          }
          break;
@@ -820,7 +862,7 @@ void               oyjlTreeToYaml    ( oyjl_val            v,
                }
                return;
              }
-             oyjlStringAdd( text, 0,0, "%s:", v->u.object.keys[i] );
+             oyjlStringAdd( text, 0,0, "%s:", oyjlTermColor(oyjlITALIC,v->u.object.keys[i]) );
              *level += 2;
              oyjlTreeToYaml( v->u.object.values[i], level, text );
              *level -= 2;
@@ -837,6 +879,7 @@ void               oyjlTreeToYaml    ( oyjl_val            v,
 
 static void oyjlTreeToXml2_(oyjl_val v, const char * parent_key, int * level, oyjl_str text)
 {
+  const char * t;
   if(!v) return;
 
   switch(v->type)
@@ -844,15 +887,18 @@ static void oyjlTreeToXml2_(oyjl_val v, const char * parent_key, int * level, oy
     case oyjl_t_null:
          break;
     case oyjl_t_number:
-         oyjlStr_AppendN (text, v->u.number.r, strlen(v->u.number.r));
+         t = oyjlTermColor(oyjlBLUE, v->u.number.r);
+         oyjlStr_AppendN (text, t, strlen(t));
          break;
     case oyjl_t_true:
-         oyjlStr_AppendN (text, "true", 4); break;
+         t = oyjlTermColor(oyjlGREEN,"true");
+         oyjlStr_AppendN (text, t, strlen(t)); break;
     case oyjl_t_false:
-         oyjlStr_AppendN (text, "false", 5); break;
+         t = oyjlTermColor(oyjlRED,"false");
+         oyjlStr_AppendN (text, t, strlen(t)); break;
     case oyjl_t_string:
          {
-          const char * t = v->u.string;
+          const char * t = oyjlTermColor(oyjlBOLD,v->u.string);
           oyjlStr_AppendN (text, t, strlen(t));
          }
          break;
@@ -872,11 +918,13 @@ static void oyjlTreeToXml2_(oyjl_val v, const char * parent_key, int * level, oy
               {
                 oyjlStr_AppendN( text, "\n", 1 );
                 for(j = 0; j < *level; ++j) oyjlStr_AppendN( text, " ", 1 );
-                oyjlStr_Add( text, "<%s>", parent_key );
+                t = oyjlTermColor(oyjlITALIC,parent_key);
+                oyjlStr_Add( text, "<%s>", t );
 
                 oyjlTreeToXml2_( v->u.array.values[i], parent_key, level, text );
 
-                oyjlStr_Add( text, "</%s>", parent_key );
+                t = oyjlTermColor(oyjlITALIC,parent_key);
+                oyjlStr_Add( text, "</%s>", t );
               }
             }
           }
@@ -910,7 +958,8 @@ static void oyjlTreeToXml2_(oyjl_val v, const char * parent_key, int * level, oy
           {
             oyjlStr_AppendN( text, "\n", 1 );
             for(j = 0; j < *level; ++j) oyjlStr_AppendN( text, " ", 1 );
-            oyjlStr_Add( text, "<%s", parent_key );
+            t = oyjlTermColor(oyjlITALIC,parent_key);
+            oyjlStr_Add( text, "<%s", t );
 
             /* insert attributes to key */
             for(i = 0; i < count; ++i)
@@ -990,7 +1039,7 @@ static void oyjlTreeToXml2_(oyjl_val v, const char * parent_key, int * level, oy
             if( !is_array &&
                 !is_object &&
                 !is_inner_string )
-              oyjlStr_Add( text, "<%s>", key );
+              oyjlStr_Add( text, "<%s>", oyjlTermColor(oyjlITALIC,key) );
 
             if( strcmp(key, XML_CDATA) == 0 )
               oyjlStr_AppendN( text, "<![CDATA[", 9 );
@@ -1004,7 +1053,8 @@ static void oyjlTreeToXml2_(oyjl_val v, const char * parent_key, int * level, oy
                 !is_object &&
                 !is_inner_string )
             {
-              oyjlStr_Add( text, "</%s>", key );
+              t = oyjlTermColor(oyjlITALIC,key);
+              oyjlStr_Add( text, "</%s>", t );
               last_is_content = 0;
             }
             else
@@ -1021,7 +1071,8 @@ static void oyjlTreeToXml2_(oyjl_val v, const char * parent_key, int * level, oy
               oyjlStr_AppendN( text, "\n", 1 );
               for(j = 0; j < *level; ++j) oyjlStr_AppendN( text, " ", 1 );
             }
-            oyjlStr_Add( text, "</%s>", parent_key );
+            t = oyjlTermColor(oyjlITALIC,parent_key);
+            oyjlStr_Add( text, "</%s>", t );
           }
          }
          break;
@@ -1178,7 +1229,7 @@ int        oyjlPathTermGetIndex_     ( const char        * term,
       memcpy( ttmp, tindex, size );
       ttmp[size] = '\000';
 
-      error = oyjlStringToLong( ttmp, &num );
+      error = oyjlStringToLong( ttmp, &num, 0 );
       if(!error)
         pos = num;
 
@@ -1738,6 +1789,84 @@ int        oyjlValueSetDouble        ( oyjl_val            v,
   return error;
 }
 
+/** Function oyjlTreeSetIntF
+ *  @brief   set a child node to a string value
+ *
+ *  @param[in,out] root                the oyjl node
+ *  @param[in]     flags               ::OYJL_CREATE_NEW - allocates nodes even
+ *                                     if they did not yet exist
+ *  @param[in]     value               integer number
+ *  @param[in]     format              the format for the slashed xpath string
+ *  @param[in]     ...                 the variable argument list; optional
+ *  @return                            error
+ *                                     - -1 - if not found
+ *                                     - 0 on success
+ *                                     - else error
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2021/12/20
+ *  @since   2021/12/20 (Oyjl: 1.0.0)
+ */
+int        oyjlTreeSetIntF           ( oyjl_val            root,
+                                       int                 flags,
+                                       long long           value,
+                                       const char        * format,
+                                                           ... )
+{
+  oyjl_val value_node = NULL;
+
+  char * text = NULL;
+  int error = 0;
+
+  OYJL_CREATE_VA_STRING(format, text, malloc, return 1)
+
+  value_node = oyjlTreeGetValue( root, flags, text );
+
+  if(text) { free(text); text = NULL; }
+
+  if(value_node)
+    error = oyjlValueSetInt( value_node, value );
+  else
+    error = -1;
+
+  return error;
+}
+
+/** Function oyjlValueSetInt
+ *  @brief   set a child node to a number value
+ *
+ *  @param[in,out] v                   the oyjl node
+ *  @param[in]     value               integer number
+ *  @return                            error
+ *                                     - -1 - if not found
+ *                                     - 0 on success
+ *                                     - else error
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2021/12/20
+ *  @since   2021/12/20 (Oyjl: 1.0.0)
+ */
+int        oyjlValueSetInt           ( oyjl_val            v,
+                                       long long           value )
+{
+  int error = 0;
+
+  if(v)
+  {
+    oyjlValueClear( v );
+    v->type = oyjl_t_number;
+    v->u.number.i = value;
+    error = oyjlStringAdd( &v->u.number.r, 0,0, "%lli", value );
+    v->u.number.flags |= OYJL_NUMBER_INT_VALID;
+    errno = 0;
+    v->u.number.i = strtoll(v->u.number.r, 0, 10);
+  }
+  else
+    error = -1;
+
+  return error;
+}
+
 /** @brief set the node value to a string */
 int        oyjlValueSetString        ( oyjl_val            v,
                                        const char        * string )
@@ -2234,6 +2363,7 @@ int  oyjlXPathGetSize_               ( oyjl_val            v,
   return size;
 }
 
+#define OYJL_PAD_SIZE( size, modulo ) ((size % modulo) ? (modulo - size % modulo) : 0)
 /** @brief   write tree to data block
  *
  *  @param         v                   tree to serialise
@@ -2252,6 +2382,7 @@ oyjl_val   oyjlTreeSerialise         ( oyjl_val            v,
                                        int                 flags,
                                        int               * size )
 {
+#define PAD_SIZE 16
   oyjlNodes_s * nodes = NULL;
   if(v && (long)v->type == oyjlOBJECT_JSON)
   {
@@ -2271,6 +2402,7 @@ oyjl_val   oyjlTreeSerialise         ( oyjl_val            v,
       oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "oyjlNodes_s: %d oyjlXPath_s: %d count: %d", OYJL_DBG_ARGS, sizeof(oyjlNodes_s), sizeof(oyjlXPath_s), count );
 
     size_ += sizeof(oyjlNodes_s) + sizeof(uint64_t) * count;
+    size_ += OYJL_PAD_SIZE( size_, PAD_SIZE );
     for(i = 0; i < count; ++i)
     {
       const char * xpath = paths[i];
@@ -2278,6 +2410,7 @@ oyjl_val   oyjlTreeSerialise         ( oyjl_val            v,
       uint32_t v_offset = 0;
       int size__ = size_;
       size_ += oyjlXPathGetSize_( val, xpath, &v_offset );
+      size_ += OYJL_PAD_SIZE( size_, PAD_SIZE );
       if(flags & OYJL_OBSERVE)
         oyjlMessage_p( oyjlMSG_INFO, 0, OYJL_DBG_FORMAT "xpath[%d]:\"%s\" %s v_offset: %d offset2: %d", OYJL_DBG_ARGS, i, xpath, val?"found":"not found", v_offset, size__ );
     }
@@ -2290,6 +2423,7 @@ oyjl_val   oyjlTreeSerialise         ( oyjl_val            v,
     memcpy( nodes, "oiJS", 4 );
 
     size_ = sizeof(oyjlNodes_s) + sizeof(uint64_t) * count;
+    size_ += OYJL_PAD_SIZE( size_, PAD_SIZE );
     nodes->count = count;
     for(i = 0; i < count; ++i)
     {
@@ -2300,6 +2434,7 @@ oyjl_val   oyjlTreeSerialise         ( oyjl_val            v,
       uint32_t v_offset = 0;
       nodes->offsets[i] = size_;
       size_ += oyjlXPathGetSize_( val, xpath, &v_offset );
+      size_ += OYJL_PAD_SIZE( size_, PAD_SIZE );
       oyjlXPath_s * node = (oyjlXPath_s *)&((char*)nodes)[nodes->offsets[i]];
       node->v_offset = v_offset;
       oyjl_val node_v = (oyjl_val)((char*)node + v_offset);
@@ -2614,11 +2749,13 @@ char **  oyjlCatalogGetLangs_        ( char             ** paths,
 
       if(!strstr(path, base))
         continue;
-      loc = len > base_len + 5 ? oyjlStringCopy(&path[base_len], 0):NULL,
+      loc = len > base_len ? oyjlStringCopy(&path[base_len], 0) : NULL;
+      if(!loc)
+        continue;
       t = loc ? strrchr(loc, '/') : NULL;
       if(t) t[0] = '\000';
       t = oyjlJsonEscape( loc, OYJL_REVERSE | OYJL_REGEXP | OYJL_KEY );
-      free(loc);
+      if(loc) { free(loc); loc = NULL; }
       loc = t;
       for(j = 0; j < locs_n; ++j)
       {
@@ -2707,7 +2844,6 @@ char *             oyjlLangForCatalog_(const char        * loc,
 
       langs = oyjlCatalogGetLangs_( paths, count,
                                     &langs_n, &lang_positions_start );
-
       for(j = 0; j < langs_n; ++j)
       {
         char * l = langs[j];

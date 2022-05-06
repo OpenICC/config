@@ -3,14 +3,14 @@
  *  oyjl - string, file i/o and other basic helpers
  *
  *  @par Copyright:
- *            2016-2021 (C) Kai-Uwe Behrmann
+ *            2016-2022 (C) Kai-Uwe Behrmann
  *
  *  @brief    Oyjl core functions
  *  @author   Kai-Uwe Behrmann <ku.b@gmx.de>
  *  @par License:
  *            MIT <http://www.opensource.org/licenses/mit-license.php>
  *
- * Copyright (c) 2004-2021  Kai-Uwe Behrmann  <ku.b@gmx.de>
+ * Copyright (c) 2004-2022  Kai-Uwe Behrmann  <ku.b@gmx.de>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -87,6 +87,9 @@ char * oyjlFindApplication_(const char * app_name);
 char *   oyjlBT                      ( int                 stack_limit )
 {
   char * text = NULL;
+  static int oyjl_init_has_addr2line_ = 0;
+  static int oyjl_has_addr2line_ = 0;
+  static int oyjl_has_eu_addr2line_ = 0;
 
           int j, nptrs;
           void *buffer[BT_BUF_SIZE];
@@ -109,6 +112,17 @@ char *   oyjlBT                      ( int                 stack_limit )
             int start = nptrs-1;
             do { --start; } while( start >= 0 && (strstr(strings[start], "(main+") == NULL) );
             if(start < 0) start = nptrs-1; /* handle threads */
+
+            if( oyjl_init_has_addr2line_ == 0 )
+            {
+              ++oyjl_init_has_addr2line_;
+              oyjl_has_addr2line_ = 0;
+              oyjl_has_eu_addr2line_ = 0;
+              if(oyjlHasApplication( "eu-addr2line" ))
+                ++oyjl_has_eu_addr2line_;
+              if(oyjlHasApplication( "addr2line" ))
+                ++oyjl_has_addr2line_;
+            }
 
             for(j = start; j >= (*oyjl_debug?0:1); j--)
             {
@@ -139,8 +153,7 @@ char *   oyjlBT                      ( int                 stack_limit )
                   fprintf(stderr, "prog = %s main_prog = %s\n", prog, main_prog );
               }
 
-
-              if( main_prog && prog && strstr(main_prog, prog) == NULL)
+              if( main_prog && prog && strstr(main_prog, prog) == NULL && oyjl_has_eu_addr2line_)
               {
                 char * addr2 = NULL;
                 txt = strchr( tmp?tmp:line, '(' );
@@ -158,7 +171,7 @@ char *   oyjlBT                      ( int                 stack_limit )
                   }
                 }
               }
-              else if(addr)
+              else if(addr && oyjl_has_addr2line_)
               {
                 char * addr2 = oyjlStringCopy( addr+1, NULL );
                 addr2[strlen(addr2)-1] = '\000';
@@ -332,10 +345,11 @@ int          oyjlMessageFunc         ( int/*oyjlMSG_e*/    error_code,
   if(error_code == oyjlMSG_INFO) status_text = oyjlTermColor(oyjlGREEN,"Info: ");
   if(error_code == oyjlMSG_CLIENT_CANCELED) status_text = oyjlTermColor(oyjlBLUE,"Client Canceled: ");
   if(error_code == oyjlMSG_INSUFFICIENT_DATA) status_text = oyjlTermColor(oyjlRED,"Insufficient data: ");
-  if(error_code == oyjlMSG_ERROR) status_text = oyjlTermColor(oyjlRED,"ERROR: ");
+  if(error_code == oyjlMSG_ERROR) status_text = oyjlTermColor(oyjlRED,_("Usage Error:"));
+  if(error_code == oyjlMSG_PROGRAM_ERROR) status_text = oyjlTermColor(oyjlRED,_("Program Error:"));
 
   if(status_text)
-    fprintf( stderr, "%s", status_text );
+    fprintf( stderr, "%s ", status_text );
   if(text)
     fprintf( stderr, "%s\n", text );
   fflush( stderr );
@@ -431,7 +445,7 @@ static char ** oyjlStringSplitSpace_ ( const char        * text,
     if(tmp && tmp[0] && !isspace(tmp[0])) ++n;
     while( tmp && tmp[0] && (tmp = oyjlStringGetNext_( tmp )) != NULL ) ++n;
 
-    if((list = alloc( (n+1) * sizeof(char*) )) == 0) return NULL;
+    if((list = (char**) alloc( (n+1) * sizeof(char*) )) == 0) return NULL;
     memset( list, 0, (n+1) * sizeof(char*) );
 
     {
@@ -443,7 +457,7 @@ static char ** oyjlStringSplitSpace_ ( const char        * text,
       {
         int len = oyjlStringNextSpace_( start );
 
-        if((list[i] = alloc( len+1 )) == 0) return NULL;
+        if((list[i] = (char*) alloc( len+1 )) == 0) return NULL;
 
         memcpy( list[i], start, len );
         list[i][len] = 0;
@@ -488,7 +502,7 @@ char **        oyjlStringSplit       ( const char        * text,
                                        void*            (* alloc)(size_t))
 {
   char d[2] = { delimiter, '\000' };
-  return oyjlStringSplit2( text, d, count, NULL, alloc );
+  return oyjlStringSplit2( text, d, oyjlStringDelimiter, count, NULL, alloc );
 }
 
 /** @brief   convert a string into list
@@ -497,6 +511,8 @@ char **        oyjlStringSplit       ( const char        * text,
  *  @param[in]     delimiter           the ASCII char which marks the split;
  *                                     e.g. comma ","; optional;
  *                                     default zero: extract white space separated words
+ *  @param[in]     splitFunc           function for splitting, default is
+ *                                     oyjlStringSplit(); optional
  *  @param[out]    count               number of detected string segments; optional
  *  @param[out]    index               to be allocated array of detected delimiter indexes; The array will contain the list of indexes in text, which lead to the actual split positional index.; optional
  *  @param[in]     alloc               custom allocator; optional, default is malloc
@@ -504,12 +520,16 @@ char **        oyjlStringSplit       ( const char        * text,
  */
 char **        oyjlStringSplit2      ( const char        * text,
                                        const char        * delimiter,
+                                       const char        *(splitFunc)( const char * text, const char * delimiter, int * length ),
                                        int               * count,
                                        int              ** index,
                                        void*            (* alloc)(size_t))
 {
   char ** list = 0;
   int n = 0, i;
+
+  if(!splitFunc)
+    splitFunc = oyjlStringDelimiter;
 
   /* split the path search string by a delimiter */
   if(text && text[0])
@@ -521,11 +541,11 @@ char **        oyjlStringSplit2      ( const char        * text,
     if(!delimiter || !delimiter[0])
       return oyjlStringSplitSpace_( text, count, alloc );
 
-    tmp = oyjlStringDelimiter(tmp, delimiter, NULL);
+    tmp = splitFunc(tmp, delimiter, NULL);
     if(tmp == text) ++n;
     tmp = text;
     do { ++n;
-    } while( (tmp = oyjlStringDelimiter(tmp + 1, delimiter, NULL)) );
+    } while( (tmp = splitFunc(tmp + 1, delimiter, NULL)) );
 
     tmp = 0;
 
@@ -540,7 +560,7 @@ char **        oyjlStringSplit2      ( const char        * text,
       {
         intptr_t len = 0;
         int length = 0;
-        const char * end = oyjlStringDelimiter(start, delimiter, &length);
+        const char * end = splitFunc(start, delimiter, &length);
         if(index && length) (*index)[i] = length + start - text;
 
         if(end > start)
@@ -907,23 +927,29 @@ void     oyjlStringListAddList       ( char            *** list,
  *
  *  @param[in]     text                string
  *  @param[out]    value               resulting number
+ *  @param[out]    end                 possibly part after number
  *  @return                            error
  *                                     - 0 : text input was completely read as number
- *                                     - -1 : text input was read as number with white space or other text after
+ *                                     - -1 : text input was read as number with white space or other text after; can be seen in end argument
  *                                     - 1 : missed text input
  *                                     - 2 : no number detected
  *
  */
 int      oyjlStringToLong            ( const char        * text,
-                                       long              * value )
+                                       long              * value,
+                                       const char       ** end )
 {
-  char * end = 0;
+  char * end_ = 0;
   int error = -1;
-  *value = strtol( text, &end, 0 );
-  if(end && end != text && isdigit(text[0]) && !isdigit(end[0]) )
+  *value = strtol( text, &end_, 0 );
+  if(end_ && end_ != text && isdigit(text[0]) && !isdigit(end_[0]) )
   {
-    if(end[0] && end != text)
+    if(end_[0] && end_ != text)
+    {
       error = -1;
+      if(end)
+        *end = end_;
+    }
     else
       error = 0;
   }
@@ -936,20 +962,22 @@ int      oyjlStringToLong            ( const char        * text,
  *
  *  @param[in]     text                string
  *  @param[out]    value               resulting number
+ *  @param[out]    end                 possibly part after number
  *  @return                            error
  *                                     - 0 : text input was completely read as number
- *                                     - -1 : text input was read as number with white space or other text after
+ *                                     - -1 : text input was read as number with white space or other text after; can be seen in end argument
  *                                     - 1 : missed text input
  *                                     - 2 : no number detected
  *
  *  @version Oyjl: 1.0.0
- *  @date    2021/10/04
+ *  @date    2022/04/17
  *  @since   2011/11/17 (Oyranos: 0.2.0)
  */
 int          oyjlStringToDouble      ( const char        * text,
-                                       double            * value )
+                                       double            * value,
+                                       const char       ** end )
 {
-  char * end = NULL, * t = NULL;
+  char * end_ = NULL, * t = NULL;
   int len, pos = 0;
   int error = -1;
 #ifdef OYJL_HAVE_LOCALE_H
@@ -975,16 +1003,23 @@ int          oyjlStringToDouble      ( const char        * text,
   while(text[pos] && isspace(text[pos])) pos++;
   memcpy( t, &text[pos], len );
 
-  *value = strtod( t, &end );
+  *value = strtod( t, &end_ );
 
-  if(end && end != text && isdigit(text[0]) && !isdigit(end[0]) )
+  if(end_ && end_ != text && isdigit(text[0]) && !isdigit(end_[0]) )
   {
-    if(end[0] && end != text)
+    if(end_[0] && end_ != text)
+    {
       error = -1;
+      if(end)
+      {
+        end_ = strstr( text, end_ );
+        *end = end_;
+      }
+    }
     else
       error = 0;
   }
-  else if(end && end == t)
+  else if(end_ && end_ == t)
   {
     *value = NAN;
     error = 2;
@@ -1037,13 +1072,13 @@ int          oyjlStringsToDoubles    ( const char        * text,
   if(!text || !text[0])
     return 0;
 
-  list = oyjlStringSplit2( text, delimiter, &n, NULL, alloc );
+  list = oyjlStringSplit2( text, delimiter, oyjlStringDelimiter, &n, NULL, alloc );
   if(n)
     oyjlAllocHelper_m( *value, double, n + 1, alloc, return 1);
   for( i = 0; i < n; ++i )
   {
     val = list[i];
-    l_error = oyjlStringToDouble( val, &d );
+    l_error = oyjlStringToDouble( val, &d, 0 );
     (*value)[i] = d;
     if(!error || l_error > 0) error = l_error;
     if(l_error > 0) break;
@@ -1106,6 +1141,19 @@ char *     oyjlRegExpFind            ( char              * text,
   return match;
 }
 
+const char * oyjlRegExpDelimiter ( const char * text, const char * delimiter, int * length )
+{
+  const char * pos = oyjlRegExpFind( (char*)text, delimiter ),
+             * pos2 = pos ? oyjlRegExpFind( (char*)pos+1, delimiter ) : NULL;
+  if(pos)
+  {
+    if(length)
+      *length = pos2!=NULL ? pos2-pos : (int)strlen(pos);
+    return pos;
+  }
+  return NULL;
+}
+
 /** @brief   replace pattern
  *
  *  Test for OYJL_HAVE_REGEX_H macro to see if regexec() API is
@@ -1159,7 +1207,7 @@ int        oyjlRegExpReplace         ( char             ** text,
     n = oyjlStr_Replace( str, &txt[re_match.rm_so], replacement, 0, NULL );
     if(len > re_match.rm_eo)
     {
-      oyjlStr_Add( str, tail );
+      oyjlStr_AppendN( str, tail, strlen(tail) );
       free(tail);
     }
     txt = oyjlStr(str);
@@ -1627,6 +1675,22 @@ const char*oyjlStr                   ( oyjl_str            string )
 {
   return (const char*)string->s;
 }
+extern char * oyjl_term_color_plain_;
+const char * oyjlTermColorToPlain    ( const char        * text )
+{
+  char * t = text ? oyjlStringCopy(text,0) : NULL;
+  int count = t ? oyjlRegExpReplace( &t, "\033[[0-9;]*m", "" ) : 0;
+  if(count)
+  {
+    if(oyjl_term_color_plain_) free(oyjl_term_color_plain_);
+    oyjl_term_color_plain_ = t;
+    t = NULL;
+    text = oyjl_term_color_plain_;
+  }
+  else if(t)
+    free(t);
+  return text;
+}
 /* --- String_Section --- */
 
 /* --- IO_Section --- */
@@ -1702,22 +1766,22 @@ char *    oyjlReadFile( const char * file_name,
         return NULL;
       }
       rewind(fp);
-      text = malloc(size+1);
+      text = (char*) malloc(size+1);
       if(text == NULL)
       {
-        WARNc_S( "Error: Could allocate memory: %lu", (long unsigned int)size);
+        WARNc_S( "Could allocate memory: %lu", (long unsigned int)size);
         fclose( fp );
         return NULL;
       }
       s = fread(text, sizeof(char), size, fp);
       text[size] = '\000';
       if(s != size)
-        WARNc_S( "Error: fread %lu but should read %lu",
+        WARNc_S( "fread %lu but should read %lu",
                 (long unsigned int) s, (long unsigned int)size);
       fclose( fp );
     } else
     {
-      WARNc_S( "Error: Could not open file - \"%s\"", file_name);
+      WARNc_S( "%s\"%s\"", _("Could not open: "), file_name);
     }
   }
 
@@ -1785,6 +1849,25 @@ char * oyjlFindApplication_(const char * app_name)
   return full_app_name;
 }
 
+/** @brief detect program
+ *
+ *  Search for a command in the executeable path. It resembles 'which'.
+ *
+ *  @param[in]      app_name            application name withou path
+ *  @return                             1 - if found, otherwise 0
+ *
+ *  @version Oyjl: 1.0.0
+ *  @date    2022/04/23
+ *  @since   2022/04/23 (Oyjl: 1.0.0)
+ */
+int        oyjlHasApplication        ( const char        * app_name)
+{
+  char * full_app_name = oyjlFindApplication_(app_name);
+  int found = full_app_name == NULL ? 0 : 1;
+  if(full_app_name) free(full_app_name);
+  return found;
+}
+
 /** @internal
  *  Read a file stream without knowing its size in advance.
  */
@@ -1817,7 +1900,7 @@ char * oyjlReadCmdToMem_             ( const char        * command,
         if(text) { free( text ); text = NULL; }
         *size = 0;
         mem_size = 1024;
-        mem = malloc(mem_size+1);
+        mem = (char*) malloc(mem_size+1);
         oyjlPCLOSE_m(fp);
         fp = oyjlPOPEN_m( command, mode );
       }
@@ -2467,6 +2550,11 @@ void oyjlLibRelease() {
     free(oyjl_term_color_html_);
     oyjl_term_color_html_ = NULL;
   }
+  if(oyjl_term_color_plain_)
+  {
+    free(oyjl_term_color_plain_);
+    oyjl_term_color_plain_ = NULL;
+  }
 }
 /* --- Render_Section --- */
 
@@ -2521,10 +2609,8 @@ void   oyjlGettextSetup_             ( int                 use_gettext OYJL_UNUS
       /* LOCPATH appears to be ignored by bindtextdomain("domain", NULL),
        * so it is set here to bindtextdomain(). */
       path = domain_path ? domain_path : locpath;
-      const char * d = textdomain( loc_domain );
+      const char * d = textdomain( NULL );
       const char * dpath = bindtextdomain( loc_domain, path );
-      if(*oyjl_debug)
-        oyjlMessage_p( oyjlMSG_INFO, 0,"bindtextdomain( \"%s\", \"%s\"/%s ) = ", loc_domain, path, dpath, d );
       if(*oyjl_debug)
       {
         char * fn = NULL;
@@ -2532,6 +2618,7 @@ void   oyjlGettextSetup_             ( int                 use_gettext OYJL_UNUS
         const char * gettext_call = OyjlToString2_M(_());
         const char * domain = textdomain(NULL);
 
+        oyjlMessage_p( oyjlMSG_INFO, 0,"bindtextdomain( \"%s\", \"%s\"/%s ) = ", loc_domain, path, dpath, d );
         if(path)
           oyjlStringAdd( &fn, 0,0, "%s/de/LC_MESSAGES/%s.mo", path ? path : "", loc_domain);
         if(fn)

@@ -3,7 +3,7 @@
  *  libOyjl - JSON helper tool
  *
  *  @par Copyright:
- *            2018-2021 (C) Kai-Uwe Behrmann
+ *            2018-2022 (C) Kai-Uwe Behrmann
  *
  *  @brief    Oyjl JSON translation helper
  *  @internal
@@ -22,6 +22,68 @@
 #include "oyjl_macros.h"
 #include "oyjl_i18n.h"
 #include "oyjl_tree_internal.h"
+
+oyjl_val oyjlTreeParsePo             ( const char        * text,
+                                       const char        * input OYJL_UNUSED,
+                                       int                 verbose )
+{
+  oyjl_val root = NULL;
+  int count = 0, i, pos = 0;
+  char ** blocks = oyjlStringSplit2( text, "\n\n", oyjlRegExpDelimiter, &count, NULL, NULL );
+  if(count)
+    root = oyjlTreeNew("!DOCTYPE TS");
+  fprintf( stderr, "count: %d\n", count );
+  for(i = 0; i < count; ++i)
+  {
+    const char * block = blocks[i];
+    if(strstr(block, "msgid") && !strstr(block, "~ msgid"))
+    {
+      const char * msgid = strstr( block, "msgid" );
+      const char * msgstr = strstr( block, "\nmsgstr");
+      char * t = msgid ? oyjlStringCopy(msgid + 5+2, 0) : NULL;
+      char * tr = msgstr ? oyjlStringCopy(msgstr + 7+2, 0) : NULL;
+      char * tmp;
+      if(!(t && t[0] && tr && tr[0]))
+      {
+        if(t) free(t);
+        if(tr) free(tr);
+        continue;
+      }
+      oyjlStringReplace( &t, "\"\n\"", "", NULL,NULL );
+      oyjlStringReplace( &tr, "\"\n\"", "", NULL,NULL );
+      tmp = (char*)oyjlRegExpDelimiter( t, "\"\n", 0 );
+      tmp[0] = '\000';
+      tmp = (char*)oyjlRegExpDelimiter( tr, "\"$", 0 );
+      if(tmp)
+        tmp[0] = '\000';
+      if(!(t[0] && tr[0]) || strcmp(t,tr) == 0)
+      {
+        free(t); free(tr);
+        continue;
+      }
+      oyjlStringReplace( &t, "\\", "", NULL,NULL );
+      oyjlStringReplace( &tr, "\\", "", NULL,NULL );
+      char * new_path = NULL, * new_key = oyjlStringCopy( t, NULL );
+      tmp = oyjlJsonEscape( new_key,  0 );
+      free(new_key); new_key = tmp; tmp = NULL;
+      oyjlTreeSetStringF( root, OYJL_CREATE_NEW, new_key,  "TS/context/message/[%d]/source", pos );
+      if(verbose)
+        fprintf(stderr, "[%d]: %s", i, new_key );
+      tmp = oyjlJsonEscape( tr, 0 );
+      if(tmp)
+      {
+        oyjlTreeSetStringF( root, OYJL_CREATE_NEW, t != tr ? tmp : "", "TS/context/message/[%d]/translation", pos );
+        if(verbose)
+          fprintf(stderr, " %s\n", oyjlTermColor(oyjlBOLD,tmp) );
+        free(tmp);
+      }
+      free(new_path);
+      ++pos;
+    }
+  }
+  oyjlStringListRelease( &blocks, count, free );
+  return root;
+}
 
 oyjl_val oyjlTreeParseXXX            ( const char        * text,
                                        const char        * input,
@@ -49,19 +111,23 @@ oyjl_val oyjlTreeParseXXX            ( const char        * text,
 #endif
   } else if(strstr(json, "msgid") != NULL && strstr(json, "msgstr") != NULL)
   {
-    free(json);
+    free(json); json = NULL;
     if(strcmp(input,"-") == 0)
-      fprintf( stderr, "%s accept gettext input only as file name not as data stream\n", oyjlTermColor(oyjlRED,_("Usage Error:")) );
+      root = oyjlTreeParsePo( text, input, verbose );
     else
     {
-      json = oyjlReadCommandF( &size, "r", malloc, "lconvert-qt5 -locations relative %s", input );
-      if(verbose)
+      root = oyjlTreeParsePo( text, input, verbose );
+      if(!root)
       {
-        const char * fn = "oyjl-translate-temp.ts";
-        oyjlWriteFile( fn, json, strlen(json) );
-        fprintf( stderr, "wrote: %s %lu\n", fn, strlen(json) );
+        json = oyjlReadCommandF( &size, "r", malloc, "lconvert-qt5 -locations relative %s", input );
+        if(verbose)
+        {
+          const char * fn = "oyjl-translate-temp.ts";
+          oyjlWriteFile( fn, json, strlen(json) );
+          fprintf( stderr, "wrote: %s %lu\n", fn, strlen(json) );
+        }
+        root = oyjlTreeParseXXX( json, input, verbose );
       }
-      root = oyjlTreeParseXXX( json, input, verbose );
     }
   }
 
@@ -73,6 +139,12 @@ oyjl_val oyjlTreeParseXXX            ( const char        * text,
   free( json );
 
   return root;
+}
+int oyjlStrcmpWrap_ (const void * a_, const void * b_)
+{
+  const char * a = *(const char **)a_,
+             * b = *(const char **)b_;
+  return strcmp(a,b);
 }
 
 /* This function is called the
@@ -91,6 +163,8 @@ int myMain( int argc, const char ** argv )
              * input = NULL,
              * format = NULL,
              * wrap = NULL,
+             * function_name = NULL,
+             * function_name_out = NULL,
              * key_list = "name,description,help",
              * locale = NULL,
              * locales = "cs_CZ,de_DE,eo_EO,eu_ES,fr_FR,ru_RU",
@@ -116,6 +190,10 @@ int myMain( int argc, const char ** argv )
                                                  "2020-01-02T12:00:00", _("January 2, 2020") );
 
   /* declare the option choices  *   nick,          name,               description,                  help */
+  oyjlOptionChoice_s f_choices[] = {{"_(\\\"",        NULL,               NULL,                         NULL},
+                                    {"i18n(\\\"",     "",                 NULL,                         NULL},
+                                    {"QObject::tr(\\\"", NULL,            NULL,                         NULL},
+                                    {NULL,NULL,NULL,NULL}};
   oyjlOptionChoice_s w_choices[] = {{"C",           _("C static char"), NULL,                         NULL},
                                     {NULL,NULL,NULL,NULL}};
   oyjlOptionChoice_s A_choices[] = {{_("Convert JSON to gettext ready C strings"),_("oyjl-translate -e [-v] -i oyjl-ui.json -o result.json -f '_(\"%s\"); ' -k name,description,help"),NULL,                         NULL},
@@ -159,6 +237,10 @@ int myMain( int argc, const char ** argv )
         oyjlOPTIONTYPE_NONE,     {0},                oyjlINT,       {.i=&extract}},
     {"oiwi", 0,                          "w","wrap",          NULL,     _("Wrap Type"),_("language specific wrap"),  NULL, _("TYPE"),          
         oyjlOPTIONTYPE_CHOICE,   {.choices = {(oyjlOptionChoice_s*) oyjlStringAppendN( NULL, (const char*)w_choices, sizeof(w_choices), malloc ), 0}}, oyjlSTRING,    {.s=&wrap}},
+    {"oiwi", OYJL_OPTION_FLAG_EDITABLE|OYJL_NO_OPTIMISE,  NULL,"function-name",NULL,     _("Function"), _("Function Name"),           _("A input function name string. e.g.: \"i18n(\\\"\""),_("NAME"), 
+        oyjlOPTIONTYPE_CHOICE,   {.choices = {(oyjlOptionChoice_s*) oyjlStringAppendN( NULL, (const char*)f_choices, sizeof(f_choices), malloc ), 0}}, oyjlSTRING,    {.s=&function_name}},
+    {"oiwi", OYJL_OPTION_FLAG_EDITABLE|OYJL_NO_OPTIMISE,  NULL,"function-name-out",NULL, _("Function Out"), _("Function Name"),           _("A output funtion name string. e.g.: \"_\""),_("NAME"), 
+        oyjlOPTIONTYPE_CHOICE,   {.choices = {(oyjlOptionChoice_s*) oyjlStringAppendN( NULL, (const char*)f_choices, sizeof(f_choices), malloc ), 0}}, oyjlSTRING,    {.s=&function_name_out}},
     {"oiwi", 0,                          "A","man-examples",  NULL,     _("EXAMPLES"), NULL,                         NULL, NULL,               
         oyjlOPTIONTYPE_CHOICE,   {.choices = {(oyjlOptionChoice_s*) oyjlStringAppendN( NULL, (const char*)A_choices, sizeof(A_choices), malloc ), 0}}, oyjlNONE,      {}},
     {"oiwi", 0,                          "S","man-see_also",  NULL,     _("SEE ALSO"), NULL,                         NULL, NULL,               
@@ -174,7 +256,7 @@ int myMain( int argc, const char ** argv )
     /* default option template -X|--export */
     {"oiwi", 0,                          "X","export",        NULL,     NULL,          NULL,                         NULL, NULL,
         oyjlOPTIONTYPE_CHOICE,   {0},                oyjlSTRING,    {.s=&export}},
-    {"oiwi", OYJL_OPTION_FLAG_EDITABLE,  "R","render",        NULL,     NULL,          NULL,                         NULL, NULL,               
+    {"oiwi", OYJL_OPTION_FLAG_EDITABLE|OYJL_OPTION_FLAG_MAINTENANCE,  "R","render",        NULL,     NULL,          NULL,                         NULL, NULL,               
         oyjlOPTIONTYPE_CHOICE,   {0},                oyjlSTRING,    {.s=&render}},
     {"",0,0,NULL,NULL,NULL,NULL,NULL, NULL, oyjlOPTIONTYPE_END, {0},0,{0}}
   };
@@ -183,7 +265,8 @@ int myMain( int argc, const char ** argv )
   oyjlOptionGroup_s groups[] = {
   /* type,   flags, name,               description,                  help,               mandatory,     optional,      detail */
     {"oiwg", 0,     _("Common Options"),_("Set basic parameters"),    NULL,               "",            "",            "i,o"},
-    {"oiwg", 0,     _("Extract"),       _("Convert JSON to gettext ready C strings"),NULL,"e,k",         "i,o,f,v",     "e,f,k"},
+    {"oiwg", 0,     _("Extract"),       _("Convert JSON/C to gettext ready C strings"), _("Two input modes are supported. Read Oyjl UI -X=export JSON. Or parse C sources to --function-name defined strings and replace them in --output by --function-name-out. The later is useful for oyjlTr_s, Qt style or other translations."),
+                                                                                          "e,k",         "i,o,f,v,function-name,function-name-out",     "e,f,k,function-name,function-name-out"},
     {"oiwg", 0,     _("Add"),           _("Add gettext translated keys to JSON"), NULL,   "a,d,k",       "i,o,l,p,w,t,n,v",            "a,d,l,p,k,w,t,n"},
     {"oiwg", 0,     _("Copy"),          _("Copy keys to JSON"),       _("Import translations from other formats without gettext. Supported --input=Qt-xml-format.tr"),"c,locale",           "i,o,n,v",     "c,locale,n"},
     {"oiwg", 0,     _("Misc"),          _("General options"),         NULL,               "h,X,V",       "v",           "h,X,V,v" },/* just show in documentation */
@@ -210,7 +293,7 @@ int myMain( int argc, const char ** argv )
 
   if(verbose)
   {
-    char * json = ui ? oyjlOptions_ResultsToJson( ui->opts ) : NULL;
+    char * json = ui ? oyjlOptions_ResultsToJson( ui->opts, OYJL_JSON ) : NULL;
     if(json)
       fputs( json, stderr );
     fputs( "\n", stderr );
@@ -281,7 +364,7 @@ int myMain( int argc, const char ** argv )
       int count = 0, i;
       char ** paths = oyjlTreeToPaths( root, 1000000, NULL, 0, &count );
       if(verbose)
-        fprintf(stderr, "processed:\t\"%s\"\n", input);
+        fprintf(stderr, "processed:\t\"%s\" %d\n", input, count);
 
       if(extract)
       {
@@ -307,11 +390,20 @@ int myMain( int argc, const char ** argv )
                 fprintf(stderr, "found:\t%d key: %s value: \"%s\"\n", i, path, t?t:"----" );
               if(t && t[0])
               {
+                char * txt = oyjlStringCopy( t, 0 );
+                oyjlStringReplace( &txt, "\\", "\\\\", NULL,NULL );
+                oyjlStringReplace( &txt, "\"", "\\\"", NULL,NULL );
+                oyjlStringReplace( &txt, "\n", "\\\n", NULL,NULL );
+                t = txt;
                 if(format)
                   oyjlStringAdd( &text, malloc, free, format, t );
+                else if(function_name_out)
+                  oyjlStringAdd( &text, malloc, free, "// %s:%s\n{ const char * t = %s%s%s\"); }\n\n",
+                                 input, path, function_name_out, strchr(function_name_out,'(')?"":"(\"", t );
                 else
                   oyjlStringAdd( &text, malloc, free, "// %s:%s\n{ const char * t = _(\"%s\"); }\n\n",
                                  input, path, t );
+                free(txt);
               }
             }
           }
@@ -339,8 +431,14 @@ int myMain( int argc, const char ** argv )
         {
           if(!oyjlIsDirFull_ (localedir))
           {
-            fprintf(stderr, "%sERROR: Can not find absolute path:\t%s\n", oyjlBT(0), localedir);
-            exit(1);
+            fprintf(stderr, "Create path:\t%s\n", localedir);
+            oyjlMakeDir_(localedir);
+            if(!oyjlIsDirFull_ (localedir))
+            {
+              fprintf(stderr, "%sERROR: Can not find absolute path:\t%s\n", oyjlBT(0), localedir);
+              error = 1;
+              goto clean_main;
+            }
           }
           oyjl_domain_path = oyjlStringCopy(localedir, 0);
         }
@@ -454,46 +552,101 @@ int myMain( int argc, const char ** argv )
 
       } else if(copy)
       {
-        int count;
+        int n;
         const char * lang = locale;
-        oyjl_val trans;
+        const char * t;
+        oyjl_val trans = NULL;
         if(!lang || !lang[0] || (lang && strchr(lang,',')))
         {
           fprintf( stderr, "%s need locale option with exactly one locale: %s\n", oyjlTermColor(oyjlRED,_("Usage Error:")), lang?lang:"---" );
           error = 1;
         }
-        v = oyjlTreeGetValue( root, 0, "TS/context/message" );
-        count = oyjlValueCount( v );
-        if(!error)
+        /* convert to array */
+        v = oyjlTreeGetNewValueFromArray( root, "TS/context", NULL, &n );
+        v = oyjlTreeGetValue( root, 0, "TS/context" );
+        n = oyjlValueCount( v );
+        if(verbose)
         {
-          trans = oyjlTreeNew("org/freedesktop/oyjl/translations");
-          for(i = 0; i < count; ++i)
+          fprintf( stderr, "count in TS/context: %d\n", n );
+          if(verbose > 1)
           {
-            oyjl_val val = oyjlTreeGetValueF( v, 0, "[%d]/source", i );
-            const char * t = OYJL_GET_STRING(val), *tr, *type;
-            val = oyjlTreeGetValueF( v, 0, "[%d]/translation", i );
-            tr = OYJL_GET_STRING(val);
-            val = oyjlTreeGetValueF( v, 0, "[%d]/translation/@type", i );
-            type = OYJL_GET_STRING(val);
-            if(verbose)
-              fprintf( stderr, "t:\"%s\" tr:\"%s\" type:%s\n", t, tr?tr:"---", type?type:"---" );
-            if(tr || (list_empty && type && strcmp(type,"unfinished") == 0))
+            i = 0;
+            oyjlTreeToJson( root, &i, &text );
+            if(text)
             {
-              char * new_path = NULL, * new_key = oyjlStringCopy( t, NULL ), * tmp;
-              tmp = oyjlJsonEscape( new_key, OYJL_KEY | OYJL_NO_INDEX );
-              free(new_key); new_key = tmp; tmp = NULL;
-              oyjlStringAdd( &new_path, malloc, free, "org/freedesktop/oyjl/translations/%s/%s", lang, new_key );
-              val = oyjlTreeGetValue( trans, OYJL_CREATE_NEW | OYJL_NO_INDEX, new_path );
-              tmp = oyjlJsonEscape( tr, 0 );
-              if(tmp)
-              {
-                oyjlValueSetString( val, t != tr ? tmp : "" );
-                free(tmp);
-              }
-              free(new_path);
+              fprintf( stderr, "%s\n", text );
+              free(text); text = NULL;
             }
           }
         }
+        if(!error)
+        {
+          trans = oyjlTreeNew("org/freedesktop/oyjl/translations");
+          for(i = 0; i < n; ++i)
+          {
+            int j,
+                message_n;
+            if(verbose)
+            {
+              v = oyjlTreeGetValueF( root, 0, "TS/context/[%d]/message", i );
+              message_n = oyjlValueCount( v );
+              v = oyjlTreeGetValueF( root, 0, "TS/context/[%d]/name", i );
+              t = OYJL_GET_STRING(v);
+              fprintf( stderr, "[%d]/name:\"%s\" message(s):%d\n", i, t?t:"---", message_n );
+            }
+            v = oyjlTreeGetValueF( root, 0, "TS/context/[%d]/message", i );
+            message_n = oyjlValueCount( v );
+            for(j = 0; j < message_n; ++j)
+            {
+              oyjl_val val = oyjlTreeGetValueF( v, 0, "[%d]/source", j );
+              const char *tr, *type;
+              t = OYJL_GET_STRING(val);
+              val = oyjlTreeGetValueF( v, 0, "[%d]/translation", j );
+              tr = OYJL_GET_STRING(val);
+              val = oyjlTreeGetValueF( v, 0, "[%d]/translation/@type", j );
+              type = OYJL_GET_STRING(val);
+              if(verbose > 2)
+                fprintf( stderr, "t:\"%s\" tr:\"%s\" type:%s\n", t, tr?tr:"---", type?type:"---" );
+              if(tr || (list_empty && type && strcmp(type,"unfinished") == 0))
+              {
+                char * new_path = NULL, * new_key = oyjlStringCopy( t, NULL ), * tmp;
+                tmp = oyjlJsonEscape( new_key, OYJL_KEY | OYJL_NO_INDEX );
+                free(new_key); new_key = tmp; tmp = NULL;
+                oyjlStringAdd( &new_path, malloc, free, "org/freedesktop/oyjl/translations/%s/%s", lang, new_key );
+                val = oyjlTreeGetValue( trans, OYJL_CREATE_NEW | OYJL_NO_INDEX, new_path );
+                tmp = oyjlJsonEscape( tr, 0 );
+                if(tmp)
+                {
+                  oyjlValueSetString( val, t != tr ? tmp : "" );
+                  free(tmp);
+                }
+                free(new_path);
+              }
+            }
+          }
+        }
+        /* Qt TS/context tree might be chaotic - sort for optimised lookup */
+        v = oyjlTreeGetValueF( trans, OYJL_CREATE_NEW | OYJL_NO_INDEX, "org/freedesktop/oyjl/translations/%s", lang );
+        n = oyjlValueCount( v );
+        if(verbose)
+          fprintf( stderr, "count: %d n: %d\n", count, n );
+        oyjlStringListRelease( &paths, count, free );
+        paths = oyjlTreeToPaths( trans, 1000000, NULL, OYJL_KEY, &count );
+
+        qsort( paths, count, sizeof(char*), oyjlStrcmpWrap_ );
+
+        oyjlTreeFree( root );
+        root = oyjlTreeNew("org/freedesktop/oyjl/translations");
+        for(i = 0; i < count; ++i)
+        {
+          const char * path = paths[i];
+          t = oyjlTreeGetString_( trans, 0, path );
+          oyjlTreeSetStringF( root, OYJL_CREATE_NEW, t, "%s", path );
+          if(verbose)
+            fprintf( stderr, "path[%d]: %s:%s\n", i, path, t );
+        }
+        oyjlTreeFree( trans );
+        trans = root; root = NULL;
         if(trans)
         {
           i = 0;
@@ -512,6 +665,7 @@ int myMain( int argc, const char ** argv )
         {
           char * tmp = NULL;
           char * sname;
+          const char * ptext;
           if(strcmp(wrap,"C") != 0)
           {
             fprintf(stderr,"%sERROR: Only -w C is supported.\n", oyjlBT(0));
@@ -519,6 +673,9 @@ int myMain( int argc, const char ** argv )
             goto clean_main;
           }
 
+          ptext = oyjlTermColorToPlain(text);
+          free(text);
+          text = oyjlStringCopy(ptext,0);
           sname = strdup(domain);
           oyjlStringReplace( &text, "\\", "\\\\", NULL,NULL );
           oyjlStringReplace( &text, "\"", "\\\"", NULL,NULL );
@@ -533,11 +690,76 @@ int myMain( int argc, const char ** argv )
         else
           oyjlWriteFile( output, text, strlen(text) );
       }
+    } else
+    if(json && extract)
+    {
+      int f = oyjlDataFormat(json);
+      char * txt = json;
+      int n = 0;
+      if(!function_name)
+        function_name = "_(\"";
+      if(!function_name_out)
+        function_name_out = "i18n";
+      if(verbose)
+        fprintf(stderr,"found input: %d format: %s\n", f, oyjlDataFormatToString(f) );
+      if(verbose)
+        fprintf(stderr, "search function_name: %s for replacement: %s\n", function_name, function_name_out);
+
+      while((txt = strstr(txt, function_name)) != NULL)
+      {
+        int qc = 1; /* quotes count */
+        int pos = 1;
+        int line = 1, i = 0;
+        char * t = NULL;
+
+        while(&json[i] < txt)
+        {
+          if(json[i] == '\n')
+            ++line;
+          ++i;
+        }
+        if(verbose >= 2)
+          fprintf(stderr, "[%d]:%d %c%c%c%c%c%c%c%c%c...", n, line, txt[0], txt[1], txt[2], txt[3], txt[4], txt[5], txt[6], txt[7], txt[8]);
+
+        txt += strlen(function_name);
+        while(txt[pos] && qc)
+        {
+          if(txt[pos] == '\\' && txt[pos+1] == '\"')
+            pos += 2;
+          else if(txt[pos] == '\"')
+            --qc;
+          else
+            ++pos;
+        }
+        if(pos > 1)
+        {
+          t = oyjlStringAppendN( NULL, (const char*)txt, pos, malloc );
+          oyjlStringReplace( &t, "\\", "\\\\", NULL,NULL );
+          oyjlStringReplace( &t, "\"", "\\\"", NULL,NULL );
+          oyjlStringReplace( &t, "\n", "\\\n", NULL,NULL );
+          if(format)
+            oyjlStringAdd( &text, malloc, free, format, t );
+          else
+            oyjlStringAdd( &text, malloc, free, "// %s:%d\n{ const char * t = %s%s%s\"); }\n\n",
+                           input, line, function_name_out, strchr(function_name_out,'(')?"":"(\"", t );
+        }
+        if(verbose >= 2)
+          fprintf(stderr, " \"%s\"\n", t?t:"---");
+        txt += pos;
+        ++n;
+      }
+      if(verbose)
+        fprintf(stderr, "found: %d\n", n);
+      if(!output || (strcmp(output,"-") == 0 || strcmp(output,"stdout") == 0))
+        fputs( text, stdout );
+      else
+        oyjlWriteFile( output, text, strlen(text) );
     }
   }
   else error = 1;
 
   clean_main:
+  free(sections);
   {
     int i = 0;
     while(oarray[i].type[0])

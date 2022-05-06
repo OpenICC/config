@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: oyjl .\n"
 "Report-Msgid-Bugs-To: ku.b@gmx.de\n"
-"POT-Creation-Date: 2021-11-21 00:02+0100\n"
+"POT-Creation-Date: 2021-11-21 09:05+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -93,14 +93,14 @@ msgstr ""
 msgid "Generate test Args Export"
 msgstr ""
 
-#: oyjl-args.c:68 oyjl_web.c:79 test-args.c:393 test-args.c:952
-#: test-args.c:1067 test-core.c:1045 test.c:1845 test.c:1981
-#: oyjl-args-qml/mini-app.c:185 oyjl-args-qml/main.cpp:87
+#: oyjl-args.c:68 test-args.c:393 test-args.c:952 test-args.c:1067
+#: test-core.c:1045 test.c:1845 test.c:1981 oyjl-args-qml/mini-app.c:185
+#: oyjl-args-qml/main.cpp:87
 msgid "verbose"
 msgstr ""
 
-#: oyjl-args.c:69 oyjl.c:288 oyjl_translate.c:172 oyjl_web.c:80
-#: test-core.c:1046 oyjl-args-qml/main.cpp:89
+#: oyjl-args.c:69 oyjl.c:288 oyjl_translate.c:172 test-core.c:1046
+#: oyjl-args-qml/main.cpp:89
 msgid "version"
 msgstr ""
 
@@ -110,12 +110,12 @@ msgid "Version"
 msgstr ""
 
 #: oyjl-args.c:71 oyjl.c:278 oyjl_args.c:4491 oyjl_args_tree.c:2142
-#: oyjl_translate.c:162 oyjl_web.c:83 oyjl-args-qml/main.cpp:93
+#: oyjl_translate.c:162 oyjl-args-qml/main.cpp:93
 msgid "EXAMPLES"
 msgstr ""
 
 #: oyjl-args.c:73 oyjl.c:280 oyjl_args.c:4503 oyjl_args_tree.c:2148
-#: oyjl_translate.c:164 oyjl_web.c:85 oyjl-args-qml/main.cpp:95
+#: oyjl_translate.c:164 oyjl-args-qml/main.cpp:95
 msgid "SEE ALSO"
 msgstr ""
 
@@ -129,14 +129,14 @@ msgid "Generate source code"
 msgstr ""
 
 #. parsed and checked with -i option
-#: oyjl-args.c:84 oyjl.c:306 oyjl_translate.c:189 oyjl_web.c:94 test-args.c:412
+#: oyjl-args.c:84 oyjl.c:306 oyjl_translate.c:189 test-args.c:412
 #: test-args.c:776 test-args.c:960 test-args.c:1075 test-core.c:1056
 #: test-core.c:1136 test.c:1855 test.c:1991 oyjl-args-qml/mini-app.c:196
 #: oyjl-args-qml/main.cpp:104
 msgid "Misc"
 msgstr ""
 
-#: oyjl-args.c:84 oyjl.c:306 oyjl_translate.c:189 oyjl_web.c:94 test-args.c:412
+#: oyjl-args.c:84 oyjl.c:306 oyjl_translate.c:189 test-args.c:412
 #: test-args.c:776 test-args.c:960 test-args.c:1075 test-core.c:1056
 #: test-core.c:1136 test.c:1855 test.c:1991 oyjl-args-qml/mini-app.c:196
 #: oyjl-args-qml/main.cpp:104
@@ -153,8 +153,7 @@ msgstr ""
 msgid "Convert UI JSON to C code using libOyjl"
 msgstr ""
 
-#: oyjl-args.c:100 oyjl.c:328 oyjl_translate.c:207 oyjl_web.c:107
-#: oyjl-args-qml/main.cpp:117
+#: oyjl-args.c:100 oyjl.c:328 oyjl_translate.c:207 oyjl-args-qml/main.cpp:117
 msgid "For more information read the man page:"
 msgstr ""
 
@@ -261,8 +260,7 @@ msgstr ""
 msgid "Set Value"
 msgstr ""
 
-#: oyjl.c:262 oyjl_web.c:75 oyjl_web.c:76 oyjl_web.c:77
-#: oyjl-args-qml/main.cpp:83 oyjl-args-qml/main.cpp:84
+#: oyjl.c:262 oyjl-args-qml/main.cpp:83 oyjl-args-qml/main.cpp:84
 #: oyjl-args-qml/main.cpp:85
 msgid "STRING"
 msgstr ""
@@ -442,9 +440,8 @@ msgid "Show all groups including syntax"
 msgstr ""
 
 #. default options -h, -v and -V
-#: oyjl_args.c:2016 oyjl_web.c:78 test-args.c:392 test-args.c:951
-#: test-args.c:1066 test-core.c:1044 test.c:1844 test.c:1980
-#: oyjl-args-qml/mini-app.c:184
+#: oyjl_args.c:2016 test-args.c:392 test-args.c:951 test-args.c:1066
+#: test-core.c:1044 test.c:1844 test.c:1980 oyjl-args-qml/mini-app.c:184
 msgid "help"
 msgstr ""
 
@@ -485,7 +482,7 @@ msgid "Json"
 msgstr ""
 
 #. type,   flags, name,      description,          help, mandatory, optional, detail
-#: oyjl_args.c:2040 oyjl_web.c:93 oyjl-args-qml/main.cpp:103
+#: oyjl_args.c:2040 oyjl-args-qml/main.cpp:103
 msgid "GUI"
 msgstr ""
 
@@ -641,9 +638,8 @@ msgstr ""
 msgid "Option has a different value range"
 msgstr ""
 
-#: oyjl_args.c:3136 oyjl_web.c:78 test-args.c:392 test-args.c:951
-#: test-args.c:1066 test-core.c:1044 test.c:1844 test.c:1980
-#: oyjl-args-qml/mini-app.c:184
+#: oyjl_args.c:3136 test-args.c:392 test-args.c:951 test-args.c:1066
+#: test-core.c:1044 test.c:1844 test.c:1980 oyjl-args-qml/mini-app.c:184
 msgid "Help"
 msgstr ""
 
@@ -1041,58 +1037,6 @@ msgstr ""
 msgid "Rendering Intent"
 msgstr ""
 
-#: oyjl_web.c:61
-msgid "The tool renders Oyjl JSON UI files."
-msgstr ""
-
-#: oyjl_web.c:62
-msgid "March 05, 2020"
-msgstr ""
-
-#. declare the option choices  *   nick,          name,               description,                  help
-#: oyjl_web.c:66 oyjl-args-qml/main.cpp:74
-msgid "Load a UI JSON declaration from file"
-msgstr ""
-
-#: oyjl_web.c:66
-msgid "oyjl-args-render -i oyjl-ui-text.json -c oyjl-command.json"
-msgstr ""
-
-#: oyjl_web.c:67 oyjl-args-qml/main.cpp:75
-msgid "Load a UI JSON declaration from tool"
-msgstr ""
-
-#: oyjl_web.c:67
-msgid "oyjl -X json+command | oyjl-args-render -i - -c +"
-msgstr ""
-
-#. type,   flags, o,   option,    key,  name,         description,         help, value_name,    value_type,               values,                                                          variable_type, output variable
-#: oyjl_web.c:75 oyjl-args-qml/main.cpp:83
-msgid "JSON UI Description"
-msgstr ""
-
-#: oyjl_web.c:76 oyjl-args-qml/main.cpp:84
-msgid "JSON Command"
-msgstr ""
-
-#: oyjl_web.c:77 oyjl-args-qml/main.cpp:85
-msgid "Results JSON"
-msgstr ""
-
-#: oyjl_web.c:93
-msgid "Render UI"
-msgstr ""
-
-#. tell about the tool
-#. argc+argv are required for parsing the command line options
-#: oyjl_web.c:100
-msgid "Oyjl Args Renderer"
-msgstr ""
-
-#: oyjl_web.c:100
-msgid "Small JSON UI tool using libOyjl and a selectable renderer"
-msgstr ""
-
 #: test-args.c:368 test-core.c:1021
 msgid "The example tool demontrates the usage of the libOyjl API's."
 msgstr ""
@@ -1382,12 +1326,25 @@ msgstr ""
 msgid "November 15, 2020"
 msgstr ""
 
+#. declare the option choices  *   nick,          name,               description,                  help
+#: oyjl-args-qml/main.cpp:74
+msgid "Load a UI JSON declaration from file"
+msgstr ""
+
 #: oyjl-args-qml/main.cpp:74
 msgid "oyjl-args-qml -i oyjl-ui-text.json -c oyjl-command.json"
 msgstr ""
 
 #: oyjl-args-qml/main.cpp:75
+msgid "Load a UI JSON declaration from tool"
+msgstr ""
+
+#: oyjl-args-qml/main.cpp:75
 msgid "oyjl -X json+command | oyjl-args-qml -i - -c +"
+msgstr ""
+
+#: oyjl-args-qml/main.cpp:83
+msgid "JSON UI Description"
 msgstr ""
 
 #: oyjl-args-qml/main.cpp:83
@@ -1401,11 +1358,19 @@ msgid "Command"
 msgstr ""
 
 #: oyjl-args-qml/main.cpp:84
+msgid "JSON Command"
+msgstr ""
+
+#: oyjl-args-qml/main.cpp:84
 msgid ""
 "Supported is the value of '+' as hint to take the merged in data from the "
 "input. The command can be passed as JSON string, e.g. \"{\"command_set\":"
 "\"my-cli-program\"}\", as file name pointing to JSON containing the command "
 "or the command alone as string."
+msgstr ""
+
+#: oyjl-args-qml/main.cpp:85
+msgid "Results JSON"
 msgstr ""
 
 #: oyjl-args-qml/main.cpp:103
